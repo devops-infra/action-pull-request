@@ -1,0 +1,7 @@
+# Exclude
+*
+
+# Include
+!LICENSE
+!README.md
+!entrypoint.sh

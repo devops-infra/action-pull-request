@@ -1,0 +1,17 @@
+name: "GitHub Action template"
+author: "Krzysztof Szyper <biotyk@mail.com>"
+description: "Template repository for GitHub Actions."
+inputs:
+  baz:
+    description: "Some input variable for 'with: ...'."
+    required: false
+    default: "foo"
+outputs:
+  foobar:
+    description: "Output from action."
+runs:
+  using: "docker"
+  image: "docker://christophshyper/template-action:latest"
+branding:
+  color: "purple"
+  icon: "upload-cloud"
