@@ -13,8 +13,9 @@ if [[ -z "${INPUT_GITHUB_TOKEN}" ]]; then
 fi
 
 # Set GitHub credentials
-git config --global user.name "${GITHUB_ACTOR}"
-git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+git remote set-url origin "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}"
+#git config --global user.name "${GITHUB_ACTOR}"
+#git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 export GITHUB_USER="${GITHUB_ACTOR}"
 
 # Set branches
@@ -74,7 +75,9 @@ if [[ "${INPUT_DRAFT}" ==  "true" ]]; then
 fi
 
 # Main action
-URL=$(hub pull-request -b "${TARGET_BRANCH}" -h "${SOURCE_BRANCH}" --no-edit "${ARG_LIST}" || true)
+COMMAND="hub pull-request -b "${TARGET_BRANCH}" -h "${SOURCE_BRANCH}" --no-edit "${ARG_LIST}" || true"\
+echo "Run ${COMMAND}"
+URL=$(${COMMAND})
 if [[ "$?" != "0" ]]; then
   exit 1
 fi
