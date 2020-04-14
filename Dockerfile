@@ -4,9 +4,9 @@ FROM alpine:3.11
 # Labels for http://label-schema.org/rc1/#build-time-labels
 # And for https://github.com/opencontainers/image-spec/blob/master/annotations.md
 # And for https://help.github.com/en/actions/building-actions/metadata-syntax-for-github-actions
-ARG NAME="GitHub Action template"
-ARG DESCRIPTION="Template repository for GitHub Actions."
-ARG REPO_URL="https://github.com/ChristophShyper/template-action"
+ARG NAME="GitHub Action for creating Pull Requests"
+ARG DESCRIPTION="GitHub Action that will create a pull request from the current directory."
+ARG REPO_URL="https://github.com/ChristophShyper/action-pull-request"
 ARG AUTHOR="Krzysztof Szyper <biotyk@mail.com>"
 ARG HOMEPAGE="https://christophshyper.github.io/"
 ARG BUILD_DATE=2020-04-01T00:00:00Z
@@ -48,13 +48,16 @@ COPY entrypoint.sh /
 # Install needed packages
 RUN set -eux \
   && chmod +x /entrypoint.sh \
+  && echo http://dl-cdn.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories \
   && apk update --no-cache \
   && apk upgrade --no-cache \
   && apk add --no-cache bash \
-  # Insert here
+  && apk add --no-cache git \
+  && apk add --no-cache hub \
   && rm -rf /var/cache/* \
   && rm -rf /root/.cache/*
 
 # Finish up
+CMD hub version
 WORKDIR /github/workspace
 ENTRYPOINT /entrypoint.sh

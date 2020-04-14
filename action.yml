@@ -1,17 +1,53 @@
-name: "GitHub Action template"
+name: "GitHub Action for creating Pull Requests"
 author: "Krzysztof Szyper <biotyk@mail.com>"
-description: "Template repository for GitHub Actions."
+description: "GitHub Action that will create a pull request from the current directory."
 inputs:
-  baz:
-    description: "Some input variable for 'with: ...'."
+  github_token:
+    description: "TODO"
     required: false
-    default: "foo"
+    default: ""
+  target_branch:
+    description: "TODO"
+    required: false
+    default: "master"
+  title:
+    description: "TODO"
+    required: false
+    default: ""
+  template:
+    description: "TODO"
+    required: false
+    default: ""
+  body:
+    description: "TODO"
+    required: false
+    default: ""
+  reviewer:
+    description: "TODO"
+    required: false
+    default: ""
+  assignee:
+    description: "TODO"
+    required: false
+    default: ""
+  label:
+    description: "TODO"
+    required: false
+    default: ""
+  milestone:
+    description: "TODO"
+    required: false
+    default: ""
+  draft:
+    description: "TODO"
+    required: false
+    default: "false"
 outputs:
   foobar:
     description: "Output from action."
 runs:
   using: "docker"
-  image: "docker://christophshyper/template-action:latest"
+  image: "docker://christophshyper/action-pull-request:latest"
 branding:
   color: "purple"
   icon: "upload-cloud"
