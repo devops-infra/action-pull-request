@@ -75,7 +75,7 @@ if [[ "${INPUT_DRAFT}" ==  "true" ]]; then
 fi
 
 # Main action
-COMMAND="hub pull-request -b "${TARGET_BRANCH}" -h "${SOURCE_BRANCH}" --no-edit "${ARG_LIST}" || true"\
+COMMAND="hub pull-request -b "${TARGET_BRANCH}" -h "${SOURCE_BRANCH}" --no-edit "${ARG_LIST}" || true"
 echo "Run ${COMMAND}"
 URL=$(${COMMAND})
 if [[ "$?" != "0" ]]; then
