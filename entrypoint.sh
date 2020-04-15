@@ -75,12 +75,20 @@ if [[ "${INPUT_DRAFT}" ==  "true" ]]; then
 fi
 
 # Main action
-COMMAND="hub pull-request -b "${TARGET_BRANCH}" -h "${SOURCE_BRANCH}" --no-edit "${ARG_LIST}" || true"
-echo "Run ${COMMAND}"
-URL=$(${COMMAND})
+COMMAND="hub pull-request -b $DESTINATION_BRANCH -h $SOURCE_BRANCH --no-edit $ARG_LIST || true"
+echo "$COMMAND"
+URL=$(sh -c "$COMMAND")
 if [[ "$?" != "0" ]]; then
-  exit 1
+  RET_CODE=1
 fi
+
+
+#COMMAND="hub pull-request -b "${TARGET_BRANCH}" -h "${SOURCE_BRANCH}" --no-edit "${ARG_LIST}" || true"
+#echo "Run ${COMMAND}"
+#URL=$(${COMMAND})
+#if [[ "$?" != "0" ]]; then
+#  exit 1
+#fi
 
 # Finish
 echo "::set-output name=url::${URL}"
