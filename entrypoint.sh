@@ -48,6 +48,7 @@ ARG_LIST="${INPUT_TITLE}"
 if [[ -n "${ARG_LIST}" ]]; then
   ARG_LIST="-m \"${ARG_LIST}\""
   if [[ -n "${INPUT_TEMPLATE}" ]]; then
+    sed -i 's/`/\\`/g; s/\$/\\\$/g' "${INPUT_TEMPLATE}"
     ARG_LIST="${ARG_LIST} -m \"$(echo -e "$(cat "${INPUT_TEMPLATE}")")\""
   elif [[ -n "${INPUT_BODY}" ]]; then
     ARG_LIST="${ARG_LIST} -m \"${INPUT_BODY}\""
