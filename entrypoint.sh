@@ -82,7 +82,6 @@ if [[ "$?" != "0" ]]; then
   RET_CODE=1
 fi
 
-
 #COMMAND="hub pull-request -b "${TARGET_BRANCH}" -h "${SOURCE_BRANCH}" --no-edit "${ARG_LIST}" || true"
 #echo "Run ${COMMAND}"
 #URL=$(${COMMAND})
@@ -101,6 +100,8 @@ else
   # Pass in other cases
   echo " "
   echo "[INFO] No errors found."
+  echo " "
+  echo "[INFO] See the pull request: ${URL}"
   echo " "
   exit 0
 fi
