@@ -2,16 +2,16 @@
 name: Bug report
 about: Report any bugs for this project
 title: 'TITLE'
-labels: 'bug'
+labels: 'bugfix'
 assignees: 'ChristophShyper'
 
 ---
 ### Brief description
-<!-- Write here... >>> -->
+<!-- Write here... -->
 
 *Write you description here*
 
-<!-- <<< ...write here -->
+<!-- ...write here -->
 ### Additional information
 * [ ] Provided a clear and concise description of what the bug is.
 * [ ] Given a clear and concise description of what was expected to happen.
@@ -19,5 +19,6 @@ assignees: 'ChristophShyper'
 * [ ] If applicable, added screenshots to help explain the issue.
 * [ ] Added any other context about the issue that can help to understand it.
 * [ ] Associated pull request has been already created and link was provided.
+
 
 *Check [CONTRIBUTING.md](../blob/master/.github/CONTRIBUTING.md) for more information*
