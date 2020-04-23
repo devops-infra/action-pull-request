@@ -5,7 +5,7 @@ set -e
 # Return code
 RET_CODE=0
 
-echo ":small_orange_diamond: Inputs:"
+echo "Inputs:"
 echo "  target_branch: ${INPUT_TARGET_BRANCH}"
 echo "  title:   ${INPUT_TITLE}"
 echo "  template: ${INPUT_TEMPLATE}"
@@ -20,7 +20,7 @@ echo " "
 # Required github_token
 if [[ -z "${GITHUB_TOKEN}" ]]; then
   MESSAGE='Missing env var "github_token: ${{ secrets.GITHUB_TOKEN }}".'
-  echo "[ERROR] :red_circle: ${MESSAGE}"
+  echo "[ERROR] ${MESSAGE}"
   exit 1
 fi
 
@@ -39,13 +39,13 @@ TARGET_BRANCH="${INPUT_TARGET_BRANCH:-"master"}"
 git fetch origin '+refs/heads/*:refs/heads/*' --update-head-ok
 # Compare branches by revisions
 if [[ $(git rev-parse --revs-only "${SOURCE_BRANCH}") == $(git rev-parse --revs-only "${TARGET_BRANCH}") ]]; then
-  echo "[INFO] :small_blue_diamond: Both branches are the same. No action needed."
+  echo "[INFO] Both branches are the same. No action needed."
   exit 0
 fi
 
 # Compare branches by diff
 if [[ -z $(git diff "${SOURCE_BRANCH}..${TARGET_BRANCH}") ]]; then
-  echo "[INFO] :small_blue_diamond: Both branches are the same. No action needed."
+  echo "[INFO] Both branches are the same. No action needed."
   exit 0
 fi
 
@@ -83,7 +83,7 @@ fi
 
 # Main action
 COMMAND="hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ${ARG_LIST} || true"
-echo ":small_orange_diamond: Running: $COMMAND"
+echo "Running: $COMMAND"
 URL=$(sh -c "$COMMAND")
 if [[ "$?" != "0" ]]; then
   RET_CODE=1
@@ -93,15 +93,15 @@ fi
 echo "::set-output name=url::${URL}"
 if [[ ${RET_CODE} != "0" ]]; then
   echo " "
-  echo "[ERROR] :red_circle: Check log for errors."
+  echo "[ERROR] Check log for errors."
   echo " "
   exit 1
 else
   # Pass in other cases
   echo " "
-  echo "[INFO] :small_blue_diamond: No errors found."
+  echo "[INFO] No errors found."
   echo " "
-  echo "[INFO] :small_blue_diamond: See the pull request: ${URL}"
+  echo "[INFO] See the pull request: ${URL}"
   echo " "
   exit 0
 fi

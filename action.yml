@@ -1,6 +1,6 @@
 name: "GitHub Action for creating Pull Requests"
 author: "Krzysztof Szyper <biotyk@mail.com>"
-description: "GitHub Action that will create a pull request from the current directory."
+description: "GitHub Action that will create a pull request from the current branch."
 inputs:
   target_branch:
     description: "Name of the target branch."
