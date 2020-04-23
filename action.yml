@@ -2,49 +2,45 @@ name: "GitHub Action for creating Pull Requests"
 author: "Krzysztof Szyper <biotyk@mail.com>"
 description: "GitHub Action that will create a pull request from the current directory."
 inputs:
-  github_token:
-    description: "TODO"
-    required: false
-    default: ""
   target_branch:
-    description: "TODO"
+    description: "Name of the target branch."
     required: false
     default: "master"
   title:
-    description: "TODO"
+    description: "Pull request title."
     required: false
     default: ""
   template:
-    description: "TODO"
+    description: "Template file location."
     required: false
     default: ""
   body:
-    description: "TODO"
+    description: "Pull request body."
     required: false
     default: ""
   reviewer:
-    description: "TODO"
+    description: "Reviewer's username."
     required: false
     default: ""
   assignee:
-    description: "TODO"
+    description: "Assignee's usernames."
     required: false
     default: ""
   label:
-    description: "TODO"
+    description: "Labels to apply, coma separated."
     required: false
     default: ""
   milestone:
-    description: "TODO"
+    description: "Milestone."
     required: false
     default: ""
   draft:
-    description: "TODO"
+    description: "Whether to mark it as a draft."
     required: false
     default: "false"
 outputs:
-  foobar:
-    description: "Output from action."
+  url:
+    description: "Pull request URL"
 runs:
   using: "docker"
   image: "docker://christophshyper/action-pull-request:latest"

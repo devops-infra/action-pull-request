@@ -5,7 +5,7 @@ FROM alpine:3.11
 # And for https://github.com/opencontainers/image-spec/blob/master/annotations.md
 # And for https://help.github.com/en/actions/building-actions/metadata-syntax-for-github-actions
 ARG NAME="GitHub Action for creating Pull Requests"
-ARG DESCRIPTION="GitHub Action that will create a pull request from the current directory."
+ARG DESCRIPTION="GitHub Action that will create a pull request from the current branch."
 ARG REPO_URL="https://github.com/ChristophShyper/action-pull-request"
 ARG AUTHOR="Krzysztof Szyper <biotyk@mail.com>"
 ARG HOMEPAGE="https://christophshyper.github.io/"

@@ -1,12 +1,10 @@
 # GitHub Action for creating Pull Requests
 
-GitHub Action that will create a pull request from the current directory.
+GitHub Action that will create a pull request from the current branch.
 
 Useful in combination with my other action [ChristophShyper/action-commit-push](https://github.com/ChristophShyper/action-commit-push).
 
 Dockerized as [christophshyper/action-pull-request](https://hub.docker.com/repository/docker/christophshyper/action-pull-request).
-
-**Work in Progress.**
 
 
 ## Badge swag
@@ -35,46 +33,68 @@ Dockerized as [christophshyper/action-pull-request](https://hub.docker.com/repos
     - name: Run the Action
       uses: ChristophShyper/action-pull-request@master
       env:
-        bar: barfoo
+        github_token: "${{ secrets.GITHUB_TOKEN }}"
       with:
-        baz: bazbar
+        target_branch: master
+        title: My pull request
+        template: ".github/PULL_REQUEST_TEMPLATE.md"
+        body: "**Automate pull request**"
+        reviewer: octocat
+        assignee: octocat
+        label: enhancement
+        milestone: My milestone
+        draft: true
 ```
 
 Environment Variable | Required |Description
 :--- | :---: | :---
-bar | No | Environment variable for `env: ...`.
+github_token | Yes | GitHub token `${{ secrets.GITHUB_TOKEN }}`
 
 Input Variable | Required | Default |Description
 :--- | :---: | :---: | :---
-baz | No | `bazbar` | Some input variable for `with: ...`.
+target_branch | No | `master` | Name of target branch. Defaults to .
+title | No | `""` | Pull request title.
+template | No | `""` | Template file location.
+body | No | `""` | Pull request body.
+reviewer | No | `""` | Reviewer's username.
+assignee | No | `""` | Assignee's usernames.
+label | No | `""` | Labels to apply, coma separated.
+milestone | No | `""` | Milestone.
+draft | No | `""` | Whether to mark it as a draft.
 
 Outputs | Description
 :--- | :---
-foobar | Output from action.
+url | Pull request URL
 
 
 ## Examples
 
-Run the Action via GitHub.
+Create pull request for non-master branches
 ```yaml
 name: Run the Action on each commit
 on:
-  push
+  push:
+    branches-ignore: master
 jobs:
   action-pull-request:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Run the Action
+      - name: Create pull request
         uses: ChristophShyper/action-pull-request@master
+        env:
+          github_token: "${{ secrets.GITHUB_TOKEN }}"
+        with:
+          title: Automatic pull request
 ```
 
-Run the Action via DockerHub.
+Use first commit as a title and add label based on branch name
 ```yaml
 name: Run the Action on each commit
 on:
-  push
+  push:
+    branches-ignore: master
 jobs:
   action-pull-request:
     runs-on: ubuntu-latest
@@ -82,9 +102,11 @@ jobs:
       - name: Checkout repoistory
         uses: actions/checkout@v2
       - name: Run the Action
-        uses: docker://christophshyper/action-pull-request:latest
+        if: startsWith(github.ref, 'refs/heads/enhancement')
+        uses: ChristophShyper/action-pull-request@master
         env:
-          bar: foo
+          github_token: "${{ secrets.GITHUB_TOKEN }}"
         with:
-          bar: baz
+          title: ${{ github.event.commits[0].message }}
+          label: enhancement
 ```
