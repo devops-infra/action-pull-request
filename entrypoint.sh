@@ -26,7 +26,7 @@ fi
 
 echo "Setting GitHub credentials"
 # Set GitHub credentials
-git remote set-url origin "https://${GITHUB_ACTOR}:${GITHUB_TOKEN.com/${GITHUB_REPOSITORY}"
+git remote set-url origin "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}"
 git config --global user.name "${GITHUB_ACTOR}"
 git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 # Needed for hub binary
