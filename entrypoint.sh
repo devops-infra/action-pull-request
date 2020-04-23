@@ -5,43 +5,49 @@ set -e
 # Return code
 RET_CODE=0
 
-# Require github_token
-if [[ -z "${INPUT_GITHUB_TOKEN}" ]]; then
-  MESSAGE='Missing input "github_token: ${{ secrets.GITHUB_TOKEN }}".'
-  echo "[ERROR] ${MESSAGE}"
+echo ":small_orange_diamond: Inputs:"
+echo "  target_branch: ${INPUT_TARGET_BRANCH}"
+echo "  title:   ${INPUT_TITLE}"
+echo "  template: ${INPUT_TEMPLATE}"
+echo "  body: ${INPUT_BODY}"
+echo "  reviewer: ${INPUT_REVIEWER}"
+echo "  assignee: ${INPUT_ASSIGNEE}"
+echo "  label: ${INPUT_LABEL}"
+echo "  milestone: ${INPUT_MILESTONE}"
+echo "  draft: ${INPUT_DRAFT}"
+echo " "
+
+# Required github_token
+if [[ -z "${GITHUB_TOKEN}" ]]; then
+  MESSAGE='Missing env var "github_token: ${{ secrets.GITHUB_TOKEN }}".'
+  echo "[ERROR] :red_circle: ${MESSAGE}"
   exit 1
 fi
 
 # Set GitHub credentials
 git remote set-url origin "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}"
-#git config --global user.name "${GITHUB_ACTOR}"
-#git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+git config --global user.name "${GITHUB_ACTOR}"
+git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+# Needed for hub binary
 export GITHUB_USER="${GITHUB_ACTOR}"
 
 # Set branches
-#if [[ -n "${INPUT_SOURCE_BRANCH}" ]]; then
-#  SOURCE_BRANCH=${INPUT_SOURCE_BRANCH}
-#else
-#  SOURCE_BRANCH=$(git symbolic-ref --short -q HEAD)
-#fi
 SOURCE_BRANCH=$(git symbolic-ref --short -q HEAD)
 TARGET_BRANCH="${INPUT_TARGET_BRANCH:-"master"}"
 
-# todo: update target
-#git branch -u origin/master master
-#git fetch origin <srcBranch>:<destBranch>
-
+# Update all branches
+git fetch origin '+refs/heads/*:refs/heads/*' --update-head-ok
 # Compare branches by revisions
-#if [[ $(git rev-parse --revs-only "${SOURCE_BRANCH}") == $(git rev-parse --revs-only "${TARGET_BRANCH}") ]]; then
-#  echo "[INFO] Both branches are the same. No action needed."
-#  exit 0
-#fi
-#
-## Compare branches by diff
-#if [[ -z $(git diff "${SOURCE_BRANCH}..${TARGET_BRANCH}") ]]; then
-#  echo "[INFO] Both branches are the same. No action needed."
-#  exit 0
-#fi
+if [[ $(git rev-parse --revs-only "${SOURCE_BRANCH}") == $(git rev-parse --revs-only "${TARGET_BRANCH}") ]]; then
+  echo "[INFO] :small_blue_diamond: Both branches are the same. No action needed."
+  exit 0
+fi
+
+# Compare branches by diff
+if [[ -z $(git diff "${SOURCE_BRANCH}..${TARGET_BRANCH}") ]]; then
+  echo "[INFO] :small_blue_diamond: Both branches are the same. No action needed."
+  exit 0
+fi
 
 # Set title and/or body
 ARG_LIST="${INPUT_TITLE}"
@@ -76,33 +82,26 @@ if [[ "${INPUT_DRAFT}" ==  "true" ]]; then
 fi
 
 # Main action
-COMMAND="hub pull-request -b $TARGET_BRANCH -h $SOURCE_BRANCH --no-edit $ARG_LIST || true"
-echo "$COMMAND"
+COMMAND="hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ${ARG_LIST} || true"
+echo ":small_orange_diamond: Running: $COMMAND"
 URL=$(sh -c "$COMMAND")
 if [[ "$?" != "0" ]]; then
   RET_CODE=1
 fi
 
-#COMMAND="hub pull-request -b "${TARGET_BRANCH}" -h "${SOURCE_BRANCH}" --no-edit "${ARG_LIST}" || true"
-#echo "Run ${COMMAND}"
-#URL=$(${COMMAND})
-#if [[ "$?" != "0" ]]; then
-#  exit 1
-#fi
-
 # Finish
 echo "::set-output name=url::${URL}"
 if [[ ${RET_CODE} != "0" ]]; then
   echo " "
-  echo "[ERROR] Check log for errors."
+  echo "[ERROR] :red_circle: Check log for errors."
   echo " "
   exit 1
 else
   # Pass in other cases
   echo " "
-  echo "[INFO] No errors found."
+  echo "[INFO] :small_blue_diamond: No errors found."
   echo " "
-  echo "[INFO] See the pull request: ${URL}"
+  echo "[INFO] :small_blue_diamond: See the pull request: ${URL}"
   echo " "
   exit 0
 fi
