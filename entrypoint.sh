@@ -18,7 +18,7 @@ echo "  draft: ${INPUT_DRAFT}"
 echo " "
 
 # Required github_token
-if [[ -z "${GITHUB_TOKEN}" ]]; then
+if [[ -z "${INPUT_GITHUB_TOKEN}" ]]; then
   MESSAGE='Missing input "github_token: ${{ secrets.GITHUB_TOKEN }}".'
   echo "[ERROR] ${MESSAGE}"
   exit 1
