@@ -61,7 +61,7 @@ jobs:
         uses: repo-sync/pull-request@v2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          pr_label: "automatic"
+          pr_label: "automatic,feature"
           pr_body: "${{ steps.pr-template-other.outputs.content }}"
           pr_title: "${{ github.event.commits[0].message }}"
           pr_assignee: "${{ github.actor }}"
