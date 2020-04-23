@@ -46,13 +46,11 @@ Dockerized as [christophshyper/action-pull-request](https://hub.docker.com/repos
         draft: true
 ```
 
-Environment Variable | Required |Description
-:--- | :---: | :---
-github_token | Yes | GitHub token `${{ secrets.GITHUB_TOKEN }}`
 
 Input Variable | Required | Default |Description
 :--- | :---: | :---: | :---
-target_branch | No | `master` | Name of target branch. Defaults to .
+github_token | Yes | `""` | GitHub token `${{ secrets.GITHUB_TOKEN }}`
+target_branch | No | `master` | Name of target branch.
 title | No | `""` | Pull request title.
 template | No | `""` | Template file location.
 body | No | `""` | Pull request body.

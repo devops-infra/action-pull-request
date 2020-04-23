@@ -19,7 +19,7 @@ echo " "
 
 # Required github_token
 if [[ -z "${GITHUB_TOKEN}" ]]; then
-  MESSAGE='Missing env var "github_token: ${{ secrets.GITHUB_TOKEN }}".'
+  MESSAGE='Missing input "github_token: ${{ secrets.GITHUB_TOKEN }}".'
   echo "[ERROR] ${MESSAGE}"
   exit 1
 fi
