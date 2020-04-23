@@ -38,7 +38,7 @@ Dockerized as [christophshyper/action-pull-request](https://hub.docker.com/repos
         target_branch: master
         title: My pull request
         template: ".github/PULL_REQUEST_TEMPLATE.md"
-        body: "**Automate pull request**"
+        body: "**Automated pull request**"
         reviewer: octocat
         assignee: octocat
         label: enhancement
