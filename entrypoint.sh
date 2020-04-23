@@ -24,6 +24,7 @@ if [[ -z "${GITHUB_TOKEN}" ]]; then
   exit 1
 fi
 
+echo "Setting GitHub credentials"
 # Set GitHub credentials
 git remote set-url origin "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}"
 git config --global user.name "${GITHUB_ACTOR}"
@@ -31,10 +32,12 @@ git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 # Needed for hub binary
 export GITHUB_USER="${GITHUB_ACTOR}"
 
+echo "Setting branch names"
 # Set branches
 SOURCE_BRANCH=$(git symbolic-ref --short -q HEAD)
 TARGET_BRANCH="${INPUT_TARGET_BRANCH:-"master"}"
 
+echo "Updating branches"
 # Update all branches
 git fetch origin '+refs/heads/*:refs/heads/*' --update-head-ok
 # Compare branches by revisions
@@ -43,12 +46,14 @@ if [[ $(git rev-parse --revs-only "${SOURCE_BRANCH}") == $(git rev-parse --revs-
   exit 0
 fi
 
+echo "Comparing branches"
 # Compare branches by diff
 if [[ -z $(git diff "${SOURCE_BRANCH}..${TARGET_BRANCH}") ]]; then
   echo "[INFO] Both branches are the same. No action needed."
   exit 0
 fi
 
+echo "Setting pull request"
 # Set title and/or body
 ARG_LIST="${INPUT_TITLE}"
 if [[ -n "${ARG_LIST}" ]]; then
@@ -81,6 +86,7 @@ if [[ "${INPUT_DRAFT}" ==  "true" ]]; then
   ARG_LIST="${ARG_LIST} -d"
 fi
 
+echo "Creating pull request"
 # Main action
 COMMAND="hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ${ARG_LIST} || true"
 echo "Running: $COMMAND"
