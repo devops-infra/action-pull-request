@@ -22,7 +22,7 @@ echo "  get_diff: ${INPUT_GET_DIFF}"
 
 echo -e "\nSetting branches"
 SOURCE_BRANCH="${INPUT_SOURCE_BRANCH:-$(git symbolic-ref --short -q HEAD)}"
-TARGET_BRANCH="${INPUT_TARGET_BRANCH:-"master"}"
+TARGET_BRANCH="${INPUT_TARGET_BRANCH:-master}"
 echo "Source branch: ${SOURCE_BRANCH}"
 echo "Target branch: ${TARGET_BRANCH}"
 
@@ -50,24 +50,28 @@ if [[ $(git rev-parse --revs-only "${SOURCE_BRANCH}") == $(git rev-parse --revs-
 fi
 
 echo -e "\nComparing branches by diff"
-if [[ -z $(git diff "${SOURCE_BRANCH}..${TARGET_BRANCH}") ]]; then
+if [[ -z $(git diff "${TARGET_BRANCH}..${SOURCE_BRANCH}") ]]; then
   echo -e "\n[INFO] Both branches are the same. No action needed."
   exit 0
 fi
 
-echo -e "Getting new commits in the source branch"
+echo -e "\n\nGetting new commits in the source branch"
 git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative "${TARGET_BRANCH}..${SOURCE_BRANCH}"
 GITLOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative --no-color "${TARGET_BRANCH}..${SOURCE_BRANCH}")
 
-echo -e "\nGetting files modified in the source branch"
+echo -e "\n\nGetting files modified in the source branch"
 git diff --compact-summary "${TARGET_BRANCH}..${SOURCE_BRANCH}"
 GITDIFF=$(git diff --compact-summary --no-color "${TARGET_BRANCH}..${SOURCE_BRANCH}")
 
 echo -e "\nReplacing strings in the template"
-if [[ -f ${INPUT_TEMPLATE} ]]; then
-  TEMPLATE=$(echo -e "$(cat "${INPUT_TEMPLATE}")" | sed "s/${INPUT_OLD_STRING}/${INPUT_NEW_STRING}/" | sed 's/`/\\`/g; s/\$/\\\$/g')
+if [[ -f "${INPUT_TEMPLATE}" ]]; then
+  if [[ -n "${INPUT_OLD_STRING}" ]]; then
+    TEMPLATE=$(echo -e "$(cat "${INPUT_TEMPLATE}")")
+    TEMPLATE="${TEMPLATE/${INPUT_OLD_STRING}/${INPUT_NEW_STRING}}"
+  fi
   if [[ "${INPUT_GET_DIFF}" ==  "true" ]]; then
-    TEMPLATE=$(echo -e "$(cat "${INPUT_TEMPLATE}")" | sed "s/<!-- Diff commits -->/${GITLOG}/" | sed "s/<!-- Diff files -->/${GITDIFF}/")
+    TEMPLATE="${TEMPLATE/<\!-- Diff commits -->/${GITLOG}}"
+    TEMPLATE="${TEMPLATE/<\!-- Diff files -->/${GITDIFF}}"
   fi
 fi
 
@@ -106,9 +110,7 @@ echo -e "Creating pull request"
 COMMAND="hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ${ARG_LIST} || true"
 echo -e "\nRunning: ${COMMAND}"
 URL=$(sh -c "${COMMAND}")
-if [[ "$?" != "0" ]]; then
-  RET_CODE=1
-fi
+if [[ "$?" != "0" ]]; then RET_CODE=1; fi
 
 # Finish
 echo "::set-output name=url::${URL}"
