@@ -55,11 +55,11 @@ if [[ -z $(git diff "${TARGET_BRANCH}..${SOURCE_BRANCH}") ]]; then
   exit 0
 fi
 
-echo -e "\nGetting new commits in the source branch"
+echo -e "\n\nGetting new commits in the source branch"
 git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative "${TARGET_BRANCH}..${SOURCE_BRANCH}"
 GITLOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative --no-color "${TARGET_BRANCH}..${SOURCE_BRANCH}")
 
-echo -e "\nGetting files modified in the source branch"
+echo -e "\n\nGetting files modified in the source branch"
 git diff --compact-summary "${TARGET_BRANCH}..${SOURCE_BRANCH}"
 GITDIFF=$(git diff --compact-summary --no-color "${TARGET_BRANCH}..${SOURCE_BRANCH}")
 
@@ -67,7 +67,7 @@ echo -e "\nReplacing strings in the template"
 if [[ -f "${INPUT_TEMPLATE}" ]]; then
   if [[ -n "${INPUT_OLD_STRING}" ]]; then
     TEMPLATE=$(echo -e "$(cat "${INPUT_TEMPLATE}")")
-    TEMPLATE="${TEMPLATE/${SED_OLD_STRING}/${SED_NEW_STRING}}"
+    TEMPLATE="${TEMPLATE/${INPUT_OLD_STRING}/${INPUT_NEW_STRING}}"
   fi
   if [[ "${INPUT_GET_DIFF}" ==  "true" ]]; then
     TEMPLATE="${TEMPLATE/<\!-- Diff commits -->/${GITLOG}}"
