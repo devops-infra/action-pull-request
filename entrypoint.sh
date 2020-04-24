@@ -66,8 +66,9 @@ GITDIFF=$(git diff --compact-summary --no-color "${TARGET_BRANCH}..${SOURCE_BRAN
 echo -e "\nReplacing strings in the template"
 if [[ -f "${INPUT_TEMPLATE}" ]]; then
   if [[ -n "${INPUT_OLD_STRING}" ]]; then
-    TEMPLATE=$(echo -e "$(cat "${INPUT_TEMPLATE}")")
-    TEMPLATE="${TEMPLATE/${INPUT_OLD_STRING}/${INPUT_NEW_STRING}}"
+    TEMPLATE=$(cat "${INPUT_TEMPLATE}")
+    OLD_STRING=${INPUT_OLD_STRING/\!/\\!}
+    TEMPLATE=${TEMPLATE/${OLD_STRING}/${INPUT_NEW_STRING}}
   fi
   if [[ "${INPUT_GET_DIFF}" ==  "true" ]]; then
     TEMPLATE="${TEMPLATE/<\!-- Diff commits -->/${GITLOG}}"
