@@ -54,7 +54,7 @@ fi
 
 # Get new commits in the source branch
 echo "[INFO] Commits in this pull request:"
-COMMAND="git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative" "${SOURCE_BRANCH}..${TARGET_BRANCH}"
+git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative "${SOURCE_BRANCH}..${TARGET_BRANCH}"
 GITLOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative --no-color "${SOURCE_BRANCH}..${TARGET_BRANCH}")
 echo " "
 
