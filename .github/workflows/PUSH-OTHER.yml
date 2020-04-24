@@ -51,77 +51,52 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v1 # Needs to be in v1 version otherwise will not work with pull-request@v2
 
-      - name: Read the template - other (conditional)
-        id: pr-template-other
-        uses: juliangruber/read-file-action@v1
-        with:
-          path: ./.github/PULL_REQUEST_TEMPLATE/FEATURE.md
-
-      - name: Create pull request - other (conditional)
-        uses: repo-sync/pull-request@v2
+      - name: Create pull request - dependency (conditional)
+        if: startsWith(github.ref, 'refs/heads/dependency')
+        uses: ChristophShyper/action-pull-request@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          pr_label: "automatic,feature"
-          pr_body: "${{ steps.pr-template-other.outputs.content }}"
-          pr_title: "${{ github.event.commits[0].message }}"
-          pr_assignee: "${{ github.actor }}"
+          title: "${{ github.event.commits[0].message }}"
+          assignee: "${{ github.actor }}"
+          label: automatic,dependency
+          template: .github/PULL_REQUEST_TEMPLATE/DEPENDENCY.md
 
+      - name: Create pull request - bugfix (conditional)
+        if: startsWith(github.ref, 'refs/heads/bugfix')
+        uses: ChristophShyper/action-pull-request@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          title: "${{ github.event.commits[0].message }}"
+          assignee: "${{ github.actor }}"
+          label: automatic,bugfix
+          template: .github/PULL_REQUEST_TEMPLATE/BUGFIX.md
 
+      - name: Create pull request - feature (conditional)
+        if: startsWith(github.ref, 'refs/heads/feature')
+        uses: ChristophShyper/action-pull-request@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          title: "${{ github.event.commits[0].message }}"
+          assignee: "${{ github.actor }}"
+          label: automatic,feature
+          template: .github/PULL_REQUEST_TEMPLATE/FEATURE.md
 
+      - name: Create pull request - documentation (conditional)
+        if: startsWith(github.ref, 'refs/heads/documentation')
+        uses: ChristophShyper/action-pull-request@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          title: "${{ github.event.commits[0].message }}"
+          assignee: "${{ github.actor }}"
+          label: automatic,documentation
+          template: .github/PULL_REQUEST_TEMPLATE/DOCUMENTATION.md
 
-#  pull_request:
-#    name: Create Pull Request
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@v1 # Needs to be in v1 version otherwise will not work with pull-request@v2
-#
-#      - name: Create pull request - dependency (conditional)
-#        if: startsWith(github.ref, 'refs/heads/dependency')
-#        uses: ChristophShyper/action-pull-request@master
-#        with:
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
-#          title: ":recycle: ${{ github.event.commits[0].message }}"
-#          assignee: "${{ github.actor }}"
-#          label: "automatic,dependency"
-#          template: ".github/PULL_REQUEST_TEMPLATE/DEPENDENCY.md"
-#
-#      - name: Create pull request - bugfix (conditional)
-#        if: startsWith(github.ref, 'refs/heads/bugfix')
-#        uses: ChristophShyper/action-pull-request@master
-#        with:
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
-#          title: ":bangbang: ${{ github.event.commits[0].message }}"
-#          assignee: "${{ github.actor }}"
-#          label: "automatic,bugfix"
-#          template: ".github/PULL_REQUEST_TEMPLATE/BUGFIX.md"
-#
-#      - name: Create pull request - feature (conditional)
-#        if: startsWith(github.ref, 'refs/heads/feature')
-#        uses: ChristophShyper/action-pull-request@master
-#        with:
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
-#          title: ":ballot_box_with_check: ${{ github.event.commits[0].message }}"
-#          assignee: "${{ github.actor }}"
-#          label: "automatic,feature"
-#          template: ".github/PULL_REQUEST_TEMPLATE/FEATURE.md"
-#
-#      - name: Create pull request - documentation (conditional)
-#        if: startsWith(github.ref, 'refs/heads/documentation')
-#        uses: ChristophShyper/action-pull-request@master
-#        with:
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
-#          title: ":blue_book: ${{ github.event.commits[0].message }}"
-#          assignee: "${{ github.actor }}"
-#          label: "automatic,documentation"
-#          template: ".github/PULL_REQUEST_TEMPLATE/DOCUMENTATION.md"
-#
-#      - name: Create pull request - other (conditional)
-#        if: startsWith(github.ref, '!refs/heads/dependency') && startsWith(github.ref, '!refs/heads/bugfix') && startsWith(github.ref, '!refs/heads/feature') && startsWith(github.ref, '!refs/heads/documentation')
-#        uses: ChristophShyper/action-pull-request@master
-#        with:
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
-#          title: ":ballot_box_with_check: ${{ github.event.commits[0].message }}"
-#          assignee: "${{ github.actor }}"
-#          label: "automatic,feature"
-#          template: ".github/PULL_REQUEST_TEMPLATE/FEATURE.md"
+      - name: Create pull request - other (conditional)
+        if: startsWith(github.ref, '!refs/heads/dependency') && startsWith(github.ref, '!refs/heads/bugfix') && startsWith(github.ref, '!refs/heads/feature') && startsWith(github.ref, '!refs/heads/documentation')
+        uses: ChristophShyper/action-pull-request@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          title: "${{ github.event.commits[0].message }}"
+          assignee: "${{ github.actor }}"
+          label: automatic,feature
+          template: .github/PULL_REQUEST_TEMPLATE/FEATURE.md
