@@ -6,6 +6,7 @@ set -e
 RET_CODE=0
 
 echo "Inputs:"
+echo "  source_branch: ${INPUT_SOURCE_BRANCH}"
 echo "  target_branch: ${INPUT_TARGET_BRANCH}"
 echo "  title:   ${INPUT_TITLE}"
 echo "  template: ${INPUT_TEMPLATE}"
@@ -21,7 +22,7 @@ echo -e "\n"
 
 
 # Set branches
-SOURCE_BRANCH=$(git symbolic-ref --short -q HEAD)
+SOURCE_BRANCH="${INPUT_SOURCE_BRANCH:-$(git symbolic-ref --short -q HEAD)}"
 TARGET_BRANCH="${INPUT_TARGET_BRANCH:-"master"}"
 echo "Source branch: ${SOURCE_BRANCH}"
 echo "Target branch: ${TARGET_BRANCH}"
