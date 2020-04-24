@@ -53,50 +53,65 @@ jobs:
 
       - name: Create pull request - dependency (conditional)
         if: startsWith(github.ref, 'refs/heads/dependency')
-        uses: repo-sync/pull-request@v2
+        uses: ChristophShyper/action-pull-request@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          pr_title: "${{ github.event.commits[0].message }}"
-          pr_assignee: "${{ github.actor }}"
-          pr_label: automatic,dependency
-          pr_template: .github/PULL_REQUEST_TEMPLATE/DEPENDENCY.md
+          title: "${{ github.event.commits[0].message }}"
+          assignee: "${{ github.actor }}"
+          label: automatic,dependency
+          template: .github/PULL_REQUEST_TEMPLATE/DEPENDENCY.md
+          old_string: "**Write you description here**"
+          new_string: "${{ github.event.commits[0].message }}"
+          get_diff: true
 
       - name: Create pull request - bugfix (conditional)
         if: startsWith(github.ref, 'refs/heads/bugfix')
-        uses: repo-sync/pull-request@v2
+        uses: ChristophShyper/action-pull-request@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          pr_title: "${{ github.event.commits[0].message }}"
-          pr_assignee: "${{ github.actor }}"
-          pr_label: automatic,bugfix
-          pr_template: .github/PULL_REQUEST_TEMPLATE/BUGFIX.md
+          title: "${{ github.event.commits[0].message }}"
+          assignee: "${{ github.actor }}"
+          label: automatic,bugfix
+          template: .github/PULL_REQUEST_TEMPLATE/BUGFIX.md
+          old_string: "**Write you description here**"
+          new_string: "${{ github.event.commits[0].message }}"
+          get_diff: true
 
       - name: Create pull request - feature (conditional)
         if: startsWith(github.ref, 'refs/heads/feature')
-        uses: repo-sync/pull-request@v2
+        uses: ChristophShyper/action-pull-request@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          pr_title: "${{ github.event.commits[0].message }}"
-          pr_assignee: "${{ github.actor }}"
-          pr_label: automatic,feature
-          pr_template: .github/PULL_REQUEST_TEMPLATE/FEATURE.md
+          title: "${{ github.event.commits[0].message }}"
+          assignee: "${{ github.actor }}"
+          label: automatic,feature
+          template: .github/PULL_REQUEST_TEMPLATE/FEATURE.md
+          old_string: "**Write you description here**"
+          new_string: "${{ github.event.commits[0].message }}"
+          get_diff: true
 
       - name: Create pull request - documentation (conditional)
         if: startsWith(github.ref, 'refs/heads/documentation')
-        uses: repo-sync/pull-request@v2
+        uses: ChristophShyper/action-pull-request@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          pr_title: "${{ github.event.commits[0].message }}"
-          pr_assignee: "${{ github.actor }}"
-          pr_label: automatic,documentation
-          pr_template: .github/PULL_REQUEST_TEMPLATE/DOCUMENTATION.md
+          title: "${{ github.event.commits[0].message }}"
+          assignee: "${{ github.actor }}"
+          label: automatic,documentation
+          template: .github/PULL_REQUEST_TEMPLATE/DOCUMENTATION.md
+          old_string: "**Write you description here**"
+          new_string: "${{ github.event.commits[0].message }}"
+          get_diff: true
 
       - name: Create pull request - other (conditional)
         if: startsWith(github.ref, '!refs/heads/dependency') && startsWith(github.ref, '!refs/heads/bugfix') && startsWith(github.ref, '!refs/heads/feature') && startsWith(github.ref, '!refs/heads/documentation')
-        uses: repo-sync/pull-request@v2
+        uses: ChristophShyper/action-pull-request@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          pr_title: "${{ github.event.commits[0].message }}"
-          pr_assignee: "${{ github.actor }}"
-          pr_label: automatic,feature
-          pr_template: .github/PULL_REQUEST_TEMPLATE/FEATURE.md
+          title: "${{ github.event.commits[0].message }}"
+          assignee: "${{ github.actor }}"
+          label: automatic,feature
+          template: .github/PULL_REQUEST_TEMPLATE/FEATURE.md
+          old_string: "**Write you description here**"
+          new_string: "${{ github.event.commits[0].message }}"
+          get_diff: true

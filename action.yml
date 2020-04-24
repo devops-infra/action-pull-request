@@ -8,7 +8,7 @@ inputs:
   source_branch:
     description: Name of the source branch.
     required: false
-    default: "master"
+    default: ""
   target_branch:
     description: Name of the target branch.
     required: false

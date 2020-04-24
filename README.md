@@ -123,6 +123,6 @@ jobs:
           label: automatic,feature
           template: .github/PULL_REQUEST_TEMPLATE/FEATURE.md
           old_string: "**Write you description here**"
-          new_strin: "${{ github.event.commits[0].message }}"
+          new_string: "${{ github.event.commits[0].message }}"
           get_diff: true
 ```

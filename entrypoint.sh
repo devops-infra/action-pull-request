@@ -21,7 +21,6 @@ echo "  new_string: ${INPUT_NEW_STRING}"
 echo "  get_diff: ${INPUT_GET_DIFF}"
 echo -e "\n"
 
-
 # Set branches
 SOURCE_BRANCH="${INPUT_SOURCE_BRANCH:-$(git symbolic-ref --short -q HEAD)}"
 TARGET_BRANCH="${INPUT_TARGET_BRANCH:-"master"}"
