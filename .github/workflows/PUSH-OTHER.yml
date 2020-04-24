@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v1 # Needs to be in v1 version otherwise will not work with pull-request@v2
+        uses: actions/checkout@v2
 
       - name: Create pull request - dependency (conditional)
         if: startsWith(github.ref, 'refs/heads/dependency')
