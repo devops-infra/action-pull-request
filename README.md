@@ -32,9 +32,9 @@ Dockerized as [christophshyper/action-pull-request](https://hub.docker.com/repos
 ```yaml
     - name: Run the Action
       uses: ChristophShyper/action-pull-request@master
-      env:
-        github_token: "${{ secrets.GITHUB_TOKEN }}"
       with:
+        github_token: "${{ secrets.GITHUB_TOKEN }}"
+        source_branch: development
         target_branch: master
         title: My pull request
         template: ".github/PULL_REQUEST_TEMPLATE.md"
@@ -52,7 +52,8 @@ Dockerized as [christophshyper/action-pull-request](https://hub.docker.com/repos
 Input Variable | Required | Default |Description
 :--- | :---: | :---: | :---
 github_token | Yes | `""` | GitHub token `${{ secrets.GITHUB_TOKEN }}`
-target_branch | No | `master` | Name of target branch.
+source_branch | No | *current branch* | Name of the source branch.
+target_branch | No | `master` | Name of the target branch.
 title | No | `""` | Pull request title.
 template | No | `""` | Template file location.
 body | No | `""` | Pull request body.
@@ -85,9 +86,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Create pull request
         uses: ChristophShyper/action-pull-request@master
-        env:
-          github_token: "${{ secrets.GITHUB_TOKEN }}"
         with:
+          github_token: "${{ secrets.GITHUB_TOKEN }}"
           title: Automatic pull request
 ```
 
@@ -106,8 +106,6 @@ jobs:
       - name: Run the Action
         if: startsWith(github.ref, 'refs/heads/enhancement')
         uses: ChristophShyper/action-pull-request@master
-        env:
-          github_token: "${{ secrets.GITHUB_TOKEN }}"
         with:
           title: ${{ github.event.commits[0].message }}
           label: enhancement
