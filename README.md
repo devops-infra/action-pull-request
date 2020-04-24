@@ -6,6 +6,13 @@ Useful in combination with my other action [ChristophShyper/action-commit-push](
 
 Dockerized as [christophshyper/action-pull-request](https://hub.docker.com/repository/docker/christophshyper/action-pull-request).
 
+Features:
+* Creates pull request if triggered from a current branch or any specified by `source_branch` to a `target_branch`.
+* Title and body of a pull request can be specified with `title` and `body`.
+* Can assign `assignee`, `reviewer`, one or more `label`, a `milestone` or mark it as a `draft`
+* Can replace any `old_string` inside a pull request template with a `new_string`.
+* When `get_diff` is `true` will add list of commits in place of `<!-- Diff commits -->` and list of modified files in place of `<!-- Diff files -->` in a pull request template.
+
 
 ## Badge swag
 [
@@ -46,6 +53,7 @@ Dockerized as [christophshyper/action-pull-request](https://hub.docker.com/repos
         draft: true
         old_string: "<!-- Add your description here -->"
         new_string: "** Automatic pull request**"
+        get_diff: true
 ```
 
 
@@ -61,9 +69,11 @@ reviewer | No | `""` | Reviewer's username.
 assignee | No | `""` | Assignee's usernames.
 label | No | `""` | Labels to apply, coma separated.
 milestone | No | `""` | Milestone.
-draft | No | `""` | Whether to mark it as a draft.
+draft | No | `false` | Whether to mark it as a draft.
 old_string | No | `""` | Old string for the replacement in the template.
 new_string | No | `""` | New string for the replacement in the template.
+get_diff | No | `false` | Whether to replace `<!-- Diff commits -->` and `<!-- Diff files -->` with differences between branches.
+
 
 Outputs | Description
 :--- | :---
@@ -91,7 +101,7 @@ jobs:
           title: Automatic pull request
 ```
 
-Use first commit as a title and add a label based on a branch name
+Use first commit as a title and part of body, add a label based on a branch name, add git differences in the template
 ```yaml
 name: Run the Action on each commit
 on:
@@ -104,9 +114,15 @@ jobs:
       - name: Checkout repoistory
         uses: actions/checkout@v2
       - name: Run the Action
-        if: startsWith(github.ref, 'refs/heads/enhancement')
+        if: startsWith(github.ref, 'refs/heads/feature')
         uses: ChristophShyper/action-pull-request@master
         with:
-          title: ${{ github.event.commits[0].message }}
-          label: enhancement
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          title: "${{ github.event.commits[0].message }}"
+          assignee: "${{ github.actor }}"
+          label: automatic,feature
+          template: .github/PULL_REQUEST_TEMPLATE/FEATURE.md
+          old_string: "**Write you description here**"
+          new_strin: "${{ github.event.commits[0].message }}"
+          get_diff: true
 ```

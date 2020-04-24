@@ -18,6 +18,7 @@ echo "  milestone: ${INPUT_MILESTONE}"
 echo "  draft: ${INPUT_DRAFT}"
 echo "  old_string: ${INPUT_OLD_STRING}"
 echo "  new_string: ${INPUT_NEW_STRING}"
+echo "  get_diff: ${INPUT_GET_DIFF}"
 echo -e "\n"
 
 
@@ -72,6 +73,9 @@ echo -e "\n"
 # Replace strings in the template
 if [[ -f ${INPUT_TEMPLATE} ]]; then
   TEMPLATE=$(echo -e "$(cat "${INPUT_TEMPLATE}")" | sed "s/${INPUT_OLD_STRING}/${INPUT_NEW_STRING}/" | sed 's/`/\\`/g; s/\$/\\\$/g')
+  if [[ "${INPUT_GET_DIFF}" ==  "true" ]]; then
+    TEMPLATE=$(echo -e "$(cat "${INPUT_TEMPLATE}")" | sed "s/<!-- Diff commits -->/${INPUT_NEW_STRING}/" | sed "s/<!-- Diff files -->/${INPUT_NEW_STRING}/")
+  fi
 fi
 
 # Set title and/or body
