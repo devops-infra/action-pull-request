@@ -33,7 +33,7 @@ if [[ -z "${INPUT_GITHUB_TOKEN}" ]]; then
   exit 1
 fi
 
-echo "\nSetting GitHub credentials"
+echo -e "\nSetting GitHub credentials"
 git remote set-url origin "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}"
 git config --global user.name "${GITHUB_ACTOR}"
 git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
@@ -58,18 +58,16 @@ fi
 echo -e "Getting new commits in the source branch"
 git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative "${TARGET_BRANCH}..${SOURCE_BRANCH}"
 GITLOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative --no-color "${TARGET_BRANCH}..${SOURCE_BRANCH}")
-echo -e "\n\n"
 
 echo -e "\nGetting files modified in the source branch"
 git diff --compact-summary "${TARGET_BRANCH}..${SOURCE_BRANCH}"
 GITDIFF=$(git diff --compact-summary --no-color "${TARGET_BRANCH}..${SOURCE_BRANCH}")
-echo -e "\n"
 
 echo -e "\nReplacing strings in the template"
 if [[ -f ${INPUT_TEMPLATE} ]]; then
   TEMPLATE=$(echo -e "$(cat "${INPUT_TEMPLATE}")" | sed "s/${INPUT_OLD_STRING}/${INPUT_NEW_STRING}/" | sed 's/`/\\`/g; s/\$/\\\$/g')
   if [[ "${INPUT_GET_DIFF}" ==  "true" ]]; then
-    TEMPLATE=$(echo -e "$(cat "${INPUT_TEMPLATE}")" | sed "s/<!-- Diff commits -->/${INPUT_NEW_STRING}/" | sed "s/<!-- Diff files -->/${INPUT_NEW_STRING}/")
+    TEMPLATE=$(echo -e "$(cat "${INPUT_TEMPLATE}")" | sed "s/<!-- Diff commits -->/${GITLOG}/" | sed "s/<!-- Diff files -->/${GITDIFF}/")
   fi
 fi
 
