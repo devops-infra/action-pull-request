@@ -8,7 +8,7 @@ RET_CODE=0
 echo "Inputs:"
 echo "  source_branch: ${INPUT_SOURCE_BRANCH}"
 echo "  target_branch: ${INPUT_TARGET_BRANCH}"
-echo "  title:   ${INPUT_TITLE}"
+echo "  title: ${INPUT_TITLE}"
 echo "  template: ${INPUT_TEMPLATE}"
 echo "  body: ${INPUT_BODY}"
 echo "  reviewer: ${INPUT_REVIEWER}"
@@ -19,14 +19,12 @@ echo "  draft: ${INPUT_DRAFT}"
 echo "  old_string: ${INPUT_OLD_STRING}"
 echo "  new_string: ${INPUT_NEW_STRING}"
 echo "  get_diff: ${INPUT_GET_DIFF}"
-echo -e "\n"
 
-# Set branches
+echo -e "\nSetting branches"
 SOURCE_BRANCH="${INPUT_SOURCE_BRANCH:-$(git symbolic-ref --short -q HEAD)}"
 TARGET_BRANCH="${INPUT_TARGET_BRANCH:-"master"}"
 echo "Source branch: ${SOURCE_BRANCH}"
 echo "Target branch: ${TARGET_BRANCH}"
-echo -e "\n"
 
 # Required github_token
 if [[ -z "${INPUT_GITHUB_TOKEN}" ]]; then
@@ -35,41 +33,39 @@ if [[ -z "${INPUT_GITHUB_TOKEN}" ]]; then
   exit 1
 fi
 
-# Set GitHub credentials
+echo "\nSetting GitHub credentials"
 git remote set-url origin "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}"
 git config --global user.name "${GITHUB_ACTOR}"
 git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 # Needed for hub binary
 export GITHUB_USER="${GITHUB_ACTOR}"
 
-# Update all branches
+echo -e "\nUpdating all branches"
 git fetch origin '+refs/heads/*:refs/heads/*' --update-head-ok
 
-# Compare branches by revisions
+echo -e "\nComparing branches by revisions"
 if [[ $(git rev-parse --revs-only "${SOURCE_BRANCH}") == $(git rev-parse --revs-only "${TARGET_BRANCH}") ]]; then
   echo -e "\n[INFO] Both branches are the same. No action needed."
   exit 0
 fi
 
-# Compare branches by diff
+echo -e "\nComparing branches by diff"
 if [[ -z $(git diff "${SOURCE_BRANCH}..${TARGET_BRANCH}") ]]; then
   echo -e "\n[INFO] Both branches are the same. No action needed."
   exit 0
 fi
 
-# Get new commits in the source branch
-echo -e "\n[INFO] Commits in this pull request:"
+echo -e "Getting new commits in the source branch"
 git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative "${TARGET_BRANCH}..${SOURCE_BRANCH}"
 GITLOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative --no-color "${TARGET_BRANCH}..${SOURCE_BRANCH}")
 echo -e "\n\n"
 
-# List files modified in those commits
-echo -e "\n[INFO] Files modified:"
+echo -e "\nGetting files modified in the source branch"
 git diff --compact-summary "${TARGET_BRANCH}..${SOURCE_BRANCH}"
 GITDIFF=$(git diff --compact-summary --no-color "${TARGET_BRANCH}..${SOURCE_BRANCH}")
 echo -e "\n"
 
-# Replace strings in the template
+echo -e "\nReplacing strings in the template"
 if [[ -f ${INPUT_TEMPLATE} ]]; then
   TEMPLATE=$(echo -e "$(cat "${INPUT_TEMPLATE}")" | sed "s/${INPUT_OLD_STRING}/${INPUT_NEW_STRING}/" | sed 's/`/\\`/g; s/\$/\\\$/g')
   if [[ "${INPUT_GET_DIFF}" ==  "true" ]]; then
@@ -77,7 +73,7 @@ if [[ -f ${INPUT_TEMPLATE} ]]; then
   fi
 fi
 
-# Set title and/or body
+echo -e "\nSetting title and body"
 ARG_LIST="${INPUT_TITLE}"
 if [[ -n "${ARG_LIST}" ]]; then
   ARG_LIST="-m \"${ARG_LIST}\""
@@ -108,7 +104,7 @@ if [[ "${INPUT_DRAFT}" ==  "true" ]]; then
   ARG_LIST="${ARG_LIST} -d"
 fi
 
-# Main action
+echo -e "Creating pull request"
 COMMAND="hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ${ARG_LIST} || true"
 echo -e "\nRunning: ${COMMAND}"
 URL=$(sh -c "${COMMAND}")
