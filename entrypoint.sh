@@ -17,6 +17,13 @@ echo "  milestone: ${INPUT_MILESTONE}"
 echo "  draft: ${INPUT_DRAFT}"
 echo " "
 
+
+# Set branches
+SOURCE_BRANCH=$(git symbolic-ref --short -q HEAD)
+TARGET_BRANCH="${INPUT_TARGET_BRANCH:-"master"}"
+echo "Source branch: ${SOURCE_BRANCH}"
+echo "Target branch: ${TARGET_BRANCH}"
+
 # Required github_token
 if [[ -z "${INPUT_GITHUB_TOKEN}" ]]; then
   MESSAGE='Missing input "github_token: ${{ secrets.GITHUB_TOKEN }}".'
@@ -31,10 +38,6 @@ git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 # Needed for hub binary
 export GITHUB_USER="${GITHUB_ACTOR}"
 
-# Set branches
-SOURCE_BRANCH=$(git symbolic-ref --short -q HEAD)
-TARGET_BRANCH="${INPUT_TARGET_BRANCH:-"master"}"
-
 # Update all branches
 git fetch origin '+refs/heads/*:refs/heads/*' --update-head-ok
 # Compare branches by revisions
@@ -48,6 +51,18 @@ if [[ -z $(git diff "${SOURCE_BRANCH}..${TARGET_BRANCH}") ]]; then
   echo "[INFO] Both branches are the same. No action needed."
   exit 0
 fi
+
+# Get new commits in the source branch
+echo "[INFO] Commits in this pull request:"
+COMMAND="git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative" "${SOURCE_BRANCH}..${TARGET_BRANCH}"
+GITLOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative --no-color "${SOURCE_BRANCH}..${TARGET_BRANCH}")
+echo " "
+
+# List files modified in those commits
+echp "[INFO] Files modified:"
+git diff --compact-summary "${SOURCE_BRANCH}..${TARGET_BRANCH}"
+GITDIFF=$(git diff --compact-summary --no-color "${SOURCE_BRANCH}..${TARGET_BRANCH}")
+echo " "
 
 # Set title and/or body
 ARG_LIST="${INPUT_TITLE}"
