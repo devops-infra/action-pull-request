@@ -1,10 +1,11 @@
 ### Brief description:
-<!-- Write here... -->
 
-*Write you description here*
 
-<!-- ...write here -->
+<!-- Write you description here -->
+
+
 ### Additional information
+* [ ] Pull request was created automatically
 * [ ] Provided a clear and concise description of what the issue is.
 * [ ] Given a clear and concise solution for what was expected to happen.
 * [ ] Proposed a clear and concise description of any alternative solutions or other features.
