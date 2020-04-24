@@ -7,11 +7,11 @@ assignees: 'ChristophShyper'
 
 ---
 ### Brief description
-<!-- Write here... -->
 
-*Write you description here*
 
-<!-- ...write here -->
+**Write you description here**
+
+
 ### Additional information
 * [ ] Provided a clear and concise description of what the bug is.
 * [ ] Given a clear and concise description of what was expected to happen.
