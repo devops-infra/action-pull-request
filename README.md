@@ -20,10 +20,8 @@ Features:
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/devops-infra/action-pull-request?color=brightgreen&label=Code%20size&style=flat-square&logo=github)
 ![GitHub last commit](https://img.shields.io/github/last-commit/devops-infra/action-pull-request?color=brightgreen&label=Last%20commit&style=flat-square&logo=github)
 ](https://github.com/devops-infra/action-pull-request "shields.io")
-[![Push to master](https://img.shields.io/github/workflow/status/devops-infra/action-pull-request/Push%20to%20master?color=brightgreen&label=Master%20branch&logo=github&style=flat-square)
-](https://github.com/devops-infra/action-pull-request/actions?query=workflow%3A%22Push+to+master%22)
-[![Push to other](https://img.shields.io/github/workflow/status/devops-infra/action-pull-request/Push%20to%20other?color=brightgreen&label=Pull%20requests&logo=github&style=flat-square)
-](https://github.com/devops-infra/action-pull-request/actions?query=workflow%3A%22Push+to+other%22)
+[![Push to master](https://github.com/devops-infra/action-pull-request/workflows/Push%20to%20master/badge.svg)](https://github.com/devops-infra/action-pull-request/actions?query=workflow%3A%22Push+to+master%22)
+[![Push to other](https://github.com/devops-infra/action-pull-request/workflows/Push%20to%20other/badge.svg)](https://github.com/devops-infra/action-pull-request/actions?query=workflow%3A%22Push+to+other%22)
 <br>
 [
 ![DockerHub](https://img.shields.io/badge/docker-christophshyper%2Faction--pull--request-blue.svg?style=flat-square&logo=docker)
