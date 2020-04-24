@@ -53,7 +53,7 @@ jobs:
 
       - name: Create pull request - dependency (conditional)
         if: startsWith(github.ref, 'refs/heads/dependency')
-        uses: ChristophShyper/action-pull-request@master
+        uses: devops-infra/action-pull-request@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           title: "${{ github.event.commits[0].message }}"
@@ -66,7 +66,7 @@ jobs:
 
       - name: Create pull request - bugfix (conditional)
         if: startsWith(github.ref, 'refs/heads/bugfix')
-        uses: ChristophShyper/action-pull-request@master
+        uses: devops-infra/action-pull-request@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           title: "${{ github.event.commits[0].message }}"
@@ -79,7 +79,7 @@ jobs:
 
       - name: Create pull request - feature (conditional)
         if: startsWith(github.ref, 'refs/heads/feature')
-        uses: ChristophShyper/action-pull-request@master
+        uses: devops-infra/action-pull-request@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           title: "${{ github.event.commits[0].message }}"
@@ -92,7 +92,7 @@ jobs:
 
       - name: Create pull request - documentation (conditional)
         if: startsWith(github.ref, 'refs/heads/documentation')
-        uses: ChristophShyper/action-pull-request@master
+        uses: devops-infra/action-pull-request@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           title: "${{ github.event.commits[0].message }}"
@@ -105,7 +105,7 @@ jobs:
 
       - name: Create pull request - other (conditional)
         if: startsWith(github.ref, '!refs/heads/dependency') && startsWith(github.ref, '!refs/heads/bugfix') && startsWith(github.ref, '!refs/heads/feature') && startsWith(github.ref, '!refs/heads/documentation')
-        uses: ChristophShyper/action-pull-request@master
+        uses: devops-infra/action-pull-request@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           title: "${{ github.event.commits[0].message }}"
