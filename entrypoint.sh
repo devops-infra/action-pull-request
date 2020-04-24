@@ -54,14 +54,14 @@ fi
 
 # Get new commits in the source branch
 echo "[INFO] Commits in this pull request:"
-git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative "${SOURCE_BRANCH}..${TARGET_BRANCH}"
-GITLOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative --no-color "${SOURCE_BRANCH}..${TARGET_BRANCH}")
+git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative "${TARGET_BRANCH}..${SOURCE_BRANCH}"
+GITLOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative --no-color "${TARGET_BRANCH}..${SOURCE_BRANCH}")
 echo " "
 
 # List files modified in those commits
-echp "[INFO] Files modified:"
-git diff --compact-summary "${SOURCE_BRANCH}..${TARGET_BRANCH}"
-GITDIFF=$(git diff --compact-summary --no-color "${SOURCE_BRANCH}..${TARGET_BRANCH}")
+echo "[INFO] Files modified:"
+git diff --compact-summary "${TARGET_BRANCH}..${SOURCE_BRANCH}"
+GITDIFF=$(git diff --compact-summary --no-color "${TARGET_BRANCH}..${SOURCE_BRANCH}")
 echo " "
 
 # Set title and/or body
