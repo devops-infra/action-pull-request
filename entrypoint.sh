@@ -28,6 +28,7 @@ echo "Target branch: ${TARGET_BRANCH}"
 
 # Required github_token
 if [[ -z "${INPUT_GITHUB_TOKEN}" ]]; then
+  # shellcheck disable=SC2016
   MESSAGE='Missing input "github_token: ${{ secrets.GITHUB_TOKEN }}".'
   echo "[ERROR] ${MESSAGE}"
   exit 1
@@ -111,6 +112,7 @@ echo -e "Creating pull request"
 COMMAND="hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ${ARG_LIST} || true"
 echo -e "\nRunning: ${COMMAND}"
 URL=$(sh -c "${COMMAND}")
+# shellcheck disable=SC2181
 if [[ "$?" != "0" ]]; then RET_CODE=1; fi
 
 # Finish

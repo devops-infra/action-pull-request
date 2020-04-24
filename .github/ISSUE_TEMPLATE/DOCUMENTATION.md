@@ -3,13 +3,13 @@ name: Update documentation
 about: Request update of the documentation.
 title: 'TITLE'
 labels: 'documentation'
-assignees: 'devops-infra/ChristophShyper'
+assignees: 'devops-infra/christophshyper'
 
 ---
 ### Brief description
 
 
-**Write you description here**
+<!-- Write you description here -->
 
 
 ### Additional information
