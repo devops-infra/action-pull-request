@@ -6,8 +6,8 @@ FROM alpine:3.11
 # And for https://help.github.com/en/actions/building-actions/metadata-syntax-for-github-actions
 ARG NAME="GitHub Action for creating Pull Requests"
 ARG DESCRIPTION="GitHub Action that will create a pull request from the current branch."
-ARG REPO_URL="https://github.com/ChristophShyper/action-pull-request"
-ARG AUTHOR="Krzysztof Szyper <biotyk@mail.com>"
+ARG REPO_URL="https://github.com/devops-infra/action-pull-request"
+ARG AUTHOR="Krzysztof Szyper / ChristophShyper <biotyk@mail.com>"
 ARG HOMEPAGE="https://christophshyper.github.io/"
 ARG BUILD_DATE=2020-04-01T00:00:00Z
 ARG VCS_REF=abcdef1
