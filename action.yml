@@ -6,49 +6,57 @@ inputs:
     description: GitHub token
     required: true
   target_branch:
-    description: "Name of the target branch."
+    description: Name of the target branch.
     required: false
     default: "master"
   title:
-    description: "Pull request title."
+    description: Pull request title.
     required: false
     default: ""
   template:
-    description: "Template file location."
+    description: Template file location.
     required: false
     default: ""
   body:
-    description: "Pull request body."
+    description: Pull request body.
     required: false
     default: ""
   reviewer:
-    description: "Reviewer's username."
+    description: Reviewer's username.
     required: false
     default: ""
   assignee:
-    description: "Assignee's usernames."
+    description: Assignee's usernames.
     required: false
     default: ""
   label:
-    description: "Labels to apply, coma separated."
+    description: Labels to apply, coma separated.
     required: false
     default: ""
   milestone:
-    description: "Milestone."
+    description: Milestone.
     required: false
     default: ""
   draft:
-    description: "Whether to mark it as a draft."
+    description: Whether to mark it as a draft.
     required: false
     default: "false"
+  old_string:
+    description: Old string for the replacement in template.
+    required: false
+    default: ""
+  new_string:
+    description: New string for the replacement in the template.
+    required: false
+    default: "**Automatic pull request**"
 outputs:
   url:
-    description: "Pull request URL"
+    description: Pull request URL.
 runs:
-  using: "docker"
-  image: "docker://christophshyper/action-pull-request:latest"
+  using: docker
+  image: docker://christophshyper/action-pull-request:latest
   env:
     GITHUB_TOKEN: ${{ inputs.github_token }}
 branding:
-  color: "purple"
-  icon: "upload-cloud"
+  color: purple
+  icon: upload-cloud

@@ -44,6 +44,8 @@ Dockerized as [christophshyper/action-pull-request](https://hub.docker.com/repos
         label: enhancement
         milestone: My milestone
         draft: true
+        old_string: "<!-- Add your description here -->"
+        new_string: "** Automatic pull request**"
 ```
 
 
@@ -59,6 +61,8 @@ assignee | No | `""` | Assignee's usernames.
 label | No | `""` | Labels to apply, coma separated.
 milestone | No | `""` | Milestone.
 draft | No | `""` | Whether to mark it as a draft.
+old_string | No | `""` | Old string for the replacement in the template.
+new_string | No | `""` | New string for the replacement in the template.
 
 Outputs | Description
 :--- | :---
@@ -87,7 +91,7 @@ jobs:
           title: Automatic pull request
 ```
 
-Use first commit as a title and add label based on branch name
+Use first commit as a title and add a label based on a branch name
 ```yaml
 name: Run the Action on each commit
 on:

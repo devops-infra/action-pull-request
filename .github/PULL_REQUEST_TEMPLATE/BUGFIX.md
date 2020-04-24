@@ -1,10 +1,11 @@
 ### Brief description:
-<!-- Write here... -->
 
-*Write you description here*
 
-<!-- ...write here -->
+<!-- Write you description here -->
+
+
 ### Additional information
+* [ ] Pull request was created automatically
 * [ ] Provided a clear and concise description of what the bug is.
 * [ ] Given a clear and concise solution for what was expected to happen.
 * [ ] Added any other context about the issue that can help to understand it.

@@ -15,7 +15,9 @@ echo "  assignee: ${INPUT_ASSIGNEE}"
 echo "  label: ${INPUT_LABEL}"
 echo "  milestone: ${INPUT_MILESTONE}"
 echo "  draft: ${INPUT_DRAFT}"
-echo " "
+echo "  old_string: ${INPUT_OLD_STRING}"
+echo "  new_string: ${INPUT_NEW_STRING}"
+echo -e "\n"
 
 
 # Set branches
@@ -23,6 +25,7 @@ SOURCE_BRANCH=$(git symbolic-ref --short -q HEAD)
 TARGET_BRANCH="${INPUT_TARGET_BRANCH:-"master"}"
 echo "Source branch: ${SOURCE_BRANCH}"
 echo "Target branch: ${TARGET_BRANCH}"
+echo -e "\n"
 
 # Required github_token
 if [[ -z "${INPUT_GITHUB_TOKEN}" ]]; then
@@ -40,37 +43,42 @@ export GITHUB_USER="${GITHUB_ACTOR}"
 
 # Update all branches
 git fetch origin '+refs/heads/*:refs/heads/*' --update-head-ok
+
 # Compare branches by revisions
 if [[ $(git rev-parse --revs-only "${SOURCE_BRANCH}") == $(git rev-parse --revs-only "${TARGET_BRANCH}") ]]; then
-  echo "[INFO] Both branches are the same. No action needed."
+  echo -e "\n[INFO] Both branches are the same. No action needed."
   exit 0
 fi
 
 # Compare branches by diff
 if [[ -z $(git diff "${SOURCE_BRANCH}..${TARGET_BRANCH}") ]]; then
-  echo "[INFO] Both branches are the same. No action needed."
+  echo -e "\n[INFO] Both branches are the same. No action needed."
   exit 0
 fi
 
 # Get new commits in the source branch
-echo "[INFO] Commits in this pull request:"
+echo -e "\n[INFO] Commits in this pull request:"
 git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative "${TARGET_BRANCH}..${SOURCE_BRANCH}"
 GITLOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative --no-color "${TARGET_BRANCH}..${SOURCE_BRANCH}")
-echo " "
+echo -e "\n\n"
 
 # List files modified in those commits
-echo "[INFO] Files modified:"
+echo -e "\n[INFO] Files modified:"
 git diff --compact-summary "${TARGET_BRANCH}..${SOURCE_BRANCH}"
 GITDIFF=$(git diff --compact-summary --no-color "${TARGET_BRANCH}..${SOURCE_BRANCH}")
-echo " "
+echo -e "\n"
+
+# Replace strings in the template
+if [[ -f ${INPUT_TEMPLATE} ]]; then
+  TEMPLATE=$(echo -e "$(cat "${INPUT_TEMPLATE}")" | sed "s/${INPUT_OLD_STRING}/${INPUT_NEW_STRING}/" | sed 's/`/\\`/g; s/\$/\\\$/g')
+fi
 
 # Set title and/or body
 ARG_LIST="${INPUT_TITLE}"
 if [[ -n "${ARG_LIST}" ]]; then
   ARG_LIST="-m \"${ARG_LIST}\""
   if [[ -n "${INPUT_TEMPLATE}" ]]; then
-    sed -i 's/`/\\`/g; s/\$/\\\$/g' "${INPUT_TEMPLATE}"
-    ARG_LIST="${ARG_LIST} -m \"$(echo -e "$(cat "${INPUT_TEMPLATE}")")\""
+    ARG_LIST="${ARG_LIST} -m \"${TEMPLATE}\""
   elif [[ -n "${INPUT_BODY}" ]]; then
     ARG_LIST="${ARG_LIST} -m \"${INPUT_BODY}\""
   fi
@@ -98,8 +106,8 @@ fi
 
 # Main action
 COMMAND="hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ${ARG_LIST} || true"
-echo "Running: $COMMAND"
-URL=$(sh -c "$COMMAND")
+echo -e "\nRunning: ${COMMAND}"
+URL=$(sh -c "${COMMAND}")
 if [[ "$?" != "0" ]]; then
   RET_CODE=1
 fi
@@ -107,16 +115,11 @@ fi
 # Finish
 echo "::set-output name=url::${URL}"
 if [[ ${RET_CODE} != "0" ]]; then
-  echo " "
-  echo "[ERROR] Check log for errors."
-  echo " "
+  echo -e "\n[ERROR] Check log for errors."
   exit 1
 else
   # Pass in other cases
-  echo " "
-  echo "[INFO] No errors found."
-  echo " "
-  echo "[INFO] See the pull request: ${URL}"
-  echo " "
+  echo -e "\n[INFO] No errors found."
+  echo -e "\n[INFO] See the pull request: ${URL}"
   exit 0
 fi
