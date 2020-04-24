@@ -53,50 +53,50 @@ jobs:
 
       - name: Create pull request - dependency (conditional)
         if: startsWith(github.ref, 'refs/heads/dependency')
-        uses: ChristophShyper/action-pull-request@master
+        uses: repo-sync/pull-request@v2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          title: "${{ github.event.commits[0].message }}"
-          assignee: "${{ github.actor }}"
-          label: automatic,dependency
-          template: .github/PULL_REQUEST_TEMPLATE/DEPENDENCY.md
+          pr_title: "${{ github.event.commits[0].message }}"
+          pr_assignee: "${{ github.actor }}"
+          pr_label: automatic,dependency
+          pr_template: .github/PULL_REQUEST_TEMPLATE/DEPENDENCY.md
 
       - name: Create pull request - bugfix (conditional)
         if: startsWith(github.ref, 'refs/heads/bugfix')
-        uses: ChristophShyper/action-pull-request@master
+        uses: repo-sync/pull-request@v2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          title: "${{ github.event.commits[0].message }}"
-          assignee: "${{ github.actor }}"
-          label: automatic,bugfix
-          template: .github/PULL_REQUEST_TEMPLATE/BUGFIX.md
+          pr_title: "${{ github.event.commits[0].message }}"
+          pr_assignee: "${{ github.actor }}"
+          pr_label: automatic,bugfix
+          pr_template: .github/PULL_REQUEST_TEMPLATE/BUGFIX.md
 
       - name: Create pull request - feature (conditional)
         if: startsWith(github.ref, 'refs/heads/feature')
-        uses: ChristophShyper/action-pull-request@master
+        uses: repo-sync/pull-request@v2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          title: "${{ github.event.commits[0].message }}"
-          assignee: "${{ github.actor }}"
-          label: automatic,feature
-          template: .github/PULL_REQUEST_TEMPLATE/FEATURE.md
+          pr_title: "${{ github.event.commits[0].message }}"
+          pr_assignee: "${{ github.actor }}"
+          pr_label: automatic,feature
+          pr_template: .github/PULL_REQUEST_TEMPLATE/FEATURE.md
 
       - name: Create pull request - documentation (conditional)
         if: startsWith(github.ref, 'refs/heads/documentation')
-        uses: ChristophShyper/action-pull-request@master
+        uses: repo-sync/pull-request@v2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          title: "${{ github.event.commits[0].message }}"
-          assignee: "${{ github.actor }}"
-          label: automatic,documentation
-          template: .github/PULL_REQUEST_TEMPLATE/DOCUMENTATION.md
+          pr_title: "${{ github.event.commits[0].message }}"
+          pr_assignee: "${{ github.actor }}"
+          pr_label: automatic,documentation
+          pr_template: .github/PULL_REQUEST_TEMPLATE/DOCUMENTATION.md
 
       - name: Create pull request - other (conditional)
         if: startsWith(github.ref, '!refs/heads/dependency') && startsWith(github.ref, '!refs/heads/bugfix') && startsWith(github.ref, '!refs/heads/feature') && startsWith(github.ref, '!refs/heads/documentation')
-        uses: ChristophShyper/action-pull-request@master
+        uses: repo-sync/pull-request@v2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          title: "${{ github.event.commits[0].message }}"
-          assignee: "${{ github.actor }}"
-          label: automatic,feature
-          template: .github/PULL_REQUEST_TEMPLATE/FEATURE.md
+          pr_title: "${{ github.event.commits[0].message }}"
+          pr_assignee: "${{ github.actor }}"
+          pr_label: automatic,feature
+          pr_template: .github/PULL_REQUEST_TEMPLATE/FEATURE.md
