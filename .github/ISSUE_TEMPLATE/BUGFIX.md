@@ -3,7 +3,7 @@ name: Bug report
 about: Report any bugs for this project
 title: 'TITLE'
 labels: 'bugfix'
-assignees: 'ChristophShyper'
+assignees: 'devops-infra/christophshyper'
 
 ---
 ### Brief description

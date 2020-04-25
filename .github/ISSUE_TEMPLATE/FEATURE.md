@@ -3,7 +3,7 @@ name: Feature request
 about: Suggest an idea for this project
 title: 'TITLE'
 labels: 'feature'
-assignees: 'ChristophShyper'
+assignees: 'devops-infra/christophshyper'
 
 ---
 ### Brief description
