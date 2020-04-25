@@ -11,7 +11,6 @@ GITHUB_SHA ?= aabbccddeeff
 # Other variables and constants
 CURRENT_BRANCH := $(shell echo $(GITHUB_REF) | sed 's/refs\/heads\///')
 GITHUB_SHORT_SHA := $(shell echo $(GITHUB_SHA) | cut -c1-7)
-RELEASE_BRANCH := master
 DOCKER_USER_ID := christophshyper
 DOCKER_IMAGE := action-pull-request
 DOCKER_NAME := $(DOCKER_USER_ID)/$(DOCKER_IMAGE)

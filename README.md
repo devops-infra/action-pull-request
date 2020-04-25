@@ -91,7 +91,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@master
       - name: Create pull request
         uses: devops-infra/action-pull-request@master
         with:
@@ -110,7 +110,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repoistory
-        uses: actions/checkout@v2
+        uses: actions/checkout@master
       - name: Run the Action
         if: startsWith(github.ref, 'refs/heads/feature')
         uses: devops-infra/action-pull-request@master
