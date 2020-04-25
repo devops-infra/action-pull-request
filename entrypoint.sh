@@ -26,7 +26,7 @@ TARGET_BRANCH="${INPUT_TARGET_BRANCH:-master}"
 echo "Source branch: ${SOURCE_BRANCH}"
 echo "Target branch: ${TARGET_BRANCH}"
 
-# Required github_token
+# Require github_token
 if [[ -z "${INPUT_GITHUB_TOKEN}" ]]; then
   # shellcheck disable=SC2016
   MESSAGE='Missing input "github_token: ${{ secrets.GITHUB_TOKEN }}".'

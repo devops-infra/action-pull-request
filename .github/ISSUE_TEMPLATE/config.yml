@@ -2,7 +2,7 @@ blank_issues_enabled: false
 contact_links:
   - name: Contributiong details
     url: https://github.com/devops-infra/action-pull-request/blob/master/.github/CONTRIBUTING.md
-    about: Details about controbuting rules.
+    about: Details about contributing rules
   - name: Code of Conduct
     url: https://github.com/devops-infra/action-pull-request/blob/master/.github/CODE_OF_CONDUCT.md
-    about: Details about Code of Conduct.
+    about: Details about Code of Conduct

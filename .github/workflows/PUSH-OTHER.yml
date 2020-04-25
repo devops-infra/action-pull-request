@@ -2,7 +2,9 @@ name: Push to other
 
 on:
   push:
-    branches-ignore: master
+    branches-ignore:
+      - master
+      - release/*
 
 jobs:
   labels:
@@ -10,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@master
 
       - name: Update labels - dry run
         uses: crazy-max/ghaction-github-labeler@v1
@@ -24,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@master
 
       - name: Docker Lint
         uses: luke142367/Docker-Lint-Action@v1.0.0
@@ -37,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@master
 
       - name: Build Docker image
         env:
@@ -49,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@master
 
       - name: Create pull request - dependency (conditional)
         if: startsWith(github.ref, 'refs/heads/dependency')
@@ -108,7 +110,7 @@ jobs:
           get_diff: true
 
       - name: Create pull request - other (conditional)
-        if: startsWith(github.ref, '!refs/heads/release') && startsWith(github.ref, '!refs/heads/dependency') && startsWith(github.ref, '!refs/heads/bugfix') && startsWith(github.ref, '!refs/heads/feature') && startsWith(github.ref, '!refs/heads/documentation')
+        if: startsWith(github.ref, '!refs/heads/dependency') && startsWith(github.ref, '!refs/heads/bugfix') && startsWith(github.ref, '!refs/heads/feature') && startsWith(github.ref, '!refs/heads/documentation')
         uses: devops-infra/action-pull-request@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

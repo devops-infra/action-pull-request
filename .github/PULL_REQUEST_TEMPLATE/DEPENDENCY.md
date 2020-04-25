@@ -13,7 +13,7 @@
 
 
 ### Additional information
-* [ ] Pull request was created automatically
+* [ ] Pull request was created manually
 * [ ] Other package new version
 
 
