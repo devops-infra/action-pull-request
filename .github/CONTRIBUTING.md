@@ -31,5 +31,8 @@ Rules for contribution are very simple.
 * Any applicable label should be selected.
 
 
-### Code of Conduct
-* Refer to [CODE_OF_CONDUCT.md](../blob/master/.github/CODE_OF_CONDUCT.md)
+### Links
+* [Issues](../../issues)
+* [Pull Requests](../../pulls)
+* [README](./README.md)
+* [Code of Conduct](../blob/master/.github/CODE_OF_CONDUCT.md)
