@@ -81,16 +81,16 @@ echo -e "\nSetting title and body"
 if [[ -n "${INPUT_TITLE}" ]]; then
   TITLE="${INPUT_TITLE}"
 else
-  TITLE=$(git log -1 --pretty=%s)
+  TITLE="$(git log -1 --pretty=%s)"
 fi
 if [[ -n "${INPUT_TEMPLATE}" ]]; then
   BODY="${TEMPLATE}"
 elif [[ -n "${INPUT_BODY}" ]]; then
   BODY="${INPUT_BODY}"
 else
-  BODY=$(git log -1 --pretty=%B)
+  BODY="$(git log -1 --pretty=%B)"
 fi
-ARG_LIST="-m ${TITLE} -m ${BODY}"
+ARG_LIST="-m \"${TITLE}\" -m \"${BODY}\""
 
 echo -e "\nSetting other arguments"
 if [[ -n "${INPUT_REVIEWER}" ]]; then
