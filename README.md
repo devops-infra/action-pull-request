@@ -80,6 +80,11 @@ url | Pull request URL
 
 ## Examples
 
+Red ares show fields that can be dynamically expanded based on commits to the current branch.
+Blue areas show fields that can be set in action configuration.
+![Example screenshot](https://github.com/devops-infra/action-pull-request/raw/master/action-pull-request.png)
+
+
 Create pull request for non-master branches
 ```yaml
 name: Run the Action on each commit
