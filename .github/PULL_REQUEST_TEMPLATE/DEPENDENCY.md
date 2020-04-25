@@ -14,7 +14,8 @@
 
 ### Additional information
 * [ ] Pull request was created manually
-* [ ] Other package new version
+* [ ] Direct dependency updated
+* [ ] Other dependency updated
 
 
 *Check [CONTRIBUTING.md](../blob/master/.github/CONTRIBUTING.md) for more information*
