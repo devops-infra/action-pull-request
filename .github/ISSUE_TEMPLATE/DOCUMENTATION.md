@@ -12,7 +12,7 @@ assignees: 'devops-infra/christophshyper'
 <!-- Write you description here -->
 
 
-### Additional information
+### Checklist
 * [ ] Provided a clear and concise description of what the issue is.
 * [ ] Given a clear and concise description of what is expected.
 * [ ] Added any other context or screenshots about the feature request.

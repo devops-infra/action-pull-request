@@ -4,7 +4,7 @@
 <!-- Write you description here -->
 
 
-### Additional information
+### Checklist
 * [ ] Provided a clear and concise description of what the issue is.
 * [ ] Given a clear and concise description of what is expected.
 * [ ] Proposed a clear and concise description of any alternative solutions or other features.

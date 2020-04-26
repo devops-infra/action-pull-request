@@ -12,7 +12,7 @@
 <!-- Diff files -->
 
 
-### Additional information
+### Checklist
 * [ ] Pull request was created manually
 * [ ] Provided a clear and concise description of what the issue is.
 * [ ] Given a clear and concise description of what was changed.

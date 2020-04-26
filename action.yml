@@ -1,58 +1,62 @@
 name: GitHub Action for creating Pull Requests
-author: "Krzysztof Szyper / ChristophShyper <biotyk@mail.com>"
+author: Krzysztof Szyper / ChristophShyper / biotyk@mail.com
 description: GitHub Action that will create a pull request from the current branch
 inputs:
   github_token:
     description: GitHub token
     required: true
   source_branch:
-    description: Name of the source branch.
+    description: Name of the source branch
     required: false
     default: ""
   target_branch:
-    description: Name of the target branch.
+    description: Name of the target branch
     required: false
     default: master
   title:
-    description: Pull request title.
+    description: Pull request title
     required: false
     default: ""
   template:
-    description: Template file location.
+    description: Template file location
     required: false
     default: ""
   body:
-    description: Pull request body.
+    description: Pull request body
     required: false
     default: ""
   reviewer:
-    description: Reviewer's username.
+    description: Reviewer's username
     required: false
     default: ""
   assignee:
-    description: Assignee's usernames.
+    description: Assignee's usernames
     required: false
     default: ""
   label:
-    description: Labels to apply, coma separated.
+    description: Labels to apply, coma separated
     required: false
     default: ""
   milestone:
-    description: Milestone.
+    description: Milestone
     required: false
     default: ""
   draft:
-    description: Whether to mark it as a draft.
+    description: Whether to mark it as a draft
     required: false
     default: "false"
   old_string:
-    description: Old string for the replacement in template.
+    description: Old string for the replacement in template
     required: false
     default: ""
   new_string:
-    description: New string for the replacement in the template.
+    description: New string for the replacement in the template
     required: false
     default: "**Automatic pull request**"
+  get_diff:
+    description: Whether to inject difference into template
+    required: false
+    default: "false"
 outputs:
   url:
     description: Pull request URL.
