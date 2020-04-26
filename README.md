@@ -1,6 +1,6 @@
 # GitHub Action for creating Pull Requests
 
-GitHub Action that will create a pull request from the current branch.
+**GitHub Action that will create a pull request from the current branch.**
 
 Useful in combination with my other action [ChristophShyper/action-commit-push](https://github.com/ChristophShyper/action-commit-push).
 
@@ -15,20 +15,21 @@ Features:
 
 
 ## Badge swag
-[
-![GitHub](https://img.shields.io/badge/github-devops--infra%2Faction--pull--request-brightgreen.svg?style=flat-square&logo=github)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/devops-infra/action-pull-request?color=brightgreen&label=Code%20size&style=flat-square&logo=github)
-![GitHub last commit](https://img.shields.io/github/last-commit/devops-infra/action-pull-request?color=brightgreen&label=Last%20commit&style=flat-square&logo=github)
-](https://github.com/devops-infra/action-pull-request "shields.io")
-[![Push to master](https://github.com/devops-infra/action-pull-request/workflows/Push%20to%20master/badge.svg)](https://github.com/devops-infra/action-pull-request/actions?query=workflow%3A%22Push+to+master%22)
-[![Push to other](https://github.com/devops-infra/action-pull-request/workflows/Push%20to%20other/badge.svg)](https://github.com/devops-infra/action-pull-request/actions?query=workflow%3A%22Push+to+other%22)
+[![Master branch](https://github.com/devops-infra/action-pull-request/workflows/Master%20branch/badge.svg)](https://github.com/devops-infra/action-pull-request/actions?query=workflow%3A%22Master+branch%22)
+[![Other branches](https://github.com/devops-infra/action-pull-request/workflows/Other%20branches/badge.svg)](https://github.com/devops-infra/action-pull-request/actions?query=workflow%3A%22Other+branches%22)
 <br>
 [
-![DockerHub](https://img.shields.io/badge/docker-christophshyper%2Faction--pull--request-blue.svg?style=flat-square&logo=docker)
-![Dockerfile size](https://img.shields.io/github/size/christophshyper/action-pull-request/Dockerfile?label=Dockerfile%20size&style=flat-square&logo=docker)
-![Image size](https://img.shields.io/docker/image-size/christophshyper/action-pull-request/latest?label=Image%20size&style=flat-square&logo=docker)
-![Docker Pulls](https://img.shields.io/docker/pulls/christophshyper/action-pull-request?color=blue&label=Pulls&logo=docker&style=flat-square)
-![Docker version](https://img.shields.io/docker/v/christophshyper/action-pull-request?color=blue&label=Version&logo=docker&style=flat-square)
+![GitHub repo](https://img.shields.io/badge/GitHub-devops--infra%2Faction--pull--request-blueviolet.svg?style=plastic&logo=github)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/devops-infra/action-pull-request?color=blueviolet&label=Code%20size&style=plastic&logo=github)
+![GitHub last commit](https://img.shields.io/github/last-commit/devops-infra/action-pull-request?color=blueviolet&logo=github&style=plastic&label=Last%20commit)
+![GitHub license](https://img.shields.io/github/license/devops-infra/action-pull-request?color=blueviolet&logo=github&style=plastic&label=License)
+](https://github.com/devops-infra/action-pull-request "shields.io")
+<br>
+[
+![DockerHub](https://img.shields.io/badge/DockerHub-christophshyper%2Faction--pull--request-blue.svg?style=plastic&logo=docker)
+![Docker version](https://img.shields.io/docker/v/christophshyper/action-pull-request?color=blue&label=Version&logo=docker&style=plastic)
+![Image size](https://img.shields.io/docker/image-size/christophshyper/action-pull-request/latest?label=Image%20size&style=plastic&logo=docker)
+![Docker Pulls](https://img.shields.io/docker/pulls/christophshyper/action-pull-request?color=blue&label=Pulls&logo=docker&style=plastic)
 ](https://hub.docker.com/r/christophshyper/action-pull-request "shields.io")
 
 
@@ -38,11 +39,11 @@ Features:
     - name: Run the Action
       uses: devops-infra/action-pull-request@master
       with:
-        github_token: "${{ secrets.GITHUB_TOKEN }}"
+        github_token: ${{ secrets.GITHUB_TOKEN }}
         source_branch: development
         target_branch: master
         title: My pull request
-        template: ".github/PULL_REQUEST_TEMPLATE.md"
+        template: .github/PULL_REQUEST_TEMPLATE.md
         body: "**Automated pull request**"
         reviewer: octocat
         assignee: octocat
@@ -96,11 +97,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@master
+        uses: actions/checkout@v2
       - name: Create pull request
         uses: devops-infra/action-pull-request@master
         with:
-          github_token: "${{ secrets.GITHUB_TOKEN }}"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           title: Automatic pull request
 ```
 
@@ -115,17 +116,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repoistory
-        uses: actions/checkout@master
+        uses: actions/checkout@v2
       - name: Run the Action
         if: startsWith(github.ref, 'refs/heads/feature')
         uses: devops-infra/action-pull-request@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          title: "${{ github.event.commits[0].message }}"
-          assignee: "${{ github.actor }}"
+          title: ${{ github.event.commits[0].message }}
+          assignee: ${{ github.actor }}
           label: automatic,feature
           template: .github/PULL_REQUEST_TEMPLATE/FEATURE.md
           old_string: "**Write you description here**"
-          new_string: "${{ github.event.commits[0].message }}"
+          new_string: ${{ github.event.commits[0].message }}
           get_diff: true
 ```

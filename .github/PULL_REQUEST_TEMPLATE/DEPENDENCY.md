@@ -12,7 +12,7 @@
 <!-- Diff files -->
 
 
-### Additional information
+### Checklist
 * [ ] Pull request was created manually
 * [ ] Direct dependency updated
 * [ ] Other dependency updated

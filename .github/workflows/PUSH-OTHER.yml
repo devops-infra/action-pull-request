@@ -1,4 +1,4 @@
-name: Push to other
+name: Other branches
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@master
+        uses: actions/checkout@v2
 
       - name: Update labels - dry run
         uses: crazy-max/ghaction-github-labeler@v1
@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@master
+        uses: actions/checkout@v2
 
       - name: Docker Lint
         uses: luke142367/Docker-Lint-Action@v1.0.0
@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@master
+        uses: actions/checkout@v2
 
       - name: Build Docker image
         env:
@@ -51,19 +51,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@master
+        uses: actions/checkout@v2
 
       - name: Create pull request - dependency (conditional)
         if: startsWith(github.ref, 'refs/heads/dependency')
         uses: devops-infra/action-pull-request@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          title: "${{ github.event.commits[0].message }}"
-          assignee: "${{ github.actor }}"
+          assignee: ${{ github.actor }}
           label: automatic,dependency
           template: .github/PULL_REQUEST_TEMPLATE/DEPENDENCY.md
           old_string: "<!-- Write you description here -->"
-          new_string: "${{ github.event.commits[0].message }}"
+          new_string: ${{ github.event.commits[0].message }}
           get_diff: true
 
       - name: Create pull request - bugfix (conditional)
@@ -71,12 +70,11 @@ jobs:
         uses: devops-infra/action-pull-request@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          title: "${{ github.event.commits[0].message }}"
-          assignee: "${{ github.actor }}"
+          assignee: ${{ github.actor }}
           label: automatic,bugfix
           template: .github/PULL_REQUEST_TEMPLATE/BUGFIX.md
           old_string: "<!-- Write you description here -->"
-          new_string: "${{ github.event.commits[0].message }}"
+          new_string: ${{ github.event.commits[0].message }}
           get_diff: true
 
       - name: Create pull request - feature (conditional)
@@ -84,12 +82,11 @@ jobs:
         uses: devops-infra/action-pull-request@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          title: "${{ github.event.commits[0].message }}"
-          assignee: "${{ github.actor }}"
+          assignee: ${{ github.actor }}
           label: automatic,feature
           template: .github/PULL_REQUEST_TEMPLATE/FEATURE.md
           old_string: "<!-- Write you description here -->"
-          new_string: "${{ github.event.commits[0].message }}"
+          new_string: ${{ github.event.commits[0].message }}
           get_diff: true
 
       - name: Create pull request - documentation (conditional)
@@ -97,12 +94,11 @@ jobs:
         uses: devops-infra/action-pull-request@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          title: "${{ github.event.commits[0].message }}"
-          assignee: "${{ github.actor }}"
+          assignee: ${{ github.actor }}
           label: automatic,documentation
           template: .github/PULL_REQUEST_TEMPLATE/DOCUMENTATION.md
           old_string: "<!-- Write you description here -->"
-          new_string: "${{ github.event.commits[0].message }}"
+          new_string: ${{ github.event.commits[0].message }}
           get_diff: true
 
       - name: Create pull request - other (conditional)
@@ -110,10 +106,9 @@ jobs:
         uses: devops-infra/action-pull-request@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          title: "${{ github.event.commits[0].message }}"
-          assignee: "${{ github.actor }}"
+          assignee: ${{ github.actor }}
           label: automatic,feature
           template: .github/PULL_REQUEST_TEMPLATE/FEATURE.md
           old_string: "<!-- Write you description here -->"
-          new_string: "${{ github.event.commits[0].message }}"
+          new_string: ${{ github.event.commits[0].message }}
           get_diff: true

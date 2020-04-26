@@ -12,7 +12,7 @@ assignees: 'devops-infra/christophshyper'
 <!-- Write you description here -->
 
 
-### Additional information
+### Checklist
 * [ ] Provided a clear and concise description of what the bug is.
 * [ ] Given a clear and concise description of what was expected to happen.
 * [ ] Provided an information how to reproduce the error.
