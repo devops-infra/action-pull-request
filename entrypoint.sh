@@ -42,7 +42,9 @@ git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 export GITHUB_USER="${GITHUB_ACTOR}"
 
 echo -e "\nUpdating all branches"
-git fetch origin '+refs/heads/*:refs/heads/*' --update-head-ok
+#git fetch origin '+refs/heads/*:refs/heads/*' --update-head-ok
+git fetch origin
+git checkout --track "${SOURCE_BRANCH}"
 
 echo -e "\nComparing branches by revisions"
 if [[ $(git rev-parse --revs-only "${SOURCE_BRANCH}") == $(git rev-parse --revs-only "${TARGET_BRANCH}") ]]; then
@@ -56,13 +58,9 @@ if [[ -z $(git diff "${TARGET_BRANCH}..${SOURCE_BRANCH}") ]]; then
   exit 0
 fi
 
-# Try remote branches
-SOURCE_BRANCH_R=$(git branch -r | grep "${SOURCE_BRANCH}" | grep -v origin/HEAD | xargs)
-TARGET_BRANCH_R=$(git branch -r | grep "${TARGET_BRANCH}" | grep -v origin/HEAD | xargs)
-
 echo -e "\n\nGetting new commits in the source branch"
-git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative "${TARGET_BRANCH_R}..${SOURCE_BRANCH_R}"
-GITLOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative --no-color "${TARGET_BRANCH_R}..${SOURCE_BRANCH_R}")
+git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative "${TARGET_BRANCH}..${SOURCE_BRANCH}"
+GITLOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative --no-color "${TARGET_BRANCH}..${SOURCE_BRANCH}")
 
 echo -e "\n\nGetting files modified in the source branch"
 git diff --compact-summary "${TARGET_BRANCH}..${SOURCE_BRANCH}"
