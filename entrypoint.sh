@@ -44,7 +44,7 @@ export GITHUB_USER="${GITHUB_ACTOR}"
 echo -e "\nUpdating all branches"
 #git fetch origin '+refs/heads/*:refs/heads/*' --update-head-ok
 git fetch origin
-git checkout --track "${SOURCE_BRANCH}"
+git checkout --track -b "${SOURCE_BRANCH}"
 
 echo -e "\nComparing branches by revisions"
 if [[ $(git rev-parse --revs-only "${SOURCE_BRANCH}") == $(git rev-parse --revs-only "${TARGET_BRANCH}") ]]; then
