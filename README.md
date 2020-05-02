@@ -2,9 +2,9 @@
 
 **GitHub Action that will create a pull request from the current branch.**
 
-Useful in combination with my other action [ChristophShyper/action-commit-push](https://github.com/ChristophShyper/action-commit-push).
+Useful in combination with my other action [devopsinfra/action-commit-push](https://github.com/devopsinfra/action-commit-push).
 
-Dockerized as [christophshyper/action-pull-request](https://hub.docker.com/repository/docker/christophshyper/action-pull-request).
+Dockerized as [devopsinfra/action-pull-request](https://hub.docker.com/repository/docker/christophshyper/action-pull-request).
 
 Features:
 * Creates pull request if triggered from a current branch or any specified by `source_branch` to a `target_branch`.
@@ -26,11 +26,11 @@ Features:
 ](https://github.com/devops-infra/action-pull-request "shields.io")
 <br>
 [
-![DockerHub](https://img.shields.io/badge/DockerHub-christophshyper%2Faction--pull--request-blue.svg?style=plastic&logo=docker)
-![Docker version](https://img.shields.io/docker/v/christophshyper/action-pull-request?color=blue&label=Version&logo=docker&style=plastic)
-![Image size](https://img.shields.io/docker/image-size/christophshyper/action-pull-request/latest?label=Image%20size&style=plastic&logo=docker)
-![Docker Pulls](https://img.shields.io/docker/pulls/christophshyper/action-pull-request?color=blue&label=Pulls&logo=docker&style=plastic)
-](https://hub.docker.com/r/christophshyper/action-pull-request "shields.io")
+![DockerHub](https://img.shields.io/badge/DockerHub-devopsinfra%2Faction--pull--request-blue.svg?style=plastic&logo=docker)
+![Docker version](https://img.shields.io/docker/v/devopsinfra/action-pull-request?color=blue&label=Version&logo=docker&style=plastic)
+![Image size](https://img.shields.io/docker/image-size/devopsinfra/action-pull-request/latest?label=Image%20size&style=plastic&logo=docker)
+![Docker Pulls](https://img.shields.io/docker/pulls/devopsinfra/action-pull-request?color=blue&label=Pulls&logo=docker&style=plastic)
+](https://hub.docker.com/r/devopsinfra/action-pull-request "shields.io")
 
 
 ## Reference
