@@ -51,7 +51,7 @@ if [[ $(git rev-parse --revs-only "${SOURCE_BRANCH}") == $(git rev-parse --revs-
 fi
 
 echo -e "\nComparing branches by diff"
-if [[ -z $(git diff "${TARGET_BRANCH}..${SOURCE_BRANCH}") ]]; then
+if [[ -z $(git diff "remotes/origin/${TARGET_BRANCH}..remotes/origin/${SOURCE_BRANCH}") ]]; then
   echo -e "\n[INFO] Both branches are the same. No action needed."
   exit 0
 fi
