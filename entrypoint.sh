@@ -20,7 +20,7 @@ echo "  old_string: ${INPUT_OLD_STRING}"
 echo "  new_string: ${INPUT_NEW_STRING}"
 echo "  get_diff: ${INPUT_GET_DIFF}"
 
-echo -e "\nSetting branches"
+echo -e "\nSetting branches..."
 SOURCE_BRANCH="${INPUT_SOURCE_BRANCH:-$(git symbolic-ref --short -q HEAD)}"
 TARGET_BRANCH="${INPUT_TARGET_BRANCH:-master}"
 echo "Source branch: ${SOURCE_BRANCH}"
@@ -34,23 +34,23 @@ if [[ -z "${INPUT_GITHUB_TOKEN}" ]]; then
   exit 1
 fi
 
-echo -e "\nSetting GitHub credentials"
+echo -e "\nSetting GitHub credentials..."
 git remote set-url origin "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}"
 git config --global user.name "${GITHUB_ACTOR}"
 git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 # Needed for hub binary
 export GITHUB_USER="${GITHUB_ACTOR}"
 
-echo -e "\nUpdating all branches"
+echo -e "\nUpdating all branches..."
 git fetch origin '+refs/heads/*:refs/heads/*' --update-head-ok
 
-echo -e "\nComparing branches by revisions"
+echo -e "\nComparing branches by revisions..."
 if [[ $(git rev-parse --revs-only "${SOURCE_BRANCH}") == $(git rev-parse --revs-only "${TARGET_BRANCH}") ]]; then
   echo -e "\n[INFO] Both branches are the same. No action needed."
   exit 0
 fi
 
-echo -e "\nComparing branches by diff"
+echo -e "\nComparing branches by diff..."
 if [[ -z $(git diff "remotes/origin/${TARGET_BRANCH}..remotes/origin/${SOURCE_BRANCH}") ]]; then
   echo -e "\n[INFO] Both branches are the same. No action needed."
   exit 0
@@ -60,15 +60,15 @@ fi
 SOURCE_BRANCH_R=$(git branch -r | grep "${SOURCE_BRANCH}" | grep -v origin/HEAD | xargs)
 TARGET_BRANCH_R=$(git branch -r | grep "${TARGET_BRANCH}" | grep -v origin/HEAD | xargs)
 
-echo -e "\n\nGetting new commits in the source branch"
-git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative "${TARGET_BRANCH_R}..${SOURCE_BRANCH_R}"
-GITLOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=relative --no-color "${TARGET_BRANCH_R}..${SOURCE_BRANCH_R}")
+echo -e "\n\nListing new commits in the source branch..."
+git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit "${TARGET_BRANCH_R}..${SOURCE_BRANCH_R}"
+GITLOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --no-color "${TARGET_BRANCH_R}..${SOURCE_BRANCH_R}")
 
-echo -e "\n\nGetting files modified in the source branch"
-git diff --compact-summary "${TARGET_BRANCH}..${SOURCE_BRANCH}"
-GITDIFF=$(git diff --compact-summary --no-color "${TARGET_BRANCH}..${SOURCE_BRANCH}")
+echo -e "\n\nListing files modified in the source branch..."
+git diff --compact-summary "remotes/origin/${TARGET_BRANCH}..remotes/origin/${SOURCE_BRANCH}"
+GITDIFF=$(git diff --compact-summary --no-color "remotes/origin/${TARGET_BRANCH}..remotes/origin/${SOURCE_BRANCH}")
 
-echo -e "\nReplacing strings in the template"
+echo -e "\nReplacing strings in the template..."
 if [[ -f "${INPUT_TEMPLATE}" ]]; then
   if [[ -n "${INPUT_OLD_STRING}" ]]; then
     TEMPLATE=$(cat "${INPUT_TEMPLATE}")
@@ -81,7 +81,7 @@ if [[ -f "${INPUT_TEMPLATE}" ]]; then
   fi
 fi
 
-echo -e "\nSetting title and body"
+echo -e "\nSetting title and body..."
 if [[ -n "${INPUT_TITLE}" ]]; then
   TITLE="${INPUT_TITLE}"
 else
@@ -96,7 +96,7 @@ else
 fi
 ARG_LIST="-m \"${TITLE}\" -m \"${BODY}\""
 
-echo -e "\nSetting other arguments"
+echo -e "\nSetting other arguments..."
 if [[ -n "${INPUT_REVIEWER}" ]]; then
   ARG_LIST="${ARG_LIST} -r \"${INPUT_REVIEWER}\""
 fi
@@ -117,12 +117,23 @@ if [[ "${INPUT_DRAFT}" ==  "true" ]]; then
   ARG_LIST="${ARG_LIST} -d"
 fi
 
-echo -e "Creating pull request"
-COMMAND="hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ${ARG_LIST} || true"
-echo -e "\nRunning: ${COMMAND}"
-URL=$(sh -c "${COMMAND}")
-# shellcheck disable=SC2181
-if [[ "$?" != "0" ]]; then RET_CODE=1; fi
+echo -e "\nChecking if pull request exists..."
+PR_NUMBER=$(hub pr list --head dependency/codebuild-test --format '%I')
+if [[ -z "${PR_NUMBER}" ]]; then
+  echo -e "\nCreating pull request"
+  COMMAND="hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ${ARG_LIST} || true"
+  echo -e "Running: ${COMMAND}"
+  URL=$(sh -c "${COMMAND}")
+  # shellcheck disable=SC2181
+  if [[ "$?" != "0" ]]; then RET_CODE=1; fi
+else
+  echo -e "\nUpdating pull request"
+  COMMAND="hub api --method PATCH repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER} --raw-field 'body=${BODY}' || true"
+  echo -e "Running: ${COMMAND}"
+  URL=$(sh -c "${COMMAND}")
+  # shellcheck disable=SC2181
+  if [[ "$?" != "0" ]]; then RET_CODE=1; fi
+fi
 
 # Finish
 echo "::set-output name=url::${URL}"
