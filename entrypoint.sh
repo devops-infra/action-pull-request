@@ -41,8 +41,8 @@ git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 # Needed for hub binary
 export GITHUB_USER="${GITHUB_ACTOR}"
 
-echo -e "\nUpdating all branches..."
-git fetch origin '+refs/heads/*:refs/heads/*' --update-head-ok
+#echo -e "\nUpdating all branches..."
+#git fetch origin '+refs/heads/*:refs/heads/*' --update-head-ok
 
 echo -e "\nComparing branches by revisions..."
 if [[ $(git rev-parse --revs-only "${SOURCE_BRANCH}") == $(git rev-parse --revs-only "${TARGET_BRANCH}") ]]; then
@@ -61,7 +61,7 @@ SOURCE_BRANCH_R=$(git branch -r | grep "${SOURCE_BRANCH}" | grep -v origin/HEAD 
 TARGET_BRANCH_R=$(git branch -r | grep "${TARGET_BRANCH}" | grep -v origin/HEAD | xargs)
 
 echo -e "\n\nListing new commits in the source branch..."
-git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit "${TARGET_BRANCH_R}..${SOURCE_BRANCH_R}"
+git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit "remotes/origin/${TARGET_BRANCH}..remotes/origin/${SOURCE_BRANCH}"
 GITLOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --no-color "${TARGET_BRANCH_R}..${SOURCE_BRANCH_R}")
 
 echo -e "\n\nListing files modified in the source branch..."
@@ -129,7 +129,7 @@ if [[ -z "${PR_NUMBER}" ]]; then
   if [[ "$?" != "0" ]]; then RET_CODE=1; fi
 else
   echo -e "\nUpdating pull request"
-  COMMAND="hub api --method PATCH repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER} --raw-field 'body=${BODY}' || true"
+  COMMAND="hub api --method PATCH repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER} --raw-field 'body=@/tmp/body' || true"
   echo -e "Running: ${COMMAND}"
   URL=$(sh -c "${COMMAND}")
   # shellcheck disable=SC2181
