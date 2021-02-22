@@ -94,7 +94,7 @@ elif [[ -n "${INPUT_BODY}" ]]; then
 else
   BODY="$(git log -1 --pretty=%B)"
 fi
-cat "${BODY}" > /tmp/body
+echo "${BODY}" > /tmp/body
 ARG_LIST="-m \"${TITLE}\" -m \"@/tmp/body\""
 
 echo -e "\nSetting other arguments..."
