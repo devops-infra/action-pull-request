@@ -10,8 +10,11 @@ Features:
 * Creates pull request if triggered from a current branch or any specified by `source_branch` to a `target_branch`.
 * Title and body of a pull request can be specified with `title` and `body`.
 * Can assign `assignee`, `reviewer`, one or more `label`, a `milestone` or mark it as a `draft`
-* Can replace any `old_string` inside a pull request template with a `new_string`.
+* Can replace any `old_string` inside a pull request template with a `new_string`. Or put commits' subjects in place of `old_string`.
 * When `get_diff` is `true` will add list of commits in place of `<!-- Diff commits -->` and list of modified files in place of `<!-- Diff files -->` in a pull request template.
+
+**CAUTION**
+Remember to not use default `fetch-depth` for [actions/checkout](https://github.com/actions/checkout) action. Rather set it to `0` - see example below.
 
 
 ## Badge swag
@@ -56,27 +59,27 @@ Features:
 ```
 
 
-Input Variable | Required | Default |Description
-:--- | :---: | :---: | :---
-github_token | Yes | `""` | GitHub token `${{ secrets.GITHUB_TOKEN }}`
-source_branch | No | *current branch* | Name of the source branch.
-target_branch | No | `master` | Name of the target branch.
-title | No | `""` | Pull request title.
-template | No | `""` | Template file location.
-body | No | `""` | Pull request body.
-reviewer | No | `""` | Reviewer's username.
-assignee | No | `""` | Assignee's usernames.
-label | No | `""` | Labels to apply, coma separated.
-milestone | No | `""` | Milestone.
-draft | No | `false` | Whether to mark it as a draft.
-old_string | No | `""` | Old string for the replacement in the template.
-new_string | No | `""` | New string for the replacement in the template.
-get_diff | No | `false` | Whether to replace `<!-- Diff commits -->` and `<!-- Diff files -->` with differences between branches.
+| Input Variable | Required | Default          | Description                                                                                                              |
+| -------------- | -------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| github_token   | Yes      | `""`             | GitHub token `${{ secrets.GITHUB_TOKEN }}`                                                                               |
+| source_branch  | No       | *current branch* | Name of the source branch.                                                                                               |
+| target_branch  | No       | `master`         | Name of the target branch.                                                                                               |
+| title          | No       | `""`             | Pull request title.                                                                                                      |
+| template       | No       | `""`             | Template file location.                                                                                                  |
+| body           | No       | `""`             | Pull request body.                                                                                                       |
+| reviewer       | No       | `""`             | Reviewer's username.                                                                                                     |
+| assignee       | No       | `""`             | Assignee's usernames.                                                                                                    |
+| label          | No       | `""`             | Labels to apply, coma separated.                                                                                         |
+| milestone      | No       | `""`             | Milestone.                                                                                                               |
+| draft          | No       | `false`          | Whether to mark it as a draft.                                                                                           |
+| old_string     | No       | `""`             | Old string for the replacement in the template.                                                                          |
+| new_string     | No       | `""`             | New string for the replacement in the template. If not specified, but `old_string` was, it will gather commits subjects. |
+| get_diff       | No       | `false`          | Whether to replace `<!-- Diff commits -->` and `<!-- Diff files -->` with differences between branches.                  |
 
 
-Outputs | Description
-:--- | :---
-url | Pull request URL
+| Outputs | Description      |
+| ------- | ---------------- |
+| url     | Pull request URL |
 
 
 ## Examples
@@ -117,6 +120,8 @@ jobs:
     steps:
       - name: Checkout repoistory
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Run the Action
         if: startsWith(github.ref, 'refs/heads/feature')
         uses: devops-infra/action-pull-request@master

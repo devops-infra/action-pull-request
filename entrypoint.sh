@@ -69,7 +69,11 @@ if [[ -f "${INPUT_TEMPLATE}" ]]; then
   if [[ -n "${INPUT_OLD_STRING}" ]]; then
     TEMPLATE=$(cat "${INPUT_TEMPLATE}")
     OLD_STRING=${INPUT_OLD_STRING/\!/\\!}
-    TEMPLATE=${TEMPLATE/${OLD_STRING}/${INPUT_NEW_STRING}}
+    if [[ -n "${INPUT_NEW_STRING}" ]]; then
+      TEMPLATE=${TEMPLATE/${OLD_STRING}/${INPUT_NEW_STRING}}
+    else
+      TEMPLATE=${TEMPLATE/${OLD_STRING}/$(git log  --pretty=format:'%s' --abbrev-commit "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}")}
+    fi
   fi
   if [[ "${INPUT_GET_DIFF}" ==  "true" ]]; then
     TEMPLATE="${TEMPLATE/<\!-- Diff commits -->/${GIT_LOG}}"
