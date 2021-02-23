@@ -52,7 +52,6 @@ inputs:
   new_string:
     description: New string for the replacement in the template
     required: false
-    default: "**Automatic pull request**"
   get_diff:
     description: Whether to inject difference into template
     required: false
