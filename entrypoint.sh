@@ -57,8 +57,8 @@ if [[ -z $(git diff "remotes/origin/${TARGET_BRANCH}..remotes/origin/${SOURCE_BR
 fi
 
 echo -e "\nListing new commits in the source branch..."
-git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}"
-GIT_LOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --no-color "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}")
+git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=format:'%Y-%m-%d %H:%M:%S' "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}"
+GIT_LOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --date=format:'%Y-%m-%d %H:%M:%S' --no-color "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}")
 
 echo -e "\n\nListing files modified in the source branch..."
 git diff --compact-summary "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}"
