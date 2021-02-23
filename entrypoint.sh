@@ -61,8 +61,8 @@ fi
 #TARGET_BRANCH_R=$(git branch -r | grep "${TARGET_BRANCH}" | grep -v origin/HEAD | xargs)
 
 echo -e "\nListing new commits in the source branch..."
-git log --all --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit "remotes/origin/${TARGET_BRANCH}..remotes/origin/${SOURCE_BRANCH}"
-GIT_LOG=$(git log --all --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --no-color "remotes/origin/${TARGET_BRANCH}..remotes/origin/${SOURCE_BRANCH}")
+git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}"
+GIT_LOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --no-color "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}")
 
 echo -e "\n\nListing files modified in the source branch..."
 git diff --compact-summary "remotes/origin/${TARGET_BRANCH}..remotes/origin/${SOURCE_BRANCH}"
