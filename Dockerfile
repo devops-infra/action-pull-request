@@ -54,6 +54,7 @@ RUN set -eux \
   && apk add --no-cache bash \
   && apk add --no-cache git \
   && apk add --no-cache hub \
+  && apk add --no-cache jq \
   && rm -rf /var/cache/* \
   && rm -rf /root/.cache/*
 
