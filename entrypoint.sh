@@ -115,7 +115,7 @@ if [[ "${INPUT_DRAFT}" ==  "true" ]]; then
 fi
 
 echo -e "\nChecking if pull request exists..."
-PR_NUMBER=$(hub pr list --head dependency/codebuild-test --format '%I')
+PR_NUMBER=$(hub pr list --head "${SOURCE_BRANCH}" --format '%I')
 if [[ -z "${PR_NUMBER}" ]]; then
   echo -e "\nCreating pull request"
   COMMAND="hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ${ARG_LIST}"
