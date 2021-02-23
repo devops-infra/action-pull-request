@@ -16,15 +16,9 @@ echo "  assignee: ${INPUT_ASSIGNEE}"
 echo "  label: ${INPUT_LABEL}"
 echo "  milestone: ${INPUT_MILESTONE}"
 echo "  draft: ${INPUT_DRAFT}"
+echo "  get_diff: ${INPUT_GET_DIFF}"
 echo "  old_string: ${INPUT_OLD_STRING}"
 echo "  new_string: ${INPUT_NEW_STRING}"
-echo "  get_diff: ${INPUT_GET_DIFF}"
-
-echo -e "\nSetting branches..."
-SOURCE_BRANCH="${INPUT_SOURCE_BRANCH:-$(git symbolic-ref --short -q HEAD)}"
-TARGET_BRANCH="${INPUT_TARGET_BRANCH:-master}"
-echo "Source branch: ${SOURCE_BRANCH}"
-echo "Target branch: ${TARGET_BRANCH}"
 
 # Require github_token
 if [[ -z "${INPUT_GITHUB_TOKEN}" ]]; then
@@ -41,8 +35,14 @@ git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 # Needed for hub binary
 export GITHUB_USER="${GITHUB_ACTOR}"
 
-#echo -e "\nUpdating all branches..."
-#git fetch origin '+refs/heads/*:refs/heads/*' --update-head-ok
+echo -e "\nSetting branches..."
+SOURCE_BRANCH="${INPUT_SOURCE_BRANCH:-$(git symbolic-ref --short -q HEAD)}"
+TARGET_BRANCH="${INPUT_TARGET_BRANCH:-master}"
+echo "Source branch: ${SOURCE_BRANCH}"
+echo "Target branch: ${TARGET_BRANCH}"
+
+echo -e "\nUpdating all branches..."
+git fetch origin '+refs/heads/*:refs/heads/*' --update-head-ok
 
 echo -e "\nComparing branches by revisions..."
 if [[ $(git rev-parse --revs-only "${SOURCE_BRANCH}") == $(git rev-parse --revs-only "${TARGET_BRANCH}") ]]; then
@@ -60,11 +60,11 @@ fi
 SOURCE_BRANCH_R=$(git branch -r | grep "${SOURCE_BRANCH}" | grep -v origin/HEAD | xargs)
 TARGET_BRANCH_R=$(git branch -r | grep "${TARGET_BRANCH}" | grep -v origin/HEAD | xargs)
 
-echo -e "\n\nListing new commits in the source branch..."
+echo -e "\nListing new commits in the source branch..."
 git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit "remotes/origin/${TARGET_BRANCH}..remotes/origin/${SOURCE_BRANCH}"
 GITLOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --no-color "${TARGET_BRANCH_R}..${SOURCE_BRANCH_R}")
 
-echo -e "\n\nListing files modified in the source branch..."
+echo -e "\nListing files modified in the source branch..."
 git diff --compact-summary "remotes/origin/${TARGET_BRANCH}..remotes/origin/${SOURCE_BRANCH}"
 GITDIFF=$(git diff --compact-summary --no-color "remotes/origin/${TARGET_BRANCH}..remotes/origin/${SOURCE_BRANCH}")
 
@@ -95,7 +95,7 @@ else
   BODY="$(git log -1 --pretty=%B)"
 fi
 echo "${BODY}" > /tmp/body
-ARG_LIST="-m \"${TITLE}\" -m \"@/tmp/body\""
+ARG_LIST="-m \"${TITLE}\" -m \"${BODY}\""
 
 echo -e "\nSetting other arguments..."
 if [[ -n "${INPUT_REVIEWER}" ]]; then
