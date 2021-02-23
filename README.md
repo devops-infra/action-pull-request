@@ -59,27 +59,39 @@ Remember to not use default `fetch-depth` for [actions/checkout](https://github.
 ```
 
 
-| Input Variable | Required | Default          | Description                                                                                                              |
-| -------------- | -------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| github_token   | Yes      | `""`             | GitHub token `${{ secrets.GITHUB_TOKEN }}`                                                                               |
-| source_branch  | No       | *current branch* | Name of the source branch.                                                                                               |
-| target_branch  | No       | `master`         | Name of the target branch.                                                                                               |
-| title          | No       | `""`             | Pull request title.                                                                                                      |
-| template       | No       | `""`             | Template file location.                                                                                                  |
-| body           | No       | `""`             | Pull request body.                                                                                                       |
-| reviewer       | No       | `""`             | Reviewer's username.                                                                                                     |
-| assignee       | No       | `""`             | Assignee's usernames.                                                                                                    |
-| label          | No       | `""`             | Labels to apply, coma separated.                                                                                         |
-| milestone      | No       | `""`             | Milestone.                                                                                                               |
-| draft          | No       | `false`          | Whether to mark it as a draft.                                                                                           |
-| old_string     | No       | `""`             | Old string for the replacement in the template.                                                                          |
-| new_string     | No       | `""`             | New string for the replacement in the template. If not specified, but `old_string` was, it will gather commits subjects. |
-| get_diff       | No       | `false`          | Whether to replace `<!-- Diff commits -->` and `<!-- Diff files -->` with differences between branches.                  |
+| Input Variable | Required | Default                       | Description                                                                                                              |
+| -------------- | -------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| github_token   | Yes      | `""`                          | GitHub token `${{ secrets.GITHUB_TOKEN }}`                                                                               |
+| source_branch  | No       | *current branch*              | Name of the source branch.                                                                                               |
+| target_branch  | No       | `master`                      | Name of the target branch. Change it if you use `main`.                                                                  |
+| title          | No       | *subject of the first commit* | Pull request title.                                                                                                      |
+| template       | No       | `""`                          | Template file location.                                                                                                  |
+| body           | No       | *list of commits*             | Pull request body.                                                                                                       |
+| reviewer       | No       | `""`                          | Reviewer's username.                                                                                                     |
+| assignee       | No       | `""`                          | Assignee's usernames.                                                                                                    |
+| label          | No       | `""`                          | Labels to apply, coma separated.                                                                                         |
+| milestone      | No       | `""`                          | Milestone.                                                                                                               |
+| draft          | No       | `false`                       | Whether to mark it as a draft.                                                                                           |
+| old_string     | No       | `""`                          | Old string for the replacement in the template.                                                                          |
+| new_string     | No       | `""`                          | New string for the replacement in the template. If not specified, but `old_string` was, it will gather commits subjects. |
+| get_diff       | No       | `false`                       | Whether to replace predefined comments with differences between branches - see details below.                            |
 
 
 | Outputs | Description      |
 | ------- | ---------------- |
 | url     | Pull request URL |
+
+
+### How get_diff works
+In previous versions occurrences of following strings in a template result with replacing them with list of commits and list of modified files (`<!-- Diff commits -->` and `<!-- Diff files -->`).
+
+Now this action will expect to have three types of comment blocks. Meaning anything between `START` and `END` comment will get replaced. This is especially important when updating pull request with new commits.
+
+* `<!-- Diff summary - START -->` and `<!-- Diff summary - END -->` - show first lines of each commit the pull requests
+* `<!-- Diff commits - START -->` and `<!-- Diff commits - END -->` - show graph of commits in the pull requests, with authors' info and time
+* `<!-- Diff files - START -->` and `<!-- Diff files - END -->` - show list of modified files
+
+If your template uses old comment strings it will try to adjust them in the pull request body to a new standard when pull request is created. It will not modify the template.
 
 
 ## Examples

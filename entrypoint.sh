@@ -60,69 +60,79 @@ echo -e "\nListing new commits in the source branch..."
 git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cd%Creset %n%s %b' --abbrev-commit --date=format:'%Y-%m-%d %H:%M:%S' "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}"
 GIT_LOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cd%Creset %n%s %b' --abbrev-commit --date=format:'%Y-%m-%d %H:%M:%S' --no-color "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}")
 
+echo -e "\n\nListing commits subjects in the source branch..."
+git log  --pretty=format:'%s' --abbrev-commit "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}"
+GIT_SUMMARY=$(git log  --pretty=format:'%s' --abbrev-commit "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}")
+
 echo -e "\n\nListing files modified in the source branch..."
 git diff --compact-summary "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}"
 GIT_DIFF=$(git diff --compact-summary --no-color "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}")
 
-echo -e "\nReplacing strings in the template..."
-if [[ -f "${INPUT_TEMPLATE}" ]]; then
-  if [[ -n "${INPUT_OLD_STRING}" ]]; then
-    TEMPLATE=$(cat "${INPUT_TEMPLATE}")
-    OLD_STRING=${INPUT_OLD_STRING/\!/\\!}
-    if [[ -n "${INPUT_NEW_STRING}" ]]; then
-      TEMPLATE=${TEMPLATE/${OLD_STRING}/${INPUT_NEW_STRING}}
-    else
-      TEMPLATE=${TEMPLATE/${OLD_STRING}/$(git log  --pretty=format:'%s' --abbrev-commit "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}")}
-    fi
-  fi
-  if [[ "${INPUT_GET_DIFF}" ==  "true" ]]; then
-    TEMPLATE="${TEMPLATE/<\!-- Diff commits -->/${GIT_LOG}}"
-    TEMPLATE="${TEMPLATE/<\!-- Diff files -->/${GIT_DIFF}}"
-  fi
-fi
-
-echo -e "\nSetting title and body..."
-if [[ -n "${INPUT_TITLE}" ]]; then
-  TITLE=$(echo "${INPUT_TITLE}" | head -1)
-else
-  TITLE=$(git log -1 --pretty=%s | head -1)
-fi
-if [[ -n "${INPUT_TEMPLATE}" ]]; then
-  BODY="${TEMPLATE}"
-elif [[ -n "${INPUT_BODY}" ]]; then
-  BODY="${INPUT_BODY}"
-else
-  BODY="$(git log -1 --pretty=%B)"
-fi
-echo "${BODY}" > /tmp/body
-ARG_LIST="-m \"${TITLE}\" -m \"${BODY}\""
-
-echo -e "\nSetting other arguments..."
-if [[ -n "${INPUT_REVIEWER}" ]]; then
-  ARG_LIST="${ARG_LIST} -r \"${INPUT_REVIEWER}\""
-fi
-
-if [[ -n "${INPUT_ASSIGNEE}" ]]; then
-  ARG_LIST="${ARG_LIST} -a \"${INPUT_ASSIGNEE}\""
-fi
-
-if [[ -n "${INPUT_LABEL}" ]]; then
-  ARG_LIST="${ARG_LIST} -l \"${INPUT_LABEL}\""
-fi
-
-if [[ -n "${INPUT_MILESTONE}" ]]; then
-  ARG_LIST="${ARG_LIST} -M \"${INPUT_MILESTONE}\""
-fi
-
-if [[ "${INPUT_DRAFT}" ==  "true" ]]; then
-  ARG_LIST="${ARG_LIST} -d"
-fi
-
-echo -e "\nChecking if pull request exists..."
+echo -e "\nSetting template..."
 PR_NUMBER=$(hub pr list --head "${SOURCE_BRANCH}" --format '%I')
 if [[ -z "${PR_NUMBER}" ]]; then
+  if [[ -n "${INPUT_TEMPLATE}" ]]; then
+    TEMPLATE=$(cat "${INPUT_TEMPLATE}")
+  elif [[ -n "${INPUT_BODY}" ]]; then
+    TEMPLATE="${INPUT_BODY}"
+  else
+    TEMPLATE="${GIT_LOG}"
+  fi
+else
+  TEMPLATE=$(hub api --method GET "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" | jq -r '.body')
+fi
+
+if [[ -n "${INPUT_OLD_STRING}" ]]; then
+  echo -e "\nReplacing old_string with new_string..."
+  OLD_STRING=${INPUT_OLD_STRING/\!/\\!}
+  if [[ -n "${INPUT_NEW_STRING}" ]]; then
+    TEMPLATE=${TEMPLATE/${OLD_STRING}/${INPUT_NEW_STRING}}
+  else
+    TEMPLATE=${TEMPLATE/${OLD_STRING}/${GIT_SUMMARY}}
+  fi
+fi
+
+if [[ "${INPUT_GET_DIFF}" ==  "true" ]]; then
+  echo -e "\nReplacing predefined fields with git information..."
+  TEMPLATE=$(echo "${TEMPLATE}" | sed ':a;N;$!ba; s|<!-- Diff summary - START -->.*<!-- Diff summary - END -->|<!-- Diff summary - START -->'"${GIT_SUMMARY}"'<!-- Diff summary - END -->|g')
+  TEMPLATE=$(echo "${TEMPLATE}" | sed ':a;N;$!ba; s|<!-- Diff commits -->|<!-- Diff commits - START -->'"${GIT_LOG}"'<!-- Diff commits - END -->|g')
+  TEMPLATE=$(echo "${TEMPLATE}" | sed ':a;N;$!ba; s|<!-- Diff commits - START -->.*<!-- Diff commits - END -->|<!-- Diff commits - START -->'"${GIT_LOG}"'<!-- Diff commits - END -->|g')
+  TEMPLATE=$(echo "${TEMPLATE}" | sed ':a;N;$!ba; s|<!-- Diff files -->|<!-- Diff files - START -->'"${GIT_DIFF}"'<!-- Diff files - END -->|g')
+  TEMPLATE=$(echo "${TEMPLATE}" | sed ':a;N;$!ba; s|<!-- Diff files - START -->.*<!-- Diff files - END -->|<!-- Diff files - START -->'"${GIT_DIFF}"'<!-- Diff files - END -->|g')
+fi
+
+if [[ -z "${PR_NUMBER}" ]]; then
+  echo -e "\nSetting all arguments..."
+  if [[ -n "${INPUT_TITLE}" ]]; then
+    TITLE=$(echo "${INPUT_TITLE}" | head -1)
+  else
+    TITLE=$(git log -1 --pretty=%s | head -1)
+  fi
+  ARG_LIST="-m \"${TITLE}\" -m \"${TEMPLATE}\""
+  if [[ -n "${INPUT_REVIEWER}" ]]; then
+    ARG_LIST="${ARG_LIST} -r \"${INPUT_REVIEWER}\""
+  fi
+  if [[ -n "${INPUT_ASSIGNEE}" ]]; then
+    ARG_LIST="${ARG_LIST} -a \"${INPUT_ASSIGNEE}\""
+  fi
+  if [[ -n "${INPUT_LABEL}" ]]; then
+    ARG_LIST="${ARG_LIST} -l \"${INPUT_LABEL}\""
+  fi
+  if [[ -n "${INPUT_MILESTONE}" ]]; then
+    ARG_LIST="${ARG_LIST} -M \"${INPUT_MILESTONE}\""
+  fi
+  if [[ "${INPUT_DRAFT}" ==  "true" ]]; then
+    ARG_LIST="${ARG_LIST} -d"
+  fi
+else
+  echo "${TEMPLATE}" > /tmp/template
+fi
+
+if [[ -z "${PR_NUMBER}" ]]; then
   echo -e "\nCreating pull request"
-  ARG_LIST=$(echo "${ARG_LIST}" | sed 's/\`/\\`/g')
+  # shellcheck disable=SC2016
+  # shellcheck disable=SC2001
+  ARG_LIST=$(echo "${ARG_LIST}" | sed 's/\`/\\`/g') # fix for '`' marks in template
   COMMAND="hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ${ARG_LIST}"
   echo -e "Running: ${COMMAND}"
   URL=$(sh -c "${COMMAND}")
@@ -130,7 +140,7 @@ if [[ -z "${PR_NUMBER}" ]]; then
   if [[ "$?" != "0" ]]; then RET_CODE=1; fi
 else
   echo -e "\nUpdating pull request"
-  COMMAND="hub api --method PATCH repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER} --field 'body=@/tmp/body'"
+  COMMAND="hub api --method PATCH repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER} --field 'body=@/tmp/template'"
   echo -e "Running: ${COMMAND}"
   URL=$(sh -c "${COMMAND} | jq -r '.html_url'")
   # shellcheck disable=SC2181
