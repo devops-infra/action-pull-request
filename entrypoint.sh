@@ -122,6 +122,7 @@ echo -e "\nChecking if pull request exists..."
 PR_NUMBER=$(hub pr list --head "${SOURCE_BRANCH}" --format '%I')
 if [[ -z "${PR_NUMBER}" ]]; then
   echo -e "\nCreating pull request"
+  ARG_LIST=$(echo "${ARG_LIST}" | sed 's/\`/\\`/g')
   COMMAND="hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ${ARG_LIST}"
   echo -e "Running: ${COMMAND}"
   URL=$(sh -c "${COMMAND}")
