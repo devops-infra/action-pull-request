@@ -129,7 +129,7 @@ if [[ -z "${PR_NUMBER}" ]]; then
   if [[ "$?" != "0" ]]; then RET_CODE=1; fi
 else
   echo -e "\nUpdating pull request"
-  COMMAND="hub api --method PATCH repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER} --raw-field 'body=@/tmp/body'"
+  COMMAND="hub api --method PATCH repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER} --field 'body=@/tmp/body'"
   echo -e "Running: ${COMMAND}"
   URL=$(sh -c "${COMMAND} | jq -r '.html_url'")
   # shellcheck disable=SC2181
