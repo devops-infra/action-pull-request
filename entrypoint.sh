@@ -62,9 +62,9 @@ TARGET_BRANCH_R=$(git branch -r | grep "${TARGET_BRANCH}" | grep -v origin/HEAD 
 
 echo -e "\nListing new commits in the source branch..."
 git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit "remotes/origin/${TARGET_BRANCH}..remotes/origin/${SOURCE_BRANCH}"
-GITLOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --no-color "${TARGET_BRANCH_R}..${SOURCE_BRANCH_R}")
+GITLOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cr%Creset %n%s %b' --abbrev-commit --no-color "remotes/origin/${TARGET_BRANCH}..remotes/origin/${SOURCE_BRANCH}")
 
-echo -e "\nListing files modified in the source branch..."
+echo -e "\n\nListing files modified in the source branch..."
 git diff --compact-summary "remotes/origin/${TARGET_BRANCH}..remotes/origin/${SOURCE_BRANCH}"
 GITDIFF=$(git diff --compact-summary --no-color "remotes/origin/${TARGET_BRANCH}..remotes/origin/${SOURCE_BRANCH}")
 
@@ -122,16 +122,16 @@ echo -e "\nChecking if pull request exists..."
 PR_NUMBER=$(hub pr list --head dependency/codebuild-test --format '%I')
 if [[ -z "${PR_NUMBER}" ]]; then
   echo -e "\nCreating pull request"
-  COMMAND="hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ${ARG_LIST} || true"
+  COMMAND="hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ${ARG_LIST}"
   echo -e "Running: ${COMMAND}"
   URL=$(sh -c "${COMMAND}")
   # shellcheck disable=SC2181
   if [[ "$?" != "0" ]]; then RET_CODE=1; fi
 else
   echo -e "\nUpdating pull request"
-  COMMAND="hub api --method PATCH repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER} --raw-field 'body=@/tmp/body' || true"
+  COMMAND="hub api --method PATCH repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER} --raw-field 'body=@/tmp/body'"
   echo -e "Running: ${COMMAND}"
-  URL=$(sh -c "${COMMAND}")
+  URL=$(sh -c "${COMMAND} | jq -r '.html_url'")
   # shellcheck disable=SC2181
   if [[ "$?" != "0" ]]; then RET_CODE=1; fi
 fi
