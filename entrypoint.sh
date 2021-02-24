@@ -56,20 +56,22 @@ if [[ -z $(git diff "remotes/origin/${TARGET_BRANCH}..remotes/origin/${SOURCE_BR
   exit 0
 fi
 
+# hash maskowac tylko w outpucie z gita
+
 echo -e "\nListing new commits in the source branch..."
 git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cd%Creset %n%s %b' --abbrev-commit --date=format:'%Y-%m-%d %H:%M:%S' "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}"
 GIT_LOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cd%Creset %n%s %b' --abbrev-commit --date=format:'%Y-%m-%d %H:%M:%S' --no-color "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}")
-GIT_LOG=$(echo -e "${GIT_LOG}" | tr "\n" "^")
+GIT_LOG=$(echo -e "${GIT_LOG}" | sed 's|#|^HaSz^|g')
 
 echo -e "\n\nListing commits subjects in the source branch..."
 git log  --pretty=format:'%s' --abbrev-commit "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}"
 GIT_SUMMARY=$(git log  --pretty=format:'%s' --abbrev-commit "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}")
-GIT_SUMMARY=$(echo -e "${GIT_SUMMARY}" | tr "\n" "^")
+GIT_SUMMARY=$(echo -e "${GIT_SUMMARY}" | sed 's|#|^HaSz^|g')
 
 echo -e "\n\nListing files modified in the source branch..."
 git diff --compact-summary "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}"
 GIT_DIFF=$(git diff --compact-summary --no-color "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}")
-GIT_DIFF=$(echo -e "${GIT_DIFF}" | tr "\n" "^")
+GIT_DIFF=$(echo -e "${GIT_DIFF}" | sed 's|#|^HaSz^|g')
 
 echo -e "\nSetting template..."
 PR_NUMBER=$(hub pr list --head "${SOURCE_BRANCH}" --format '%I')
@@ -98,11 +100,11 @@ fi
 if [[ "${INPUT_GET_DIFF}" ==  "true" ]]; then
   echo -e "\nReplacing predefined fields with git information..."
   # little hack to trick sed to work with multiline
-  TEMPLATE=$(echo "${TEMPLATE}" | sed ':a;N;$!ba; s#<!-- Diff summary - START -->.*<!-- Diff summary - END -->#<!-- Diff summary - START -->\n'"${GIT_SUMMARY}"'\n<!-- Diff summary - END -->#g' | tr "^" "\n")
-  TEMPLATE=$(echo "${TEMPLATE}" | sed ':a;N;$!ba; s#<!-- Diff commits -->#<!-- Diff commits - START -->\n'"${GIT_LOG}"'\n<!-- Diff commits - END -->#g' | tr "^" "\n")
-  TEMPLATE=$(echo "${TEMPLATE}" | sed ':a;N;$!ba; s#<!-- Diff commits - START -->.*<!-- Diff commits - END -->#<!-- Diff commits - START -->\n'"${GIT_LOG}"'\n<!-- Diff commits - END -->#g' | tr "^" "\n")
-  TEMPLATE=$(echo "${TEMPLATE}" | sed ':a;N;$!ba; s#<!-- Diff files -->#<!-- Diff files - START -->\n'"${GIT_DIFF}"'\n<!-- Diff files - END -->#g' | tr "^" "\n")
-  TEMPLATE=$(echo "${TEMPLATE}" | sed ':a;N;$!ba; s#<!-- Diff files - START -->.*<!-- Diff files - END -->#<!-- Diff files - START -->\n'"${GIT_DIFF}"'\n<!-- Diff files - END -->#g' | tr "^" "\n")
+  TEMPLATE=$(echo "${TEMPLATE}" | sed ':a;N;$!ba; s#<!-- Diff summary - START -->.*<!-- Diff summary - END -->#<!-- Diff summary - START -->\n'"${GIT_SUMMARY}"'\n<!-- Diff summary - END -->#g' | tr "^HaSz^" "#")
+  TEMPLATE=$(echo "${TEMPLATE}" | sed ':a;N;$!ba; s#<!-- Diff commits -->#<!-- Diff commits - START -->\n'"${GIT_LOG}"'\n<!-- Diff commits - END -->#g' | tr "^HaSz^" "#")
+  TEMPLATE=$(echo "${TEMPLATE}" | sed ':a;N;$!ba; s#<!-- Diff commits - START -->.*<!-- Diff commits - END -->#<!-- Diff commits - START -->\n'"${GIT_LOG}"'\n<!-- Diff commits - END -->#g' | tr "^HaSz^" "#")
+  TEMPLATE=$(echo "${TEMPLATE}" | sed ':a;N;$!ba; s#<!-- Diff files -->#<!-- Diff files - START -->\n'"${GIT_DIFF}"'\n<!-- Diff files - END -->#g' | tr "^HaSz^" "#")
+  TEMPLATE=$(echo "${TEMPLATE}" | sed ':a;N;$!ba; s#<!-- Diff files - START -->.*<!-- Diff files - END -->#<!-- Diff files - START -->\n'"${GIT_DIFF}"'\n<!-- Diff files - END -->#g' | tr "^HaSz^" "#")
 fi
 
 if [[ -z "${PR_NUMBER}" ]]; then

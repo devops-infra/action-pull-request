@@ -13,9 +13,6 @@ Features:
 * Can replace any `old_string` inside a pull request template with a `new_string`. Or put commits' subjects in place of `old_string`.
 * When `get_diff` is `true` will add list of commits in place of `<!-- Diff commits -->` and list of modified files in place of `<!-- Diff files -->` in a pull request template.
 
-**CAUTION**
-Remember to not use default `fetch-depth` for [actions/checkout](https://github.com/actions/checkout) action. Rather set it to `0` - see example below.
-
 
 ## Badge swag
 [![Master branch](https://github.com/devops-infra/action-pull-request/workflows/Master%20branch/badge.svg)](https://github.com/devops-infra/action-pull-request/actions?query=workflow%3A%22Master+branch%22)
@@ -92,6 +89,9 @@ Now this action will expect to have three types of comment blocks. Meaning anyth
 * `<!-- Diff files - START -->` and `<!-- Diff files - END -->` - show list of modified files
 
 If your template uses old comment strings it will try to adjust them in the pull request body to a new standard when pull request is created. It will not modify the template.
+
+**CAUTION**
+Remember to not use default `fetch-depth` for [actions/checkout](https://github.com/actions/checkout) action. Rather set it to `0` - see example below.
 
 
 ## Examples
