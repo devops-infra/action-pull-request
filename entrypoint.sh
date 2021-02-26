@@ -61,13 +61,13 @@ fi
 # after insertions of git information into template those strings are replaced back by proper characters
 
 echo -e "\nListing new commits in the source branch..."
-git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cd%Creset %n%s %b' --abbrev-commit --date=format:'%Y-%m-%d %H:%M:%S' "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}"
-GIT_LOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cd%Creset %n%s %b' --abbrev-commit --date=format:'%Y-%m-%d %H:%M:%S' --no-color "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}")
+git log --reverse --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cd%Creset %n%s %b' --abbrev-commit --date=format:'%Y-%m-%d %H:%M:%S' "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}"
+GIT_LOG=$(git log --reverse --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cd%Creset %n%s %b' --abbrev-commit --date=format:'%Y-%m-%d %H:%M:%S' --no-color "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}")
 GIT_LOG=$(echo -e "${GIT_LOG}" | sed 's|#|^HaSz^|g' | sed ':a;N;$!ba; s/\n/^NowALiNiA^/g')
 
 echo -e "\n\nListing commits subjects in the source branch..."
-git log  --pretty=format:'%s' --abbrev-commit "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}"
-GIT_SUMMARY=$(git log  --pretty=format:'%s' --abbrev-commit "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}")
+git log --reverse --pretty=format:'%s' --abbrev-commit "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}"
+GIT_SUMMARY=$(git log --reverse --pretty=format:'%s' --abbrev-commit "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}")
 GIT_SUMMARY=$(echo -e "${GIT_SUMMARY}" | sed 's|#|^HaSz^|g' | sed ':a;N;$!ba; s/\n/^NowALiNiA^/g')
 
 echo -e "\n\nListing files modified in the source branch..."
