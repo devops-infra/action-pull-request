@@ -51,7 +51,7 @@ if [[ $(git rev-parse --revs-only "${SOURCE_BRANCH}") == $(git rev-parse --revs-
 fi
 
 echo -e "\nComparing branches by diff..."
-if [[ -z $(git diff "remotes/origin/${TARGET_BRANCH}..remotes/origin/${SOURCE_BRANCH}") ]]; then
+if [[ -z $(git diff "remotes/origin/${TARGET_BRANCH}...remotes/origin/${SOURCE_BRANCH}") ]]; then
   echo -e "\n[INFO] Both branches are the same. No action needed."
   exit 0
 fi
@@ -61,18 +61,18 @@ fi
 # after insertions of git information into template those strings are replaced back by proper characters
 
 echo -e "\nListing new commits in the source branch..."
-git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cd%Creset %n%s %b' --abbrev-commit --date=format:'%Y-%m-%d %H:%M:%S' "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}"
-GIT_LOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cd%Creset %n%s %b' --abbrev-commit --date=format:'%Y-%m-%d %H:%M:%S' --no-color "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}")
+git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cd%Creset %n%s %b' --abbrev-commit --date=format:'%Y-%m-%d %H:%M:%S' "origin/${TARGET_BRANCH}...origin/${SOURCE_BRANCH}"
+GIT_LOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cd%Creset %n%s %b' --abbrev-commit --date=format:'%Y-%m-%d %H:%M:%S' --no-color "origin/${TARGET_BRANCH}...origin/${SOURCE_BRANCH}")
 GIT_LOG=$(echo -e "${GIT_LOG}" | sed 's|#|^HaSz^|g' | sed ':a;N;$!ba; s/\n/^NowALiNiA^/g')
 
 echo -e "\n\nListing commits subjects in the source branch..."
-git log --reverse --pretty=format:'%s' --abbrev-commit "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}"
-GIT_SUMMARY=$(git log --reverse --pretty=format:'%s' --abbrev-commit "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}")
+git log --reverse --pretty=format:'%s' --abbrev-commit "origin/${TARGET_BRANCH}...origin/${SOURCE_BRANCH}"
+GIT_SUMMARY=$(git log --reverse --pretty=format:'%s' --abbrev-commit "origin/${TARGET_BRANCH}...origin/${SOURCE_BRANCH}")
 GIT_SUMMARY=$(echo -e "${GIT_SUMMARY}" | sed 's|#|^HaSz^|g' | sed ':a;N;$!ba; s/\n/^NowALiNiA^/g')
 
 echo -e "\n\nListing files modified in the source branch..."
-git diff --compact-summary "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}"
-GIT_DIFF=$(git diff --compact-summary --no-color "origin/${TARGET_BRANCH}..origin/${SOURCE_BRANCH}")
+git diff --compact-summary "origin/${TARGET_BRANCH}...origin/${SOURCE_BRANCH}"
+GIT_DIFF=$(git diff --compact-summary --no-color "origin/${TARGET_BRANCH}...origin/${SOURCE_BRANCH}")
 GIT_DIFF=$(echo -e "${GIT_DIFF}" | sed 's|#|^HaSz^|g' | sed ':a;N;$!ba; s/\n/^NowALiNiA^/g')
 
 echo -e "\nSetting template..."
