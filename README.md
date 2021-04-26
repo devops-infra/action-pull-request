@@ -53,25 +53,27 @@ Features:
         old_string: "<!-- Add your description here -->"
         new_string: "** Automatic pull request**"
         get_diff: true
+        ignore_users: "dependabot"
 ```
 
 
 | Input Variable | Required | Default                       | Description                                                                                                              |
 | -------------- | -------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | github_token   | Yes      | `""`                          | GitHub token `${{ secrets.GITHUB_TOKEN }}`                                                                               |
-| source_branch  | No       | *current branch*              | Name of the source branch.                                                                                               |
-| target_branch  | No       | `master`                      | Name of the target branch. Change it if you use `main`.                                                                  |
-| title          | No       | *subject of the first commit* | Pull request title.                                                                                                      |
-| template       | No       | `""`                          | Template file location.                                                                                                  |
-| body           | No       | *list of commits*             | Pull request body.                                                                                                       |
-| reviewer       | No       | `""`                          | Reviewer's username.                                                                                                     |
 | assignee       | No       | `""`                          | Assignee's usernames.                                                                                                    |
+| body           | No       | *list of commits*             | Pull request body.                                                                                                       |
+| draft          | No       | `false`                       | Whether to mark it as a draft.                                                                                           |
+| get_diff       | No       | `false`                       | Whether to replace predefined comments with differences between branches - see details below.                            |
+| ignore_users   | No       | `"dependabot"`                | List of users to ignore, coma separated.                                                                                 |
 | label          | No       | `""`                          | Labels to apply, coma separated.                                                                                         |
 | milestone      | No       | `""`                          | Milestone.                                                                                                               |
-| draft          | No       | `false`                       | Whether to mark it as a draft.                                                                                           |
-| old_string     | No       | `""`                          | Old string for the replacement in the template.                                                                          |
 | new_string     | No       | `""`                          | New string for the replacement in the template. If not specified, but `old_string` was, it will gather commits subjects. |
-| get_diff       | No       | `false`                       | Whether to replace predefined comments with differences between branches - see details below.                            |
+| old_string     | No       | `""`                          | Old string for the replacement in the template.                                                                          |
+| reviewer       | No       | `""`                          | Reviewer's username.                                                                                                     |
+| source_branch  | No       | *current branch*              | Name of the source branch.                                                                                               |
+| target_branch  | No       | `master`                      | Name of the target branch. Change it if you use `main`.                                                                  |
+| template       | No       | `""`                          | Template file location.                                                                                                  |
+| title          | No       | *subject of the first commit* | Pull request title.                                                                                                      |
 
 
 | Outputs | Description      |
