@@ -56,6 +56,10 @@ inputs:
     description: Whether to inject difference into template
     required: false
     default: "false"
+  ignore_users:
+    description: List of users to ignore, coma separated
+    required: false
+    default: "dependabot"
 outputs:
   url:
     description: Pull request URL.

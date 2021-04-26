@@ -19,6 +19,18 @@ echo "  draft: ${INPUT_DRAFT}"
 echo "  get_diff: ${INPUT_GET_DIFF}"
 echo "  old_string: ${INPUT_OLD_STRING}"
 echo "  new_string: ${INPUT_NEW_STRING}"
+echo "  ignore_users: ${INPUT_IGNORE_USERS}"
+
+# Skip whole script to not cause errors
+IFS=',' read -r -a IGNORE_USERS <<< "${INPUT_IGNORE_USERS}"
+for USER in "${IGNORE_USERS[@]}"
+do
+  if [[ "${GITHUB_ACTOR}" == "${USER}" ]]; then
+    MESSAGE="User ${GITHUB_ACTOR} is ignored. Skipping."
+    echo -e "\n[INFO] ${MESSAGE}"
+    exit 0
+  fi
+done
 
 # Require github_token
 if [[ -z "${INPUT_GITHUB_TOKEN}" ]]; then
