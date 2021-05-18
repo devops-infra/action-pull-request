@@ -2,7 +2,7 @@
 
 **GitHub Action that will create a pull request from the current branch.**
 
-Useful in combination with my other action [devopsinfra/action-commit-push](https://github.com/devopsinfra/action-commit-push).
+Useful in combination with my other action [devops-infra/action-commit-push](https://github.com/devops-infra/action-commit-push).
 
 Dockerized as [devopsinfra/action-pull-request](https://hub.docker.com/repository/docker/christophshyper/action-pull-request).
 
