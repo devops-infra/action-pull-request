@@ -1,0 +1,22 @@
+name: Check for updates
+
+on:
+  schedule:
+    # Run every week at 5.00 AM UTC
+    - cron: "0 5 */7 * *"
+
+jobs:
+  build_and_push:
+    name: Build and push images
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2.3.4
+
+      - name: Build Docker image and push to registry
+        env:
+          DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TERM: xterm-256color
+        run: make build push
