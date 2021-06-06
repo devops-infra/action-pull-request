@@ -46,19 +46,18 @@ LABEL \
 COPY entrypoint.sh /
 
 # Install needed packages
-RUN set -eux \
-  && chmod +x /entrypoint.sh \
-  && echo http://dl-cdn.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories \
-  && apk update --no-cache \
-  && apk upgrade --no-cache \
-  && apk add --no-cache bash \
-  && apk add --no-cache git \
-  && apk add --no-cache hub \
-  && apk add --no-cache jq \
-  && rm -rf /var/cache/* \
-  && rm -rf /root/.cache/*
+RUN set -eux ;\
+  chmod +x /entrypoint.sh ;\
+  echo http://dl-cdn.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories ;\
+  apk update --no-cache ;\
+  apk add --no-cache bash=5.0.11-r1 ;\
+  apk add --no-cache git=2.24.4-r0 ;\
+  apk add --no-cache hub=2.14.2-r1 ;\
+  apk add --no-cache jq=1.6-r0 ;\
+  rm -rf /var/cache/* ;\
+  rm -rf /root/.cache/*
 
 # Finish up
-CMD hub version
+CMD ["hub version"]
 WORKDIR /github/workspace
-ENTRYPOINT /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
