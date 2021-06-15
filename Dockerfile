@@ -50,10 +50,11 @@ RUN set -eux ;\
   chmod +x /entrypoint.sh ;\
   echo http://dl-cdn.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories ;\
   apk update --no-cache ;\
-  apk add --no-cache bash=5.0.11-r1 ;\
-  apk add --no-cache git=2.24.4-r0 ;\
-  apk add --no-cache hub=2.14.2-r1 ;\
-  apk add --no-cache jq=1.6-r0 ;\
+  apk add --no-cache \
+    bash~=5.0.11 \
+    git~=2.24.4 \
+    hub~=2.14.2 \
+    jq~=1.6 ;\
   rm -rf /var/cache/* ;\
   rm -rf /root/.cache/*
 
