@@ -1,5 +1,5 @@
 # Use a clean tiny image to store artifacts in
-FROM alpine:3.11
+FROM alpine:3.14
 
 # Labels for http://label-schema.org/rc1/#build-time-labels
 # And for https://github.com/opencontainers/image-spec/blob/master/annotations.md
@@ -48,12 +48,11 @@ COPY entrypoint.sh /
 # Install needed packages
 RUN set -eux ;\
   chmod +x /entrypoint.sh ;\
-  echo http://dl-cdn.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories ;\
   apk update --no-cache ;\
+  apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing hub~=2.14.2 ;\
   apk add --no-cache \
-    bash~=5.0.11 \
-    git~=2.24.4 \
-    hub~=2.14.2 \
+    bash~=5.1.4 \
+    git~=2.32.0 \
     jq~=1.6 ;\
   rm -rf /var/cache/* ;\
   rm -rf /root/.cache/*
