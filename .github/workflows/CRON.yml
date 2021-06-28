@@ -1,4 +1,4 @@
-name: Check for updates
+name: Weekly build
 
 on:
   schedule:
