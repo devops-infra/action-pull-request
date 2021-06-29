@@ -1,17 +1,31 @@
 version: 2
 updates:
   # Maintain dependencies for GitHub Actions
-  - package-ecosystem: "github-actions"
+  - package-ecosystem: github-actions
     directory: "/"
     schedule:
-      interval: "daily"
-
-  # Enable version updates for Docker
-  - package-ecosystem: "docker"
-    directory: "/"
-    schedule:
-      interval: "daily"
+      interval: daily
     assignees:
-      - "ChristophShyper"
+      - ChristophShyper
     labels:
       - automatic
+
+  # Enable version updates for Docker
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: daily
+    assignees:
+      - ChristophShyper
+    labels:
+      - automatic
+
+#  # Enable version updates for pip
+#  - package-ecosystem: pip
+#    directory: "/"
+#    schedule:
+#      interval: daily
+#    assignees:
+#      - ChristophShyper
+#    labels:
+#      - automatic
