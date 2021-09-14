@@ -65,7 +65,7 @@ outputs:
     description: Pull request URL.
 runs:
   using: docker
-  image: docker://devopsinfra/action-pull-request:v0.4
+  image: docker://devopsinfra/action-pull-request:v0.4.2
   env:
     GITHUB_TOKEN: ${{ inputs.github_token }}
 branding:
