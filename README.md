@@ -4,7 +4,7 @@
 
 Useful in combination with my other action [devops-infra/action-commit-push](https://github.com/devops-infra/action-commit-push).
 
-Dockerized as [devopsinfra/action-pull-request](https://hub.docker.com/repository/docker/christophshyper/action-pull-request).
+Dockerized as [devopsinfra/action-pull-request](https://hub.docker.com/repository/docker/devopsinfra/action-pull-request).
 
 Features:
 * Creates pull request if triggered from a current branch or any specified by `source_branch` to a `target_branch`.
