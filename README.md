@@ -132,7 +132,7 @@ jobs:
   action-pull-request:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repoistory
+      - name: Checkout repository
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
