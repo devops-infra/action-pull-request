@@ -52,7 +52,7 @@ RUN set -eux ;\
   apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing hub~=2.14.2 ;\
   apk add --no-cache \
     bash~=5.1.16 \
-    git~=2.34.1 \
+    git~=2.34.2 \
     jq~=1.6 ;\
   rm -rf /var/cache/* ;\
   rm -rf /root/.cache/*
