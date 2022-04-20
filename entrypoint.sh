@@ -158,8 +158,9 @@ fi
 if [[ -z "${PR_NUMBER}" ]]; then
   echo -e "\nCreating pull request"
   # shellcheck disable=SC2016
-  # shellcheck disable=SC2001
   COMMAND="hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ${ARG_LIST[@]}"
+  # shellcheck disable=SC2001
+  COMMAND=$(echo -e "${COMMAND}" | sed 's/\`/\\`/g')
   echo -e "Running: ${COMMAND}"
   URL=$(sh -c "${COMMAND}")
   # shellcheck disable=SC2181
