@@ -41,6 +41,7 @@ if [[ -z "${INPUT_GITHUB_TOKEN}" ]]; then
 fi
 
 echo -e "\nSetting GitHub credentials..."
+# Prevents issues with: fatal: unsafe repository ('/github/workspace' is owned by someone else)
 git config --global --add safe.directory "${GITHUB_WORKSPACE}"
 git config --global --add safe.directory /github/workspace
 git remote set-url origin "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}"
@@ -132,21 +133,25 @@ if [[ -z "${PR_NUMBER}" ]]; then
   else
     TITLE=$(git log -1 --pretty=%s | head -1)
   fi
-  ARG_LIST="-m \"${TITLE}\" -m \"${TEMPLATE}\""
+  # shellcheck disable=SC2001
+  TEMPLATE=$(echo "${TEMPLATE}" | sed 's/\`/\\`/g') # fix for '`' marks in template
+  ARG_LIST=()
+  ARG_LIST+=("-m \"${TITLE}\"")
+  ARG_LIST+=("-m \"${TEMPLATE}\"")
   if [[ -n "${INPUT_REVIEWER}" ]]; then
-    ARG_LIST="${ARG_LIST} -r \"${INPUT_REVIEWER}\""
+    ARG_LIST+=("-r \"${INPUT_REVIEWER}\"")
   fi
   if [[ -n "${INPUT_ASSIGNEE}" ]]; then
-    ARG_LIST="${ARG_LIST} -a \"${INPUT_ASSIGNEE}\""
+    ARG_LIST+=("-a \"${INPUT_ASSIGNEE}\"")
   fi
   if [[ -n "${INPUT_LABEL}" ]]; then
-    ARG_LIST="${ARG_LIST} -l \"${INPUT_LABEL}\""
+    ARG_LIST+=("-l \"${INPUT_LABEL}\"")
   fi
   if [[ -n "${INPUT_MILESTONE}" ]]; then
-    ARG_LIST="${ARG_LIST} -M \"${INPUT_MILESTONE}\""
+    ARG_LIST+=("-M \"${INPUT_MILESTONE}\"")
   fi
   if [[ "${INPUT_DRAFT}" ==  "true" ]]; then
-    ARG_LIST="${ARG_LIST} -d"
+    ARG_LIST+=("-d")
   fi
 else
   echo "${TEMPLATE}" > /tmp/template
@@ -156,8 +161,7 @@ if [[ -z "${PR_NUMBER}" ]]; then
   echo -e "\nCreating pull request"
   # shellcheck disable=SC2016
   # shellcheck disable=SC2001
-  ARG_LIST=$(echo "${ARG_LIST}" | sed 's/\`/\\`/g') # fix for '`' marks in template
-  COMMAND="hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ${ARG_LIST}"
+  COMMAND="hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ${ARG_LIST[@]}"
   echo -e "Running: ${COMMAND}"
   URL=$(sh -c "${COMMAND}")
   # shellcheck disable=SC2181
