@@ -133,10 +133,6 @@ if [[ -z "${PR_NUMBER}" ]]; then
   else
     TITLE=$(git log -1 --pretty=%s | head -1)
   fi
-  # shellcheck disable=SC2001
-  TITLE=$(echo -e "${TITLE}" | sed 's/\`/\\`/g') # fix for '`' marks in title
-  # shellcheck disable=SC2001
-  TEMPLATE=$(echo -e "${TEMPLATE}" | sed 's/\`/\\`/g') # fix for '`' marks in template
   ARG_LIST=()
   ARG_LIST+=("-m \"${TITLE}\"")
   ARG_LIST+=("-m \"${TEMPLATE}\"")
