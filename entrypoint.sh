@@ -134,8 +134,7 @@ if [[ -z "${PR_NUMBER}" ]]; then
     TITLE=$(git log -1 --pretty=%s | head -1)
   fi
   ARG_LIST=()
-  ARG_LIST+=("-m \"${TITLE}\"")
-  ARG_LIST+=("-m \"${TEMPLATE}\"")
+  ARG_LIST+=("-F /tmp/template")
   if [[ -n "${INPUT_REVIEWER}" ]]; then
     ARG_LIST+=("-r \"${INPUT_REVIEWER}\"")
   fi
@@ -157,11 +156,13 @@ fi
 
 if [[ -z "${PR_NUMBER}" ]]; then
   echo -e "\nCreating pull request"
+  echo -e "${TITLE}" > /tmp/template
+  echo -e "\n${TEMPLATE}" >> /tmp/template
+  echo -e "\nTemplate:"
+  cat /tmp/template
   # shellcheck disable=SC2016
   COMMAND="hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ${ARG_LIST[@]}"
-  # shellcheck disable=SC2001
-  COMMAND=$(echo -e "${COMMAND}" | sed 's/\`/\\`/g')
-  echo -e "Running: ${COMMAND}"
+  echo -e "\nRunning: ${COMMAND}"
   URL=$(sh -c "${COMMAND}")
   # shellcheck disable=SC2181
   if [[ "$?" != "0" ]]; then RET_CODE=1; fi
