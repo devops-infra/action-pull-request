@@ -1,5 +1,5 @@
 # Use a clean tiny image to store artifacts in
-FROM alpine:3.15.4
+FROM ubuntu:jammy-20220404
 
 # Labels for http://label-schema.org/rc1/#build-time-labels
 # And for https://github.com/opencontainers/image-spec/blob/master/annotations.md
@@ -46,16 +46,21 @@ LABEL \
 COPY entrypoint.sh /
 
 # Install needed packages
-RUN set -eux ;\
-  chmod +x /entrypoint.sh ;\
-  apk update --no-cache ;\
-  apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing hub~=2.14.2 ;\
-  apk add --no-cache \
-    bash~=5.1.16 \
-    git~=2.34.2 \
-    jq~=1.6 ;\
-  rm -rf /var/cache/* ;\
-  rm -rf /root/.cache/*
+SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
+# hadolint ignore=DL3008
+RUN chmod +x /entrypoint.sh ;\
+  apt-get update -y ;\
+  apt-get install --no-install-recommends -y \
+    gpg-agent \
+    software-properties-common ;\
+  add-apt-repository ppa:git-core/ppa ;\
+  apt-get update -y ;\
+  apt-get install --no-install-recommends -y \
+    git \
+    hub \
+    jq ;\
+  apt-get clean ;\
+  rm -rf /var/lib/apt/lists/*
 
 # Finish up
 CMD ["hub version"]
