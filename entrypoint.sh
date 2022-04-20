@@ -36,7 +36,7 @@ done
 if [[ -z "${INPUT_GITHUB_TOKEN}" ]]; then
   # shellcheck disable=SC2016
   MESSAGE='Missing input "github_token: ${{ secrets.GITHUB_TOKEN }}".'
-  echo "[ERROR] ${MESSAGE}"
+  echo -e "[ERROR] ${MESSAGE}"
   exit 1
 fi
 
@@ -129,12 +129,14 @@ TEMPLATE=$(echo -e "${TEMPLATE}" | sed 's|\^HaSz\^|#|g' | sed ':a;N;$!ba; s|\^No
 if [[ -z "${PR_NUMBER}" ]]; then
   echo -e "\nSetting all arguments..."
   if [[ -n "${INPUT_TITLE}" ]]; then
-    TITLE=$(echo "${INPUT_TITLE}" | head -1)
+    TITLE=$(echo -e "${INPUT_TITLE}" | head -1)
   else
     TITLE=$(git log -1 --pretty=%s | head -1)
   fi
   # shellcheck disable=SC2001
-  TEMPLATE=$(echo "${TEMPLATE}" | sed 's/\`/\\`/g') # fix for '`' marks in template
+  TITLE=$(echo -e "${TITLE}" | sed 's/\`/\\`/g') # fix for '`' marks in title
+  # shellcheck disable=SC2001
+  TEMPLATE=$(echo -e "${TEMPLATE}" | sed 's/\`/\\`/g') # fix for '`' marks in template
   ARG_LIST=()
   ARG_LIST+=("-m \"${TITLE}\"")
   ARG_LIST+=("-m \"${TEMPLATE}\"")
@@ -154,7 +156,7 @@ if [[ -z "${PR_NUMBER}" ]]; then
     ARG_LIST+=("-d")
   fi
 else
-  echo "${TEMPLATE}" > /tmp/template
+  echo -e "${TEMPLATE}" > /tmp/template
 fi
 
 if [[ -z "${PR_NUMBER}" ]]; then
