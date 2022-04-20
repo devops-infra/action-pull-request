@@ -41,11 +41,11 @@ if [[ -z "${INPUT_GITHUB_TOKEN}" ]]; then
 fi
 
 echo -e "\nSetting GitHub credentials..."
-git remote set-url origin "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}"
 git config --global --add safe.directory "${GITHUB_WORKSPACE}"
 git config --global --add safe.directory /github/workspace
 sudo git config --global --add safe.directory "${GITHUB_WORKSPACE}"
 sudo git config --global --add safe.directory /github/workspace
+git remote set-url origin "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}"
 git config --global user.name "${GITHUB_ACTOR}"
 git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 # Needed for hub binary
