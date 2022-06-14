@@ -60,6 +60,10 @@ inputs:
     description: List of users to ignore, coma separated
     required: false
     default: "dependabot"
+  check_diff:
+    description: Whether to check if files differ before creating a PR
+    required: false
+    default: "true"
 outputs:
   url:
     description: Pull request URL.
