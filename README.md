@@ -37,7 +37,7 @@ Features:
 
 ```yaml
     - name: Run the Action
-      uses: devops-infra/action-pull-request@v0.4.2
+      uses: devops-infra/action-pull-request@v0.5.0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         source_branch: development
@@ -118,7 +118,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
       - name: Create pull request
-        uses: devops-infra/action-pull-request@v0.4.2
+        uses: devops-infra/action-pull-request@v0.5.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           title: Automatic pull request
@@ -140,7 +140,7 @@ jobs:
           fetch-depth: 0
       - name: Run the Action
         if: startsWith(github.ref, 'refs/heads/feature')
-        uses: devops-infra/action-pull-request@v0.4.2
+        uses: devops-infra/action-pull-request@v0.5.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           title: ${{ github.event.commits[0].message }}
