@@ -12,7 +12,7 @@ Features:
 * Can assign `assignee`, `reviewer`, one or more `label`, a `milestone` or mark it as a `draft`
 * Can replace any `old_string` inside a pull request template with a `new_string`. Or put commits' subjects in place of `old_string`.
 * When `get_diff` is `true` will add list of commits in place of `<!-- Diff commits -->` and list of modified files in place of `<!-- Diff files -->` in a pull request template.
-
+* When `allow_no_diff` is set to true will continue execution and create pull request even if both branches have no differences, e.g. having only a merge commit.
 
 ## Badge swag
 [![Master branch](https://github.com/devops-infra/action-pull-request/workflows/Master%20branch/badge.svg)](https://github.com/devops-infra/action-pull-request/actions?query=workflow%3A%22Master+branch%22)
@@ -54,16 +54,16 @@ Features:
         new_string: "** Automatic pull request**"
         get_diff: true
         ignore_users: "dependabot"
-        check_diff: true
+        allow_no_diff: false
 ```
 
 
 | Input Variable | Required | Default                       | Description                                                                                                              |
 | -------------- | -------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | github_token   | Yes      | `""`                          | GitHub token `${{ secrets.GITHUB_TOKEN }}`                                                                               |
+| allow_no_diff  | No       | `false`                       | Allows to continue on merge commits with no diffs.                                                                       |
 | assignee       | No       | `""`                          | Assignee's usernames.                                                                                                    |
 | body           | No       | *list of commits*             | Pull request body.                                                                                                       |
-| check_diff     | No       | `true`                        | Whether to check if files differ before creating a PR.                                                                   |
 | draft          | No       | `false`                       | Whether to mark it as a draft.                                                                                           |
 | get_diff       | No       | `false`                       | Whether to replace predefined comments with differences between branches - see details below.                            |
 | ignore_users   | No       | `"dependabot"`                | List of users to ignore, coma separated.                                                                                 |

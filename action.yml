@@ -60,10 +60,10 @@ inputs:
     description: List of users to ignore, coma separated
     required: false
     default: "dependabot"
-  check_diff:
-    description: Whether to check if files differ before creating a PR
+  allow_no_diff:
+    description: Allows to continue on merge commits with no diffs
     required: false
-    default: "true"
+    default: "false"
 outputs:
   url:
     description: Pull request URL.
