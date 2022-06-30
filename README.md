@@ -54,6 +54,7 @@ Features:
         new_string: "** Automatic pull request**"
         get_diff: true
         ignore_users: "dependabot"
+        check_diff: true
 ```
 
 
@@ -62,6 +63,7 @@ Features:
 | github_token   | Yes      | `""`                          | GitHub token `${{ secrets.GITHUB_TOKEN }}`                                                                               |
 | assignee       | No       | `""`                          | Assignee's usernames.                                                                                                    |
 | body           | No       | *list of commits*             | Pull request body.                                                                                                       |
+| check_diff     | No       | `true`                        | Whether to check if files differ before creating a PR.                                                                   |
 | draft          | No       | `false`                       | Whether to mark it as a draft.                                                                                           |
 | get_diff       | No       | `false`                       | Whether to replace predefined comments with differences between branches - see details below.                            |
 | ignore_users   | No       | `"dependabot"`                | List of users to ignore, coma separated.                                                                                 |
