@@ -12,7 +12,7 @@ Features:
 * Can assign `assignee`, `reviewer`, one or more `label`, a `milestone` or mark it as a `draft`
 * Can replace any `old_string` inside a pull request template with a `new_string`. Or put commits' subjects in place of `old_string`.
 * When `get_diff` is `true` will add list of commits in place of `<!-- Diff commits -->` and list of modified files in place of `<!-- Diff files -->` in a pull request template.
-
+* When `allow_no_diff` is set to true will continue execution and create pull request even if both branches have no differences, e.g. having only a merge commit.
 
 ## Badge swag
 [![Master branch](https://github.com/devops-infra/action-pull-request/workflows/Master%20branch/badge.svg)](https://github.com/devops-infra/action-pull-request/actions?query=workflow%3A%22Master+branch%22)
@@ -37,7 +37,7 @@ Features:
 
 ```yaml
     - name: Run the Action
-      uses: devops-infra/action-pull-request@v0.4.2
+      uses: devops-infra/action-pull-request@v0.5.0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         source_branch: development
@@ -54,12 +54,14 @@ Features:
         new_string: "** Automatic pull request**"
         get_diff: true
         ignore_users: "dependabot"
+        allow_no_diff: false
 ```
 
 
 | Input Variable | Required | Default                       | Description                                                                                                              |
 | -------------- | -------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | github_token   | Yes      | `""`                          | GitHub token `${{ secrets.GITHUB_TOKEN }}`                                                                               |
+| allow_no_diff  | No       | `false`                       | Allows to continue on merge commits with no diffs.                                                                       |
 | assignee       | No       | `""`                          | Assignee's usernames.                                                                                                    |
 | body           | No       | *list of commits*             | Pull request body.                                                                                                       |
 | draft          | No       | `false`                       | Whether to mark it as a draft.                                                                                           |
@@ -116,7 +118,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
       - name: Create pull request
-        uses: devops-infra/action-pull-request@v0.4.2
+        uses: devops-infra/action-pull-request@v0.5.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           title: Automatic pull request
@@ -138,7 +140,7 @@ jobs:
           fetch-depth: 0
       - name: Run the Action
         if: startsWith(github.ref, 'refs/heads/feature')
-        uses: devops-infra/action-pull-request@v0.4.2
+        uses: devops-infra/action-pull-request@v0.5.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           title: ${{ github.event.commits[0].message }}

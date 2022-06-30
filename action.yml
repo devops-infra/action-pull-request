@@ -60,12 +60,16 @@ inputs:
     description: List of users to ignore, coma separated
     required: false
     default: "dependabot"
+  allow_no_diff:
+    description: Allows to continue on merge commits with no diffs
+    required: false
+    default: "false"
 outputs:
   url:
     description: Pull request URL.
 runs:
   using: docker
-  image: docker://devopsinfra/action-pull-request:v0.4.2
+  image: docker://devopsinfra/action-pull-request:v0.5.0
   env:
     GITHUB_TOKEN: ${{ inputs.github_token }}
 branding:

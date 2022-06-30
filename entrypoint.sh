@@ -20,6 +20,7 @@ echo "  get_diff: ${INPUT_GET_DIFF}"
 echo "  old_string: ${INPUT_OLD_STRING}"
 echo "  new_string: ${INPUT_NEW_STRING}"
 echo "  ignore_users: ${INPUT_IGNORE_USERS}"
+echo "  allow_no_diff: ${INPUT_ALLOW_NO_DIFF}"
 
 # Skip whole script to not cause errors
 IFS=',' read -r -a IGNORE_USERS <<< "${INPUT_IGNORE_USERS}"
@@ -67,8 +68,12 @@ fi
 
 echo -e "\nComparing branches by diff..."
 if [[ -z $(git diff "remotes/origin/${TARGET_BRANCH}...remotes/origin/${SOURCE_BRANCH}") ]]; then
-  echo -e "\n[INFO] Both branches are the same. No action needed."
-  exit 0
+  if [[ "${INPUT_ALLOW_NO_DIFF}" == "true" ]]; then
+    echo -e "\n[INFO] Both branches are the same. Continuing."
+  else
+    echo -e "\n[INFO] Both branches are the same. No action needed."
+    exit 0
+  fi
 fi
 
 # sed has problems with putting multi-line strings in the next steps, and later we use # for sed
