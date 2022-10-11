@@ -96,7 +96,7 @@ GIT_DIFF=$(git diff --compact-summary --no-color "origin/${TARGET_BRANCH}...orig
 GIT_DIFF=$(echo -e "${GIT_DIFF}" | sed 's|#|^HaSz^|g' | sed ':a;N;$!ba; s/\n/^NowALiNiA^/g')
 
 echo -e "\nSetting template..."
-PR_NUMBER=$(hub pr list --head "${SOURCE_BRANCH}" --format '%I')
+PR_NUMBER=$(hub pr list --base "${TARGET_BRANCH}" --head "${SOURCE_BRANCH}" --format '%I')
 if [[ -z "${PR_NUMBER}" ]]; then
   if [[ -n "${INPUT_TEMPLATE}" ]]; then
     TEMPLATE=$(cat "${INPUT_TEMPLATE}")
