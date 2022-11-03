@@ -165,7 +165,7 @@ if [[ -z "${PR_NUMBER}" ]]; then
   echo -e "\n${TEMPLATE}" >> /tmp/template
   echo -e "\nTemplate:"
   cat /tmp/template
-  # shellcheck disable=SC2016
+  # shellcheck disable=SC2016,SC2124
   COMMAND="hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ${ARG_LIST[@]}"
   echo -e "\nRunning: ${COMMAND}"
   URL=$(sh -c "${COMMAND}")
@@ -181,7 +181,10 @@ else
 fi
 
 # Finish
-echo "::set-output name=url::${URL}"
+{
+  echo "url=${URL}"
+  echo "pr_number=${PR_NUMBER}"
+} >> "$GITHUB_OUTPUT"
 if [[ ${RET_CODE} != "0" ]]; then
   echo -e "\n[ERROR] Check log for errors."
   exit 1
