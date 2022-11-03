@@ -78,9 +78,10 @@ Features:
 | title          | No       | *subject of the first commit* | Pull request title.                                                                                                      |
 
 
-| Outputs | Description      |
-| ------- | ---------------- |
-| url     | Pull request URL |
+| Outputs   | Description                   |
+| --------- | ----------------------------- |
+| url       | Pull request URL              |
+| pr_number | Number of GitHub pull request |
 
 
 ### How get_diff works
