@@ -113,6 +113,7 @@ jobs:
           get_diff: true
 
       - name: Create pull request - test (conditional)
+        id: test
         if: startsWith(github.ref, 'refs/heads/test')
         uses: devops-infra/action-pull-request@v0.5.3
         with:
@@ -133,3 +134,6 @@ jobs:
           label: feature
           template: .tmp/PULL_REQUEST_TEMPLATE.md
           get_diff: true
+
+      - name: pr number
+        run: echo pr ${{ steps.test.outputs.pr_number }}
