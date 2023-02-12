@@ -58,6 +58,7 @@ RUN chmod +x /entrypoint.sh ;\
   apt-get install --no-install-recommends -y \
     git \
     hub \
+    github-cli \
     jq ;\
   apt-get clean ;\
   rm -rf /var/lib/apt/lists/*
