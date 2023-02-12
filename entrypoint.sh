@@ -169,9 +169,9 @@ if [[ -z "${PR_NUMBER}" ]]; then
   COMMAND="hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ${ARG_LIST[@]}"
   echo -e "\nRunning: ${COMMAND}"
   URL=$(sh -c "${COMMAND}")
-  PR_NUMBER=$(gh pr view --json number -q .number ${URL})
   # shellcheck disable=SC2181
   if [[ "$?" != "0" ]]; then RET_CODE=1; fi
+  PR_NUMBER=$(gh pr view --json number -q .number "${URL}")
 else
   echo -e "\nUpdating pull request"
   COMMAND="hub api --method PATCH repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER} --field 'body=@/tmp/template'"
