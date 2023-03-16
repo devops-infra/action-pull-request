@@ -1,5 +1,5 @@
 # Use a clean tiny image to store artifacts in
-FROM ubuntu:jammy-20230301
+FROM ubuntu:jammy-20230308
 
 # Labels for http://label-schema.org/rc1/#build-time-labels
 # And for https://github.com/opencontainers/image-spec/blob/master/annotations.md
