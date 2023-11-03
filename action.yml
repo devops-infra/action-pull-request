@@ -25,6 +25,10 @@ inputs:
     description: Pull request body
     required: false
     default: ""
+  body_file:
+    description: File to be used as pull request body
+    required: false
+    default: ""
   reviewer:
     description: Reviewer's username
     required: false
@@ -69,7 +73,7 @@ outputs:
     description: Pull request URL.
 runs:
   using: docker
-  image: docker://devopsinfra/action-pull-request:v0.5.5
+  image: docker://devopsinfra/action-pull-request:v0.6.0
   env:
     GITHUB_TOKEN: ${{ inputs.github_token }}
 branding:

@@ -11,6 +11,7 @@ echo "  target_branch: ${INPUT_TARGET_BRANCH}"
 echo "  title: ${INPUT_TITLE}"
 echo "  template: ${INPUT_TEMPLATE}"
 echo "  body: ${INPUT_BODY}"
+echo "  body_file: ${INPUT_BODY_FILE}"
 echo "  reviewer: ${INPUT_REVIEWER}"
 echo "  assignee: ${INPUT_ASSIGNEE}"
 echo "  label: ${INPUT_LABEL}"
@@ -174,7 +175,11 @@ if [[ -z "${PR_NUMBER}" ]]; then
   PR_NUMBER=$(gh pr view --json number -q .number "${URL}")
 else
   echo -e "\nUpdating pull request"
-  COMMAND="hub api --method PATCH repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER} --field 'body=@/tmp/template'"
+  if [[ -z "${INPUT_BODY_FILE}" ]]; then
+    COMMAND="hub api --method PATCH repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER} --field 'body=@/tmp/template'"
+  else
+    COMMAND="hub api --method PATCH repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER} --field 'body=@${GITHUB_WORKSPACE}/${INPUT_BODY_FILE}'"
+  fi
   echo -e "Running: ${COMMAND}"
   URL=$(sh -c "${COMMAND} | jq -r '.html_url'")
   # shellcheck disable=SC2181
