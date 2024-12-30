@@ -15,8 +15,10 @@ Features:
 * When `allow_no_diff` is set to true will continue execution and create pull request even if both branches have no differences, e.g. having only a merge commit.
 
 ## Badge swag
-[![Master branch](https://github.com/devops-infra/action-pull-request/workflows/Master%20branch/badge.svg)](https://github.com/devops-infra/action-pull-request/actions?query=workflow%3A%22Master+branch%22)
-[![Other branches](https://github.com/devops-infra/action-pull-request/workflows/Other%20branches/badge.svg)](https://github.com/devops-infra/action-pull-request/actions?query=workflow%3A%22Other+branches%22)
+<!--[![Master branch](https://github.com/devops-infra/action-pull-request/workflows/Master%20branch/badge.svg)](https://github.com/devops-infra/action-pull-request/actions?query=workflow%3A%22Master+branch%22)-->
+[![Master branch](https://github.com/devops-infra/action-pull-request/actions/workflows/PUSH-MASTER.yml/badge.svg)](https://github.com/devops-infra/action-pull-request/actions/workflows/PUSH-MASTER.yml)
+<!--[![Other branches](https://github.com/devops-infra/action-pull-request/workflows/Other%20branches/badge.svg)](https://github.com/devops-infra/action-pull-request/actions?query=workflow%3A%22Other+branches%22)-->
+[![Other branches](https://github.com/devops-infra/action-pull-request/actions/workflows/PUSH-OTHER.yml/badge.svg)](https://github.com/devops-infra/action-pull-request/actions/workflows/PUSH-OTHER.yml)
 <br>
 [
 ![GitHub repo](https://img.shields.io/badge/GitHub-devops--infra%2Faction--pull--request-blueviolet.svg?style=plastic&logo=github)
