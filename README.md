@@ -1,10 +1,15 @@
 # GitHub Action for creating Pull Requests
 
-**GitHub Action that will create a pull request from the current branch.**
+## GitHub Action that will create a pull request from the current branch.
+
+### Supporting `amd64` and `aarch64/arm64` images!
 
 Useful in combination with my other action [devops-infra/action-commit-push](https://github.com/devops-infra/action-commit-push).
 
-Dockerized as [devopsinfra/action-pull-request](https://hub.docker.com/repository/docker/devopsinfra/action-pull-request).
+Available in Docker Hub: [devopsinfra/action-pull-request:latest](https://hub.docker.com/repository/docker/devopsinfra/action-pull-request)
+<br>
+And GitHub Packages: [ghcr.io/devops-infra/action-pull-request/action-pull-request:latest](https://github.com/devops-infra/action-pull-request/packages)
+
 
 Features:
 * Creates pull request if triggered from a current branch or any specified by `source_branch` to a `target_branch`.
@@ -37,7 +42,7 @@ Features:
 
 ```yaml
     - name: Run the Action
-      uses: devops-infra/action-pull-request@v0.5.5
+      uses: devops-infra/action-pull-request@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         source_branch: development
@@ -119,7 +124,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
       - name: Create pull request
-        uses: devops-infra/action-pull-request@v0.5.5
+        uses: devops-infra/action-pull-request@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           title: Automatic pull request
@@ -136,12 +141,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@master
         with:
           fetch-depth: 0
       - name: Run the Action
         if: startsWith(github.ref, 'refs/heads/feature')
-        uses: devops-infra/action-pull-request@v0.5.5
+        uses: devops-infra/action-pull-request@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           title: ${{ github.event.commits[0].message }}

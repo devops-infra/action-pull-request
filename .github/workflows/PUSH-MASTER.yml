@@ -7,10 +7,10 @@ on:
 
 jobs:
   labels:
-    name: Update repo labels
-    runs-on: ubuntu-latest
+    name: Repo labels
+    runs-on: ubuntu-24.04-arm
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Download labels' config
@@ -26,33 +26,40 @@ jobs:
           yaml-file: .tmp/labels.yml
 
   lint:
-    name: Run linters
-    runs-on: ubuntu-latest
+    name: Linters
+    runs-on: ubuntu-24.04-arm
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Docker Lint
-        uses: luke142367/Docker-Lint-Action@v1.1.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Haskell Dockerfile Linter (Hadolint)
-        uses: brpaz/hadolint-action@v1.5.0
+      - name: Hadolint
+        uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: Dockerfile
 
   build_and_push:
-    name: Build and push images
+    name: Build & push
     needs: lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build Docker image and push to registry
+      - name: Docker Buildx
+        uses: docker/setup-buildx-action@v3.9.0
+        with:
+          install: true
+
+      - name: QEMU
+        uses: docker/setup-qemu-action@v3.4.0
+        with:
+          image: tonistiigi/binfmt:latest
+          platforms: amd64,arm64
+
+      - name: Build & push
         env:
+          DOCKER_BUILDKIT: 1
           DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TERM: xterm-256color
-        run: make build push
+        run: make push

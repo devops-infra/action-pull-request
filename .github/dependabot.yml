@@ -19,13 +19,3 @@ updates:
       - ChristophShyper
     labels:
       - automatic
-
-#  # Enable version updates for pip
-#  - package-ecosystem: pip
-#    directory: "/"
-#    schedule:
-#      interval: daily
-#    assignees:
-#      - ChristophShyper
-#    labels:
-#      - automatic
