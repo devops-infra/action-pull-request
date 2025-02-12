@@ -12,11 +12,11 @@ VERSION_PREFIX ?=
 # Other variables and constants
 CURRENT_BRANCH := $(shell echo $(GITHUB_REF) | sed 's/refs\/heads\///')
 GITHUB_SHORT_SHA := $(shell echo $(GITHUB_SHA) | cut -c1-7)
-DOCKER_USER_ID := christophshyper
+DOCKER_USERNAME := christophshyper
 DOCKER_ORG_NAME := devopsinfra
 DOCKER_IMAGE := action-pull-request
 DOCKER_NAME := $(DOCKER_ORG_NAME)/$(DOCKER_IMAGE)
-GITHUB_USER_ID := ChristophShyper
+GITHUB_USERNAME := ChristophShyper
 GITHUB_ORG_NAME := devops-infra
 GITHUB_NAME := ghcr.io/$(GITHUB_ORG_NAME)/$(DOCKER_IMAGE)
 BUILD_DATE := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -71,9 +71,9 @@ build: ## Build Docker images
 .PHONY: login
 login: ## Log into all registries
 	@echo -e "\n$(TXT_GREEN)Logging to: $(TXT_YELLOW)Docker Hub$(TXT_RESET)"
-	@echo $(DOCKER_TOKEN) | docker login -u $(DOCKER_USER_ID) --password-stdin
+	@echo $(DOCKER_TOKEN) | docker login -u $(DOCKER_USERNAME) --password-stdin
 	@echo -e "\n$(TXT_GREEN)Logging to: $(TXT_YELLOW)GitHub Packages$(TXT_RESET)"
-	@echo $(GITHUB_TOKEN) | docker login ghcr.io -u $(GITHUB_USER_ID) --password-stdin
+	@echo $(GITHUB_TOKEN) | docker login ghcr.io -u $(GITHUB_USERNAME) --password-stdin
 
 
 .PHONY: push

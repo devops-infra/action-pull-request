@@ -1,6 +1,4 @@
-# GitHub Action for creating Pull Requests
-
-## GitHub Action that will create a pull request from the current branch.
+# GitHub Action for creating Pull Requests in a repository
 
 ### Supporting `amd64` and `aarch64/arm64` images!
 
