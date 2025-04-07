@@ -65,7 +65,7 @@ jobs:
         run: make push
 
       - name: Docker Hub Description
-        uses: peter-evans/dockerhub-description@v4.0.0
+        uses: peter-evans/dockerhub-description@v4.0.2
         with:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
