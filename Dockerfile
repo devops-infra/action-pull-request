@@ -1,5 +1,5 @@
 # Use a clean tiny image to store artifacts in
-FROM ubuntu:24.10
+FROM ubuntu:25.10
 
 # Disable interactive mode
 ENV DEBIAN_FRONTEND noninteractive
@@ -43,7 +43,7 @@ ARG AUTHOR="Krzysztof Szyper / ChristophShyper / biotyk@mail.com"
 ARG HOMEPAGE="https://shyper.pro"
 ARG BUILD_DATE=2020-04-01T00:00:00Z
 ARG VCS_REF=abcdef1
-ARG VERSION=v0.0
+ARG VERSION
 LABEL \
   com.github.actions.name="${NAME}" \
   com.github.actions.author="${AUTHOR}" \
