@@ -2,7 +2,7 @@
 phony: help
 
 # Release tag for the action
-VERSION := v0.6.0
+VERSION := $(or $(VERSION),$(shell git describe --tags --abbrev=0 2>/dev/null))
 
 # GitHub Actions bogus variables
 GITHUB_REF ?= refs/heads/null
@@ -12,12 +12,12 @@ VERSION_PREFIX ?=
 # Other variables and constants
 CURRENT_BRANCH := $(shell echo $(GITHUB_REF) | sed 's/refs\/heads\///')
 GITHUB_SHORT_SHA := $(shell echo $(GITHUB_SHA) | cut -c1-7)
-DOCKER_USERNAME := christophshyper
-DOCKER_ORG_NAME := devopsinfra
+DOCKER_USERNAME := $(or $(DOCKER_USERNAME),christophshyper)
+DOCKER_ORG_NAME := $(or $(DOCKER_ORG_NAME),devopsinfra)
 DOCKER_IMAGE := action-pull-request
 DOCKER_NAME := $(DOCKER_ORG_NAME)/$(DOCKER_IMAGE)
-GITHUB_USERNAME := ChristophShyper
-GITHUB_ORG_NAME := devops-infra
+GITHUB_USERNAME := $(or $(GITHUB_USERNAME),ChristophShyper)
+GITHUB_ORG_NAME := $(or $(GITHUB_ORG_NAME),devops-infra)
 GITHUB_NAME := ghcr.io/$(GITHUB_ORG_NAME)/$(DOCKER_IMAGE)
 BUILD_DATE := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 

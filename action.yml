@@ -52,6 +52,7 @@ inputs:
   new_string:
     description: New string for the replacement in the template
     required: false
+    default: ""
   get_diff:
     description: Whether to inject difference into template
     required: false
@@ -67,9 +68,11 @@ inputs:
 outputs:
   url:
     description: Pull request URL.
+  pr_number:
+    description: Pull request number.
 runs:
   using: docker
-  image: docker://devopsinfra/action-pull-request:v0.6.0
+  image: docker://devopsinfra/action-pull-request:latest
   env:
     GITHUB_TOKEN: ${{ inputs.github_token }}
 branding:
