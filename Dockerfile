@@ -43,7 +43,7 @@ ARG AUTHOR="Krzysztof Szyper / ChristophShyper / biotyk@mail.com"
 ARG HOMEPAGE="https://shyper.pro"
 ARG BUILD_DATE=2020-04-01T00:00:00Z
 ARG VCS_REF=abcdef1
-ARG VERSION=v0.0
+ARG VERSION
 LABEL \
   com.github.actions.name="${NAME}" \
   com.github.actions.author="${AUTHOR}" \
