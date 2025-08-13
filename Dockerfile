@@ -1,5 +1,5 @@
 # Use a clean tiny image to store artifacts in
-FROM ubuntu:24.10
+FROM ubuntu:25.10
 
 # Disable interactive mode
 ENV DEBIAN_FRONTEND noninteractive
