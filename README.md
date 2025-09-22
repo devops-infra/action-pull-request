@@ -154,6 +154,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Run the Action
         if: startsWith(github.ref, 'refs/heads/feature')
         uses: devops-infra/action-pull-request@v0.6

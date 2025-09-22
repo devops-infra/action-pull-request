@@ -3,7 +3,7 @@ name: Pull Request
 on:
   push:
     branches-ignore:
-      - master
+      - 'master'
       - 'dependabot**'
 
 jobs:
@@ -26,6 +26,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Extract branch name
         id: branch
