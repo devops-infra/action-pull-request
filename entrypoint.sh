@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -Eeuo pipefail
 
 # Return code
 RET_CODE=0
@@ -129,6 +129,7 @@ if [[ "${INPUT_GET_DIFF}" ==  "true" ]]; then
   TEMPLATE=$(echo -e "${TEMPLATE}" | sed ':a;N;$!ba; s#<!-- Diff files -->#<!-- Diff files - START -->\n'"${GIT_DIFF}"'\n<!-- Diff files - END -->#g')
   TEMPLATE=$(echo -e "${TEMPLATE}" | sed ':a;N;$!ba; s#<!-- Diff files - START -->.*<!-- Diff files - END -->#<!-- Diff files - START -->\n'"${GIT_DIFF}"'\n<!-- Diff files - END -->#g')
 fi
+#shellcheck disable=SC2016
 TEMPLATE=$(echo -e "${TEMPLATE}" | sed 's|\^HaSz\^|#|g' | sed '1h;2,$H;$!d;g; s|\^NowALiNiA\^|\n|g')
 
 if [[ -z "${PR_NUMBER}" ]]; then

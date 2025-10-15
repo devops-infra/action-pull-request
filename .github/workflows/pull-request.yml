@@ -3,8 +3,13 @@ name: Pull Request
 on:
   push:
     branches-ignore:
-      - 'master'
-      - 'dependabot**'
+      - master
+      - dependabot/**
+
+permissions:
+  contents: read
+  packages: write
+  pull-requests: write
 
 jobs:
   lint:
@@ -13,55 +18,56 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-
-      - name: Hadolint
-        uses: hadolint/hadolint-action@v3.3.0
         with:
-          dockerfile: Dockerfile
+          fetch-depth: 0
+          fetch-tags: true
 
-  build-test:
-    name: Push test
-    if: ${{ !startsWith(github.ref, 'refs/heads/doc') && !startsWith(github.ref, 'refs/heads/test') }}
+      - name: Install Task
+        uses: arduino/setup-task@v2.0.0
+        with:
+          version: 3.x
+
+      - name: Run linters
+        run: task lint
+
+  build-and-push:
+    name: Build and Push test
     runs-on: ubuntu-24.04-arm
+    needs: [lint]
     steps:
       - name: Checkout
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
+          fetch-tags: true
 
-      - name: Extract branch name
-        id: branch
-        run: |
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            BRANCH_NAME="${{ github.head_ref }}"
-          else
-            BRANCH_NAME="${GITHUB_REF#refs/heads/}"
-          fi
-          # Sanitize branch name for Docker tag (replace special chars with -)
-          SANITIZED_BRANCH=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9._-]/-/g' | tr '[:upper:]' '[:lower:]')
-          echo "name=$SANITIZED_BRANCH" >> $GITHUB_OUTPUT
-          echo "Branch name: $BRANCH_NAME -> Docker tag: test-$SANITIZED_BRANCH"
+      - name: Install Task
+        uses: arduino/setup-task@v2.0.0
+        with:
+          version: 3.x
 
-      - name: Docker Buildx
+      - name: Install Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
           install: true
 
-      - name: QEMU
+      - name: Install QEMU
         uses: docker/setup-qemu-action@v3
         with:
           image: tonistiigi/binfmt:latest
           platforms: amd64,arm64
 
+      - name: Get Docker commands
+        run: task docker:cmds
+
       - name: Build and push test image
         env:
-          DOCKER_BUILDKIT: 1
           DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ steps.branch.outputs.name }}
-          VERSION_PREFIX: test-
-          TERM: xterm-256color
-        run: make push
+        run: task docker:push
+
+      - name: Inspect image
+        run: task docker:push:inspect
 
   pull-request:
     name: Pull Request
@@ -71,12 +77,16 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
+          fetch-tags: true
 
-      - name: Template
+      - name: Install Task
+        uses: arduino/setup-task@v2.0.0
+        with:
+          version: 3.x
+
+      - name: Get template
         shell: bash
-        run: |
-          mkdir -p .tmp
-          curl -LsS https://raw.githubusercontent.com/devops-infra/.github/master/PULL_REQUEST_TEMPLATE.md -o .tmp/PULL_REQUEST_TEMPLATE.md
+        run: task git:get-pr-template
 
       - name: Create Pull Request
         uses: devops-infra/action-pull-request@v0.6
