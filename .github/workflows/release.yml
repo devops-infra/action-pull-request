@@ -4,9 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g., v1.2.3)'
+        description: Release version (e.g., v1.2.3)
         required: true
         type: string
+        default: __TAKEN_FROM_ACTION_YML__
+
+permissions:
+  contents: write
+  packages: write
 
 jobs:
   release:
@@ -17,109 +22,69 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
+          fetch-tags: true
 
-      - name: Validate version format
-        run: |
-          VERSION="${{ github.event.inputs.version }}"
-          if [[ ! $VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "❌ Invalid version format. Use format: v1.2.3"
-            exit 1
-          fi
-          echo "✅ Version format is valid: $VERSION"
+      - name: Install Task
+        uses: arduino/setup-task@v2.0.0
+        with:
+          version: 3.x
 
-      - name: Check if version already exists
-        run: |
-          VERSION="${{ github.event.inputs.version }}"
-          if git tag -l | grep -q "^${VERSION}$"; then
-            echo "❌ Version $VERSION already exists"
-            exit 1
-          fi
-          echo "✅ Version $VERSION is available"
-
-      - name: Create and push full tag
-        run: |
-          VERSION="${{ github.event.inputs.version }}"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "$VERSION" -m "$VERSION"
-          git push origin "$VERSION"
-
-      - name: Extract version components
+      - name: Create and push git tags
         id: version
+        env:
+          VERSION_OVERRIDE: ${{ github.event.inputs.version }}
+          VERSION_SUFFIX: ""
         run: |
-          VERSION="${{ github.event.inputs.version }}"
-          # Remove 'v' prefix and split version
-          VERSION_NO_V="${VERSION#v}"
-          MAJOR=$(echo "$VERSION_NO_V" | cut -d. -f1)
-          MINOR=$(echo "$VERSION_NO_V" | cut -d. -f2)
-          
-          echo "major=v$MAJOR" >> $GITHUB_OUTPUT
-          echo "minor=v$MAJOR.$MINOR" >> $GITHUB_OUTPUT
-          echo "✅ Extracted versions - Major: v$MAJOR, Minor: v$MAJOR.$MINOR"
+          task git:set-config
+          task version:tag-release
+          echo "REL_VERSION=$(task version:get)" >> "$GITHUB_OUTPUT"
 
-      - name: Create/update major version tag
-        run: |
-          MAJOR_TAG="${{ steps.version.outputs.major }}"
-          
-          # Check if major tag exists
-          if git tag -l | grep -q "^${MAJOR_TAG}$"; then
-            echo "ℹ️ Major tag $MAJOR_TAG exists, updating it"
-            git tag -d "$MAJOR_TAG" || true
-            git push origin ":refs/tags/$MAJOR_TAG" || true
-          else
-            echo "✅ Major tag $MAJOR_TAG is new"
-          fi
-          
-          # Create/update major tag
-          git tag -a "$MAJOR_TAG" -m "Major version $MAJOR_TAG"
-          git push origin "$MAJOR_TAG"
-          echo "✅ Created/updated major tag: $MAJOR_TAG"
-
-      - name: Create/update minor version tag
-        run: |
-          MINOR_TAG="${{ steps.version.outputs.minor }}"
-          
-          # Check if minor tag exists
-          if git tag -l | grep -q "^${MINOR_TAG}$"; then
-            echo "ℹ️ Minor tag $MINOR_TAG exists, updating it"
-            git tag -d "$MINOR_TAG" || true
-            git push origin ":refs/tags/$MINOR_TAG" || true
-          else
-            echo "✅ Minor tag $MINOR_TAG is new"
-          fi
-          
-          # Create/update minor tag
-          git tag -a "$MINOR_TAG" -m "Minor version $MINOR_TAG"
-          git push origin "$MINOR_TAG"
-          echo "✅ Created/updated minor tag: $MINOR_TAG"
-
-      - name: Docker Buildx
+      - name: Install Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
           install: true
 
-      - name: QEMU
+      - name: Install QEMU
         uses: docker/setup-qemu-action@v3
         with:
           image: tonistiigi/binfmt:latest
           platforms: amd64,arm64
 
+      - name: Get Docker commands
+        env:
+          VERSION_OVERRIDE: ${{ github.event.inputs.version }}
+          VERSION_SUFFIX: ""
+        run: task docker:cmds
+
       - name: Build and push Docker images
         env:
-          DOCKER_BUILDKIT: 1
           DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ github.event.inputs.version }}
-          TERM: xterm-256color
-        run: make push
+          VERSION_OVERRIDE: ${{ github.event.inputs.version }}
+          VERSION_SUFFIX: ""
+        run: task docker:push
+
+      - name: Inspect image
+        env:
+          VERSION_OVERRIDE: ${{ github.event.inputs.version }}
+          VERSION_SUFFIX: ""
+        run: task docker:push:inspect
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.inputs.version }}
-          name: ${{ github.event.inputs.version }}
+          tag_name: ${{ steps.version.outputs.REL_VERSION }}
+          name: ${{ steps.version.outputs.REL_VERSION }}
           draft: false
           prerelease: false
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Docker Hub description
+        uses: peter-evans/dockerhub-description@v5
+        with:
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+          repository: ${{ vars.DOCKER_ORG_NAME }}/${{ github.event.repository.name }}
+          short-description: ${{ github.event.repository.description }}

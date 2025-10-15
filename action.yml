@@ -1,5 +1,5 @@
 name: GitHub Action for creating Pull Requests
-author: Krzysztof Szyper / ChristophShyper / biotyk@mail.com
+author: Krzysztof Szyper / ChristophShyper / shyper.pro
 description: GitHub Action that will create a pull request from the current branch
 inputs:
   github_token:
@@ -60,19 +60,19 @@ inputs:
   ignore_users:
     description: List of users to ignore, coma separated
     required: false
-    default: "dependabot"
+    default: dependabot
   allow_no_diff:
     description: Allows to continue on merge commits with no diffs
     required: false
     default: "false"
 outputs:
   url:
-    description: Pull request URL.
+    description: Pull request URL
   pr_number:
-    description: Pull request number.
+    description: Pull request number
 runs:
   using: docker
-  image: docker://devopsinfra/action-pull-request:latest
+  image: docker://devopsinfra/action-pull-request:v1.0.0
   env:
     GITHUB_TOKEN: ${{ inputs.github_token }}
 branding:

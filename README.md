@@ -6,11 +6,13 @@
 
 
 ## 📦 Available on
-Dockerized as [devopsinfra/action-pull-request](https://hub.docker.com/repository/docker/devopsinfra/action-pull-request).
-Built from [ghcr.io/devops-infra//action-pull-request](https://github.com/devops-infra/pkgs/container/template-action).
+
+- **Docker Hub:** [devopsinfra/action-pull-request:latest](https://hub.docker.com/repository/docker/devopsinfra/action-pull-request)
+- **GitHub Packages:** [ghcr.io/devops-infra/action-pull-request:latest](https://github.com/devops-infra/action-pull-request/pkgs/container/action-pull-request)
 
 
 ## ✨ Features
+
 * Creates pull request if triggered from a current branch or any specified by `source_branch` to a `target_branch`
 * Title and body of a pull request can be specified with `title` and `body`
 * Can assign `assignee`, `reviewer`, one or more `label`, a `milestone` or mark it as a `draft`
@@ -20,17 +22,18 @@ Built from [ghcr.io/devops-infra//action-pull-request](https://github.com/devops
 * Supports both `amd64` and `arm64` architectures
 
 
-## Badge swag
+## 📊 Badges
+
 [
 ![GitHub repo](https://img.shields.io/badge/GitHub-devops--infra%2Faction--pull--request-blueviolet.svg?style=plastic&logo=github)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/devops-infra/action-pull-request?color=blueviolet&label=Code%20size&style=plastic&logo=github)
 ![GitHub last commit](https://img.shields.io/github/last-commit/devops-infra/action-pull-request?color=blueviolet&logo=github&style=plastic&label=Last%20commit)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/devops-infra/action-pull-request?color=blueviolet&label=Code%20size&style=plastic&logo=github)
 ![GitHub license](https://img.shields.io/github/license/devops-infra/action-pull-request?color=blueviolet&logo=github&style=plastic&label=License)
 ](https://github.com/devops-infra/action-pull-request "shields.io")
 <br>
 [
 ![DockerHub](https://img.shields.io/badge/DockerHub-devopsinfra%2Faction--pull--request-blue.svg?style=plastic&logo=docker)
-![Docker version](https://img.shields.io/docker/v/devopsinfra/action-pull-request?color=blue&label=Version&logo=docker&style=plastic)
+![Docker version](https://img.shields.io/docker/v/devopsinfra/action-pull-request?color=blue&label=Version&logo=docker&style=plastic&sort=semver)
 ![Image size](https://img.shields.io/docker/image-size/devopsinfra/action-pull-request/latest?label=Image%20size&style=plastic&logo=docker)
 ![Docker Pulls](https://img.shields.io/docker/pulls/devopsinfra/action-pull-request?color=blue&label=Pulls&logo=docker&style=plastic)
 ](https://hub.docker.com/r/devopsinfra/action-pull-request "shields.io")
@@ -40,7 +43,7 @@ Built from [ghcr.io/devops-infra//action-pull-request](https://github.com/devops
 
 ```yaml
     - name: Run the Action
-      uses: devops-infra/action-pull-request@v0.6
+      uses: devops-infra/action-pull-request@v1.0.0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         source_branch: development
@@ -63,32 +66,32 @@ Built from [ghcr.io/devops-infra//action-pull-request](https://github.com/devops
 
 ### 🔧 Input Parameters
 
-| Input Variable | Required | Default                       | Description                                                                                                             |
-|----------------|----------|-------------------------------|-------------------------------------------------------------------------------------------------------------------------|
-| github_token   | **Yes**  | `""`                          | GitHub token `${{ secrets.GITHUB_TOKEN }}`                                                                              |
-| source_branch  | No       | *current branch*              | Name of the source branch                                                                                               |
-| target_branch  | No       | `master`                      | Name of the target branch. Change it if you use `main`                                                                  |
-| title          | No       | *subject of the first commit* | Pull request title                                                                                                      |
-| template       | No       | `""`                          | Template file location                                                                                                  |
-| body           | No       | *list of commits*             | Pull request body                                                                                                       |
-| reviewer       | No       | `""`                          | Reviewer's username                                                                                                     |
-| assignee       | No       | `""`                          | Assignee's usernames                                                                                                    |
-| label          | No       | `""`                          | Labels to apply, comma separated                                                                                        |
-| milestone      | No       | `""`                          | Milestone                                                                                                               |
-| draft          | No       | `false`                       | Whether to mark it as a draft                                                                                           |
-| old_string     | No       | `""`                          | Old string for the replacement in the template                                                                          |
-| new_string     | No       | `""`                          | New string for the replacement in the template. If not specified, but `old_string` was, it will gather commits subjects |
-| get_diff       | No       | `false`                       | Whether to replace predefined comments with differences between branches - see details below                            |
-| ignore_users   | No       | `"dependabot"`                | List of users to ignore, comma separated                                                                                |
-| allow_no_diff  | No       | `false`                       | Allows to continue on merge commits with no diffs                                                                       |
+| Input Variable  | Required | Default                       | Description                                                                                                             |
+|-----------------|----------|-------------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| `github_token`  | **Yes**  | `""`                          | GitHub token `${{ secrets.GITHUB_TOKEN }}`                                                                              |
+| `source_branch` | No       | *current branch*              | Name of the source branch                                                                                               |
+| `target_branch` | No       | `master`                      | Name of the target branch. Change it if you use `main`                                                                  |
+| `title`         | No       | *subject of the first commit* | Pull request title                                                                                                      |
+| `template`      | No       | `""`                          | Template file location                                                                                                  |
+| `body`          | No       | *list of commits*             | Pull request body                                                                                                       |
+| `reviewer`      | No       | `""`                          | Reviewer's username                                                                                                     |
+| `assignee`      | No       | `""`                          | Assignee's usernames                                                                                                    |
+| `label`         | No       | `""`                          | Labels to apply, comma separated                                                                                        |
+| `milestone`     | No       | `""`                          | Milestone                                                                                                               |
+| `draft`         | No       | `false`                       | Whether to mark it as a draft                                                                                           |
+| `old_string`    | No       | `""`                          | Old string for the replacement in the template                                                                          |
+| `new_string`    | No       | `""`                          | New string for the replacement in the template. If not specified, but `old_string` was, it will gather commits subjects |
+| `get_diff`      | No       | `false`                       | Whether to replace predefined comments with differences between branches - see details below                            |
+| `ignore_users`  | No       | `"dependabot"`                | List of users to ignore, comma separated                                                                                |
+| `allow_no_diff` | No       | `false`                       | Allows to continue on merge commits with no diffs                                                                       |
 
 
-### 🔧 Input Parameters
+### 📤 Outputs Parameters
 
-| Output    | Description                   |
-|-----------|-------------------------------|
-| url       | Pull request URL              |
-| pr_number | Number of GitHub pull request |
+| Output      | Description                   |
+|-------------|-------------------------------|
+| `url`       | Pull request URL              |
+| `pr_number` | Number of GitHub pull request |
 
 
 ### ➿ How get_diff works
@@ -119,7 +122,7 @@ Blue areas show fields that can be set in action configuration.
 Create pull request for non-master branches:
 
 ```yaml
-name: Run the Action on each commit
+name: Run the Action
 on:
   push:
     branches-ignore: master
@@ -128,21 +131,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
       - name: Create pull request
-        uses: devops-infra/action-pull-request@v0.6
+        uses: devops-infra/action-pull-request@v1.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           title: Automatic pull request
 ```
-
 
 ### 🔀 Advanced Example
 
 Use first commit as a title and part of body, add a label based on a branch name, add git differences in the template:
 
 ```yaml
-name: Run the Action on each commit
+name: Run the Action
 on:
   push:
     branches-ignore: master
@@ -151,13 +154,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Run the Action
         if: startsWith(github.ref, 'refs/heads/feature')
-        uses: devops-infra/action-pull-request@v0.6
+        uses: devops-infra/action-pull-request@v1.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           title: ${{ github.event.commits[0].message }}
@@ -169,26 +172,36 @@ jobs:
           get_diff: true
 ```
 
+### 🎯 Use specific version
 
-## 🏷️ Version Tags: vX, vX.Y, vX.Y.Z
+Run the Action with a specific version tag.
 
-This action supports three tag levels for flexible versioning:
+```yaml
+name: Run the Action
+on:
+  push:
+    branches-ignore: master
+jobs:
+  action-pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
 
-- **`vX`**: Always points to the latest patch of a major version (e.g., `v1` → `v1.2.3`).  
-  _Benefit: Get all latest fixes for a major version automatically._
+      - uses: devops-infra/action-pull-request@v1.0.0
+        id: Pin patch version
 
-- **`vX.Y`**: Always points to the latest patch of a minor version (e.g., `v1.2` → `v1.2.3`).  
-  _Benefit: Stay on a minor version, always up-to-date with bugfixes._
+      - uses: devops-infra/action-pull-request@v1.0
+        id: Pin minor version
 
-- **`vX.Y.Z`**: Fixed to a specific release (e.g., `v1.2.3`).  
-  _Benefit: Full reproducibility—never changes._
-
-**Use the tag depth that matches your stability needs.**
+      - uses: devops-infra/action-pull-request@v1
+        id: Pin major version
+```
 
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. Refer to the [CONTRIBUTING](https://github.com/devops-infra/.github/blob/master/CONTRIBUTING.md) for guidelines.
+Contributions are welcome! See [CONTRIBUTING](https://github.com/devops-infra/.github/blob/master/CONTRIBUTING.md).
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 
 ## 📄 License
@@ -199,5 +212,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 💬 Support
 
 If you have any questions or need help, please:
-- 📝 Create an [issue](https://github.com/devops-infra/template-action/issues)
+- 📝 Create an [issue](https://github.com/devops-infra/action-pull-request/issues)
 - 🌟 Star this repository if you find it useful!
