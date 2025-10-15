@@ -198,6 +198,11 @@ jobs:
 ```
 
 
+## 🔗 Related Actions
+
+- [devops-infra/action-commit-push](https://github.com/devops-infra/action-commit-push) - Commit and push changes to a git repository
+
+
 ## 🤝 Contributing
 
 Contributions are welcome! See [CONTRIBUTING](https://github.com/devops-infra/.github/blob/master/CONTRIBUTING.md).
