@@ -72,7 +72,7 @@ outputs:
     description: Pull request number
 runs:
   using: docker
-  image: docker://devopsinfra/action-pull-request:v1.0.0
+  image: docker://devopsinfra/action-pull-request:v1.0.1
   env:
     GITHUB_TOKEN: ${{ inputs.github_token }}
 branding:
