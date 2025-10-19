@@ -28,10 +28,12 @@ vars:
       else
         echo sed
       fi
+  PROJECT_DIR_NAME:
+    sh: basename "$PWD"
 
   # Container metadata
-  DOCKER_IMAGE: '{{.DOCKER_IMAGE | default "action-pull-request"}}'
-  GITHUB_REPO: '{{.GITHUB_REPO | default "action-pull-request" }}'
+  DOCKER_IMAGE: '{{.DOCKER_IMAGE | default .PROJECT_DIR_NAME}}'
+  GITHUB_REPO: '{{.GITHUB_REPO | default .PROJECT_DIR_NAME}}'
   DOCKER_ORG_NAME: '{{.DOCKER_ORG_NAME | default "devopsinfra"}}'
   GITHUB_ORG_NAME: '{{.GITHUB_ORG_NAME | default "devops-infra"}}'
   DOCKER_USERNAME: '{{.DOCKER_USERNAME | default "christophshyper"}}'
@@ -39,6 +41,33 @@ vars:
   DOCKER_NAME: '{{.DOCKER_ORG_NAME}}/{{.DOCKER_IMAGE}}'
   GITHUB_NAME: '{{.GITHUB_ORG_NAME}}/{{.GITHUB_REPO}}'
   GHRC_NAME: ghcr.io/{{.GITHUB_ORG_NAME}}/{{.GITHUB_REPO}}
+  LABEL_AUTHOR: '{{.LABEL_AUTHOR | default .AUTHOR_FROM_ACTION_YML}}'
+  LABEL_NAME: '{{.LABEL_NAME | default .NAME_FROM_ACTION_YML}}'
+  LABEL_DESCRIPTION: '{{.LABEL_DESCRIPTION | default .DESCRIPTION_FROM_ACTION_YML}}'
+  LABEL_REPO_URL: '{{ default (printf "https://github.com/%s/%s" .GITHUB_ORG_NAME .DOCKER_IMAGE) .LABEL_REPO_URL }}'
+  LABEL_DOCS_URL: >-
+    {{ default (printf "https://github.com/%s/%s/blob/%s/README.md" .GITHUB_ORG_NAME .DOCKER_IMAGE
+    .DEFAULT_BRANCH) .LABEL_DOCS_URL }}
+  LABEL_HOMEPAGE: '{{.LABEL_HOMEPAGE | default "https://shyper.pro"}}'
+  LABEL_VENDOR: '{{.LABEL_VENDOR | default "DevOps-Infra"}}'
+  LABEL_LICENSE: '{{.LABEL_LICENSE | default "MIT"}}'
+
+  # Action metadata
+  AUTHOR_FROM_ACTION_YML:
+    sh: |
+      awk -F":" '/^author:/ { $1=""; sub(/^[: ]+/, ""); gsub(/^\"|\"$/,"",$0); print $0; exit }' action.yml || true
+  NAME_FROM_ACTION_YML:
+    sh: |
+      awk -F":" '/^name:/ { $1=""; sub(/^[: ]+/, ""); gsub(/^\"|\"$/,"",$0); print $0; exit }' action.yml || true
+  DESCRIPTION_FROM_ACTION_YML:
+    sh: |
+      awk -F":" '/^description:/ { $1=""; sub(/^[: ]+/, ""); gsub(/^\"|\"$/,"",$0); print $0; exit }' action.yml || true
+  VERSION_FROM_ACTION_YML:
+    sh: 'grep "image: docker://{{.DOCKER_NAME}}:" action.yml | cut -d ":" -f 4'
+  MAJOR_FROM_ACTION_YML:
+    sh: echo "{{.VERSION_FROM_ACTION_YML}}" | awk -F\. '{print $1}'
+  MINOR_FROM_ACTION_YML:
+    sh: echo "{{.VERSION_FROM_ACTION_YML}}" | awk -F\. '{print $1"."$2}'
 
   # Build context
   CONTEXT: '{{.CONTEXT | default "."}}'
@@ -51,10 +80,6 @@ vars:
       curl --silent "https://api.github.com/repos/{{.GITHUB_ORG_NAME}}/{{.GITHUB_REPO}}/releases/latest" | \
         grep '"tag_name":' | \
         {{.SED}} -E 's/.*"([^"]+)".*/\1/'
-  LAST_MAJOR:
-    sh: echo "{{.LAST_RELEASE}}" | awk -F\. '{print $1}'
-  LAST_MINOR:
-    sh: echo "{{.LAST_RELEASE}}" | awk -F\. '{print $1"."$2}'
   VERSION_SUFFIX:
     sh: |
       if [ "${VERSION_SUFFIX+x}" = "x" ]; then
@@ -64,8 +89,6 @@ vars:
       fi
   VERSION_OVERRIDE:
     sh: echo "__TAKEN_FROM_ACTION_YML__"
-  VERSION_FROM_ACTION_YML:
-    sh: 'grep "image: docker://{{.DOCKER_NAME}}:" action.yml | cut -d ":" -f 4'
   VERSION:
     sh: |
       if [ "${VERSION_OVERRIDE}" = "__TAKEN_FROM_ACTION_YML__" ]; then
@@ -109,17 +132,6 @@ vars:
 
   # Labels for http://label-schema.org/rc1/#build-time-labels
   # And for https://github.com/opencontainers/image-spec/blob/master/annotations.md
-  LABEL_AUTHOR:
-    sh: grep -m1 "^author:" action.yml | sed 's/^author:[[:space:]]*//'
-  LABEL_NAME:
-    sh: grep -m1 "^name:" action.yml | sed 's/^name:[[:space:]]*//'
-  LABEL_DESCRIPTION:
-    sh: grep -m1 "^description:" action.yml | sed 's/^description:[[:space:]]*//'
-  LABEL_REPO_URL: '{{ printf "https://github.com/%s/%s" .GITHUB_ORG_NAME .DOCKER_IMAGE }}'
-  LABEL_DOCS_URL: '{{ printf "https://github.com/%s/%s/blob/%s/README.md" .GITHUB_ORG_NAME .DOCKER_IMAGE .DEFAULT_BRANCH }}'
-  LABEL_HOMEPAGE: https://shyper.pro
-  LABEL_VENDOR: DevOps-Infra
-  LABEL_LICENSE: MIT
   ANNOTATIONS: >-
     --annotation manifest:org.label-schema.schema-version="1.0"
     --annotation manifest:org.label-schema.build-date="{{.BUILD_DATE}}"

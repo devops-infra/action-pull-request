@@ -1,4 +1,4 @@
-name: Pull Request
+name: (Auto) Create Pull Request
 
 on:
   push:
@@ -31,7 +31,7 @@ jobs:
         run: task lint
 
   build-and-push:
-    name: Build and Push test
+    name: Build and push
     runs-on: ubuntu-24.04-arm
     needs: [lint]
     steps:
@@ -85,11 +85,10 @@ jobs:
           version: 3.x
 
       - name: Get template
-        shell: bash
         run: task git:get-pr-template
 
       - name: Create Pull Request
-        uses: devops-infra/action-pull-request@v0.6
+        uses: devops-infra/action-pull-request@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           assignee: ${{ github.actor }}
