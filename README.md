@@ -1,18 +1,13 @@
 # 🚀 GitHub Action for creating Pull Requests
-
 **GitHub Action that will create a pull request from the currently selected branch.**
-
-**Useful in combination with my other action [devops-infra/action-commit-push](https://github.com/devops-infra/action-commit-push).**
 
 
 ## 📦 Available on
-
 - **Docker Hub:** [devopsinfra/action-pull-request:latest](https://hub.docker.com/repository/docker/devopsinfra/action-pull-request)
 - **GitHub Packages:** [ghcr.io/devops-infra/action-pull-request:latest](https://github.com/devops-infra/action-pull-request/pkgs/container/action-pull-request)
 
 
 ## ✨ Features
-
 * Creates pull request if triggered from a current branch or any specified by `source_branch` to a `target_branch`
 * Title and body of a pull request can be specified with `title` and `body`
 * Can assign `assignee`, `reviewer`, one or more `label`, a `milestone` or mark it as a `draft`
@@ -22,8 +17,11 @@
 * Supports both `amd64` and `arm64` architectures
 
 
-## 📊 Badges
+## 🔗 Related Actions
+**Useful in combination with my other action [devops-infra/action-commit-push](https://github.com/devops-infra/action-commit-push).**
 
+
+## 📊 Badges
 [
 ![GitHub repo](https://img.shields.io/badge/GitHub-devops--infra%2Faction--pull--request-blueviolet.svg?style=plastic&logo=github)
 ![GitHub last commit](https://img.shields.io/github/last-commit/devops-infra/action-pull-request?color=blueviolet&logo=github&style=plastic&label=Last%20commit)
@@ -39,8 +37,14 @@
 ](https://hub.docker.com/r/devopsinfra/action-pull-request "shields.io")
 
 
-## 📖 API Reference
+## 🏷️ Version Tags: vX, vX.Y, vX.Y.Z
+This action supports three tag levels for flexible versioning:
+- `vX`: latest patch of the major version (e.g., `v1`).
+- `vX.Y`: latest patch of the minor version (e.g., `v1.2`).
+- `vX.Y.Z`: fixed to a specific release (e.g., `v1.2.3`).
 
+
+## 📖 API Reference
 ```yaml
     - name: Run the Action
       uses: devops-infra/action-pull-request@v1.0.0
@@ -65,7 +69,6 @@
 
 
 ### 🔧 Input Parameters
-
 | Input Variable  | Required | Default                       | Description                                                                                                             |
 |-----------------|----------|-------------------------------|-------------------------------------------------------------------------------------------------------------------------|
 | `github_token`  | **Yes**  | `""`                          | GitHub token `${{ secrets.GITHUB_TOKEN }}`                                                                              |
@@ -87,7 +90,6 @@
 
 
 ### 📤 Outputs Parameters
-
 | Output      | Description                   |
 |-------------|-------------------------------|
 | `url`       | Pull request URL              |
@@ -95,7 +97,6 @@
 
 
 ### ➿ How get_diff works
-
 In previous versions occurrences of following strings in a template result with replacing them with list of commits and list of modified files (`<!-- Diff commits -->` and `<!-- Diff files -->`).
 
 Now this action will expect to have three types of comment blocks. Meaning anything between `START` and `END` comment will get replaced. This is especially important when updating pull request with new commits.
@@ -118,7 +119,6 @@ Blue areas show fields that can be set in action configuration.
 
 
 ### 📝 Basic Example
-
 Create pull request for non-master branches:
 
 ```yaml
@@ -141,7 +141,6 @@ jobs:
 ```
 
 ### 🔀 Advanced Example
-
 Use first commit as a title and part of body, add a label based on a branch name, add git differences in the template:
 
 ```yaml
@@ -173,7 +172,6 @@ jobs:
 ```
 
 ### 🎯 Use specific version
-
 Run the Action with a specific version tag.
 
 ```yaml
@@ -198,24 +196,16 @@ jobs:
 ```
 
 
-## 🔗 Related Actions
-
-- [devops-infra/action-commit-push](https://github.com/devops-infra/action-commit-push) - Commit and push changes to a git repository
-
-
 ## 🤝 Contributing
-
 Contributions are welcome! See [CONTRIBUTING](https://github.com/devops-infra/.github/blob/master/CONTRIBUTING.md).
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 
 ## 📄 License
-
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 
 ## 💬 Support
-
 If you have any questions or need help, please:
 - 📝 Create an [issue](https://github.com/devops-infra/action-pull-request/issues)
 - 🌟 Star this repository if you find it useful!

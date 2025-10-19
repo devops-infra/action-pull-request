@@ -1,4 +1,4 @@
-name: Weekly Dependency Check
+name: (Cron) Check dependencies
 
 on:
   schedule:
@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   dependency-check:
-    name: Test Dependencies
+    name: Test dependencies
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout
@@ -35,6 +35,9 @@ jobs:
         with:
           image: tonistiigi/binfmt:latest
           platforms: amd64,arm64
+
+      - name: Run linters
+        run: task lint
 
       - name: Get Docker commands
         run: task docker:cmds
