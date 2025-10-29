@@ -4,7 +4,13 @@ silent: true
 
 includes:
   variables: ./Taskfile.variables.yml
-  scripts: ./Taskfile.scripts.yml
+  cicd:
+    taskfile: ./Taskfile.cicd.yml
+    flatten: true
+  docker:
+    taskfile: ./Taskfile.docker.yml
+    flatten: true
+
 
 tasks:
   default:
@@ -15,121 +21,12 @@ tasks:
   help:
     desc: Detailed help
     cmds:
-      - task: scripts:help
-
-  pre-commit:
-    desc: Run all pre-commit hooks
-    cmds:
-      - pre-commit run --all-files
-
-  pre-commit:install:
-    desc: Install pre-commit hooks
-    cmds:
-      - pre-commit install
-
-  lint:
-    desc: Run all linters (Dockerfile, shell scripts, workflows, YAML)
-    cmds:
-      - task: lint:actionlint
-      - task: lint:hadolint
-      - task: lint:shellcheck
-      - task: lint:yamllint
-
-  lint:actionlint:
-    desc: Lint GitHub Actions workflows with actionlint
-    cmds:
-      - task: scripts:lint:actionlint
-
-  lint:hadolint:
-    desc: Lint Dockerfile with hadolint
-    cmds:
-      - task: scripts:lint:hadolint
-
-  lint:shellcheck:
-    desc: Lint shell scripts with shellcheck
-    cmds:
-      - task: scripts:lint:shellcheck
-
-  lint:yamllint:
-    desc: Lint YAML files with yamllint
-    cmds:
-      - task: scripts:lint:yamllint
-
-  docker:login:
-    desc: Login to hub.docker.com and ghcr.io
-    internal: true
-    env:
-      DOCKER_USERNAME: '{{.DOCKER_USERNAME}}'
-      GITHUB_USERNAME: '{{.GITHUB_USERNAME}}'
-    cmds:
-      - echo "Logging into Docker Hub as {{.DOCKER_USERNAME}}"
-      - echo "${DOCKER_TOKEN}" | docker login -u "{{.DOCKER_USERNAME}}" --password-stdin
-      - echo "Logging into GHCR as {{.GITHUB_USERNAME}}"
-      - echo "${GITHUB_TOKEN}" | docker login ghcr.io -u "{{.GITHUB_USERNAME}}" --password-stdin
-
-  docker:build:
-    desc: Build Docker image
-    cmds:
-      - '{{.DOCKER_BUILD_START}} {{.DOCKER_BUILD_FINISH}}'
-
-  docker:build:inspect:
-    desc: Inspect built Docker image
-    cmds:
-      - task: scripts:docker:build:inspect
-
-  docker:push:
-    desc: Build and push Docker images
-    deps:
-      - task: docker:login
-    cmds:
-      - '{{.DOCKER_BUILD_START}} --push {{.DOCKER_BUILD_FINISH}}'
-
-  docker:push:inspect:
-    desc: Inspect built Docker image
-    cmds:
-      - task: scripts:docker:push:inspect
-
-  docker:cmds:
-    desc: Show full docker build command
-    cmds:
-      - echo -e '{{.DOCKER_BUILD_START}} {{.DOCKER_BUILD_FINISH}}' | {{.SED}} 's/--/ \\\n  --/g'
-
-  version:get:
-    desc: Get current version
-    cmds:
-      - echo "{{.VERSION}}"
-
-  version:set:
-    desc: Update version in README.md and action.yml to specified VERSION
-    cmds:
-      - task: scripts:version:set
-
-  version:tag-release:
-    desc: Create set of git tags
-    cmds:
-      - task: scripts:version:tag-release
-
-  version:update:patch:
-    desc: Increment patch version (e.g., 1.2.3 -> 1.2.4)
-    cmds:
-      - task version:set VERSION=v{{.MAJOR}}.{{.MINOR}}.{{.NEXT_PATCH}}
-
-  version:update:minor:
-    desc: Increment minor version (e.g., 1.2.3 -> 1.3.0)
-    cmds:
-      - task version:set VERSION=v{{.MAJOR}}.{{.NEXT_MINOR}}.0
-
-  version:update:major:
-    desc: Increment major version (e.g., 1.2.3 -> 2.0.0)
-    cmds:
-      - task version:set VERSION=v{{.NEXT_MAJOR}}.0.0
-
-  git:get-pr-template:
-    desc: Get pull request template
-    cmds:
-      - task: scripts:git:get-pr-template
-
-  git:set-config:
-    desc: Set git user config
-    cmds:
-      - task: scripts:git:set-config
+      - |
+        echo "Tasks:"
+        task --list
+        echo ""
+        echo "Environment:"
+        echo "  DOCKER_NAME={{.DOCKER_NAME}}  DOCKER_USERNAME={{.DOCKER_USERNAME}}"
+        echo "  GHRC_NAME={{.GHRC_NAME}}  GITHUB_USERNAME={{.GITHUB_USERNAME}}"
+        echo "  LAST_RELEASE={{.LAST_RELEASE}}"  VERSION={{.VERSION}}   VERSION_FULL={{.VERSION_FULL}}
+        echo "  BRANCH={{.GIT_BRANCH}}  GIT_SHORT_SHA={{.GIT_SHORT_SHA}}"  GIT_SHA={{.GIT_SHA}}

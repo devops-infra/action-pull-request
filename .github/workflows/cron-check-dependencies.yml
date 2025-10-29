@@ -43,6 +43,9 @@ jobs:
         run: task docker:cmds
 
       - name: Build and push test image
+        env:
+          DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: task docker:push
 
       - name: Inspect image

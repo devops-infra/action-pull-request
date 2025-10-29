@@ -127,6 +127,7 @@ vars:
       else
         git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown"
       fi
+  PR_TEMPLATE: https://raw.githubusercontent.com/devops-infra/.github/master/PULL_REQUEST_TEMPLATE.md
 
   # Labels for http://label-schema.org/rc1/#build-time-labels
   # And for https://github.com/opencontainers/image-spec/blob/master/annotations.md
