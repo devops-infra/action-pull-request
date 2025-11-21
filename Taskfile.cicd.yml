@@ -2,6 +2,10 @@ version: '3'
 
 silent: true
 
+vars:
+  PR_TEMPLATE: https://raw.githubusercontent.com/devops-infra/.github/master/PULL_REQUEST_TEMPLATE.md
+  TEMPLATE_REPO_BASE_URL: https://raw.githubusercontent.com/devops-infra/template-action/refs/heads/master
+
 tasks:
   pre-commit:
     desc: Run all pre-commit hooks
@@ -228,6 +232,7 @@ tasks:
         curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.pre-commit-config.yaml -o ./.pre-commit-config.yaml
         curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.shellcheckrc -o ./.shellcheckrc
         curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.yamllint.yml -o ./.yamllint.yml
+        git add .editorconfig .hadolint.yaml .pre-commit-config.yaml .shellcheckrc .yamllint.yml
         echo "✅ Synced configuration files"
 
   sync:ignores:
@@ -237,6 +242,7 @@ tasks:
         echo "▶️ Syncing ignore files from template-action..."
         curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.gitignore -o ./.gitignore
         curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.dockerignore -o ./.dockerignore
+        git add .gitignore .dockerignore
         echo "✅ Synced ignore files"
 
   sync:taskfiles:
@@ -248,6 +254,7 @@ tasks:
         curl -sL {{.TEMPLATE_REPO_BASE_URL}}/Taskfile.cicd.yml -o ./Taskfile.cicd.yml
         curl -sL {{.TEMPLATE_REPO_BASE_URL}}/Taskfile.docker.yml -o ./Taskfile.docker.yml
         curl -sL {{.TEMPLATE_REPO_BASE_URL}}/Taskfile.variables.yml -o ./Taskfile.variables.yml
+        git add Taskfile*.yml
         echo "✅ Synced Taskfiles"
 
   sync:workflows:
@@ -258,8 +265,15 @@ tasks:
         mkdir -p .github/workflows
         curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.github/workflows/auto-create-pull-request.yml \
           -o ./.github/workflows/auto-create-pull-request.yml
-        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.github/workflows/auto-create-release.yml -o ./.github/workflows/auto-create-release.yml
+        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.github/workflows/auto-create-release.yml \
+          -o ./.github/workflows/auto-create-release.yml
         curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.github/workflows/cron-check-dependencies.yml \
           -o ./.github/workflows/cron-check-dependencies.yml
-        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.github/workflows/manual-update-version.yml -o ./.github/workflows/manual-update-version.yml
+        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.github/workflows/manual-sync-common-files.yml \
+          -o ./.github/workflows/manual-sync-common-files.yml
+        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.github/workflows/manual-update-version.yml \
+          -o ./.github/workflows/manual-update-version.yml
+        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.github/dependabot.yml \
+          -o ./.github/dependabot.yml
+        git add .github/workflows/
         echo "✅ Synced GitHub workflows"

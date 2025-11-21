@@ -1,0 +1,58 @@
+name: (Manual) Sync Common Files
+
+on:
+  workflow_dispatch:
+    inputs:
+      type:
+        description: File type to sync
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - configs
+          - ignores
+          - taskfiles
+          - workflows
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    name: Sync common files and create pull request
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Install Task
+        uses: arduino/setup-task@v2.0.0
+        with:
+          version: 3.x
+
+      - name: Sync files and get PR template
+        id: version
+        run: |
+          task sync:${{ github.event.inputs.type }}
+          task git:set-config
+          task git:get-pr-template
+
+      - name: Push to release branch
+        uses: devops-infra/action-commit-push@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          commit_message: ":art: Sync common files with action-template repository"
+          target_branch: ${{ format('release/{0}', steps.version.outputs.REL_VERSION) }}
+
+      - name: Create Pull Request
+        uses: devops-infra/action-pull-request@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          assignee: ${{ github.actor }}
+          template: .tmp/PULL_REQUEST_TEMPLATE.md
+          get_diff: true
