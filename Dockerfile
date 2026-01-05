@@ -1,4 +1,4 @@
-FROM ubuntu:questing-20251029
+FROM ubuntu:questing-20251217
 
 # Disable interactive mode
 ENV DEBIAN_FRONTEND=noninteractive
