@@ -130,7 +130,6 @@ tasks:
       - task version:set VERSION=v{{.NEXT_MAJOR}}.0.0
 
   version:tag-release:
-    internal: true
     desc: Create set of git tags
     cmds:
       - |
