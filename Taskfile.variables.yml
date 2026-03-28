@@ -43,7 +43,7 @@ vars:
   GHRC_NAME: ghcr.io/{{.GITHUB_ORG_NAME}}/{{.GITHUB_REPO}}
   DEFAULT_BRANCH: master
   VERSION_FROM_ACTION_YML:
-    sh: 'grep "image: docker://{{.DOCKER_NAME}}:" action.yml | cut -d ":" -f 4'
+    sh: 'grep "image: docker://{{.DOCKER_NAME}}:" action.yml 2>/dev/null | cut -d ":" -f 4'
   AUTHOR_FROM_ACTION_YML:
     sh: |
       grep -e "^author:" action.yml | head -1 | awk -F": " '{print $2}'

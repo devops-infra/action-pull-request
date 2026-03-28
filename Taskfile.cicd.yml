@@ -3,8 +3,9 @@ version: '3'
 silent: true
 
 vars:
-  PR_TEMPLATE: https://raw.githubusercontent.com/devops-infra/.github/master/PULL_REQUEST_TEMPLATE.md
-  TEMPLATE_REPO_BASE_URL: https://raw.githubusercontent.com/devops-infra/template-action/refs/heads/master
+  PR_TEMPLATE: https://raw.githubusercontent.com/devops-infra/.github/refs/tags/v1/PULL_REQUEST_TEMPLATE.md
+  CONFIGS_BASE_URL: https://raw.githubusercontent.com/devops-infra/.github/refs/tags/v1/templates/actions/configs
+  TASKFILES_BASE_URL: https://raw.githubusercontent.com/devops-infra/.github/refs/tags/v1/templates/actions/taskfiles
 
 tasks:
   pre-commit:
@@ -98,9 +99,12 @@ tasks:
     desc: Update version in README.md and action.yml
     cmds:
       - |
-        # check if VERSION if different than VERSION_FROM_ACTION_YML
-        if [ "{{.VERSION}}" = "{{.VERSION_FROM_ACTION_YML}}" ]; then
-          echo "❌ ERROR: VERSION is same as VERSION_FROM_ACTION_YML ({{.VERSION}})"
+        if [ -z "{{.VERSION}}" ]; then
+          echo "❌ ERROR: VERSION is empty"
+          exit 1
+        fi
+        if ! echo "{{.VERSION}}" | grep -Eq '^v?[0-9]+\.[0-9]+\.[0-9]+$'; then
+          echo "❌ ERROR: VERSION '{{.VERSION}}' is not a valid semantic version (expected vX.Y.Z or X.Y.Z)"
           exit 1
         fi
       - echo Updating full version from {{.VERSION_FROM_ACTION_YML}} to {{.VERSION}}
@@ -128,6 +132,53 @@ tasks:
     desc: Increment major version (e.g., 1.2.3 -> 2.0.0)
     cmds:
       - task version:set VERSION=v{{.NEXT_MAJOR}}.0.0
+
+  version:resolve-next:
+    desc: Resolve next version from bump type and profile
+    cmds:
+      - |
+        set -eu
+        bump_type="${BUMP_TYPE:-patch}"
+        input_version="${INPUT_VERSION:-}"
+
+        normalize_version() {
+          candidate="${1#v}"
+          if ! printf "%s" "${candidate}" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            return 1
+          fi
+          printf "v%s" "${candidate}"
+        }
+
+        current="$(task version:get 2>/dev/null || true)"
+
+        case "$bump_type" in
+          set)
+            [ -n "$input_version" ] || { echo "Missing version for type=set"; exit 1; }
+            next="$(normalize_version "$input_version")" || {
+              echo "Invalid explicit version: $input_version. Expected vX.Y.Z or X.Y.Z"
+              exit 1
+            }
+            ;;
+          patch|minor|major)
+            [ -n "$current" ] || { echo "Current version not found or invalid. Expected vX.Y.Z"; exit 1; }
+            current="$(normalize_version "$current")" || { echo "Current version not found or invalid. Expected vX.Y.Z"; exit 1; }
+            no_v="${current#v}"
+            major="$(printf "%s" "$no_v" | awk -F. '{print $1}')"
+            minor="$(printf "%s" "$no_v" | awk -F. '{print $2}')"
+            patch="$(printf "%s" "$no_v" | awk -F. '{print $3}')"
+            case "$bump_type" in
+              patch) next="v${major}.${minor}.$((patch + 1))" ;;
+              minor) next="v${major}.$((minor + 1)).0" ;;
+              major) next="v$((major + 1)).0.0" ;;
+            esac
+            ;;
+          *)
+            echo "Unknown type: $bump_type"
+            exit 1
+            ;;
+        esac
+
+        printf "%s" "$next"
 
   version:tag-release:
     desc: Create set of git tags
@@ -214,65 +265,43 @@ tasks:
       - git config user.email "github-actions[bot]@users.noreply.github.com"
 
   sync:all:
-    desc: Sync all files with template-action
+    desc: Sync all common files
     cmds:
       - task sync:configs
       - task sync:ignores
       - task sync:taskfiles
-      - task sync:workflows
 
   sync:configs:
-    desc: Sync configuration files with template-action
+    desc: Sync configuration files with devops-infra/.github
     cmds:
       - |
-        echo "▶️ Syncing configuration files from template-action..."
-        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.editorconfig -o ./.editorconfig
-        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.hadolint.yaml -o ./.hadolint.yaml
-        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.pre-commit-config.yaml -o ./.pre-commit-config.yaml
-        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.shellcheckrc -o ./.shellcheckrc
-        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.yamllint.yml -o ./.yamllint.yml
+        echo "▶️ Syncing configuration files from devops-infra/.github..."
+        curl -fsSL {{.CONFIGS_BASE_URL}}/.editorconfig -o ./.editorconfig
+        curl -fsSL {{.CONFIGS_BASE_URL}}/.hadolint.yaml -o ./.hadolint.yaml
+        curl -fsSL {{.CONFIGS_BASE_URL}}/.pre-commit-config.yaml -o ./.pre-commit-config.yaml
+        curl -fsSL {{.CONFIGS_BASE_URL}}/.shellcheckrc -o ./.shellcheckrc
+        curl -fsSL {{.CONFIGS_BASE_URL}}/.yamllint.yml -o ./.yamllint.yml
         git add .editorconfig .hadolint.yaml .pre-commit-config.yaml .shellcheckrc .yamllint.yml
         echo "✅ Synced configuration files"
 
   sync:ignores:
-    desc: Sync ignore files with template-action
+    desc: Sync ignore files with devops-infra/.github
     cmds:
       - |
-        echo "▶️ Syncing ignore files from template-action..."
-        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.gitignore -o ./.gitignore
-        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.dockerignore -o ./.dockerignore
+        echo "▶️ Syncing ignore files from devops-infra/.github..."
+        curl -fsSL {{.CONFIGS_BASE_URL}}/.gitignore -o ./.gitignore
+        curl -fsSL {{.CONFIGS_BASE_URL}}/.dockerignore -o ./.dockerignore
         git add .gitignore .dockerignore
         echo "✅ Synced ignore files"
 
   sync:taskfiles:
-    desc: Sync Taskfiles with template-action
+    desc: Sync Taskfiles with devops-infra/.github
     cmds:
       - |
-        echo "▶️ Syncing Taskfiles from template-action..."
-        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/Taskfile.yml -o ./Taskfile.yml
-        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/Taskfile.cicd.yml -o ./Taskfile.cicd.yml
-        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/Taskfile.docker.yml -o ./Taskfile.docker.yml
-        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/Taskfile.variables.yml -o ./Taskfile.variables.yml
+        echo "▶️ Syncing Taskfiles from devops-infra/.github..."
+        curl -fsSL {{.TASKFILES_BASE_URL}}/Taskfile.yml -o ./Taskfile.yml
+        curl -fsSL {{.TASKFILES_BASE_URL}}/Taskfile.cicd.yml -o ./Taskfile.cicd.yml
+        curl -fsSL {{.TASKFILES_BASE_URL}}/Taskfile.docker.yml -o ./Taskfile.docker.yml
+        curl -fsSL {{.TASKFILES_BASE_URL}}/Taskfile.variables.yml -o ./Taskfile.variables.yml
         git add Taskfile*.yml
         echo "✅ Synced Taskfiles"
-
-  sync:workflows:
-    desc: Sync GitHub workflows with template-action
-    cmds:
-      - |
-        echo "▶️ Syncing GitHub workflows from template-action..."
-        mkdir -p .github/workflows
-        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.github/workflows/auto-create-pull-request.yml \
-          -o ./.github/workflows/auto-create-pull-request.yml
-        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.github/workflows/auto-create-release.yml \
-          -o ./.github/workflows/auto-create-release.yml
-        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.github/workflows/cron-check-dependencies.yml \
-          -o ./.github/workflows/cron-check-dependencies.yml
-        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.github/workflows/manual-sync-common-files.yml \
-          -o ./.github/workflows/manual-sync-common-files.yml
-        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.github/workflows/manual-update-version.yml \
-          -o ./.github/workflows/manual-update-version.yml
-        curl -sL {{.TEMPLATE_REPO_BASE_URL}}/.github/dependabot.yml \
-          -o ./.github/dependabot.yml
-        git add .github/workflows/
-        echo "✅ Synced GitHub workflows"

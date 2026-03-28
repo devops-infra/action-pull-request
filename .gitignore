@@ -3,6 +3,7 @@
 *.iml
 
 # Custom
+.DS_Store
 .tmp/
 .venv
 .venv/
