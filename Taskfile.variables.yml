@@ -83,20 +83,21 @@ vars:
         printf "%s" "-test"
       fi
   VERSION_OVERRIDE:
-    sh: echo "__TAKEN_FROM_ACTION_YML__"
+    sh: echo "${VERSION_OVERRIDE:-}"
   VERSION:
     sh: |
-      if [ "${VERSION_OVERRIDE}" = "__TAKEN_FROM_ACTION_YML__" ]; then
-        from_file="{{.VERSION_FROM_ACTION_YML}}"
-        if [ -n "$from_file" ]; then
-          echo "$from_file"
-        else
-          git tag --sort=-v:refname 2>/dev/null | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1
-        fi
-      elif [ -z "${VERSION_OVERRIDE}" ]; then
-        echo "{{.LAST_RELEASE}}"
+      override="{{.VERSION_OVERRIDE}}"
+      if [ -n "$override" ]; then
+        echo "$override"
       else
-        echo "${VERSION_OVERRIDE}"
+        tag="$(git tag --sort=-v:refname 2>/dev/null | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)"
+        if [ -n "$tag" ]; then
+          echo "$tag"
+        elif [ -n "{{.VERSION_FROM_ACTION_YML}}" ]; then
+          echo "{{.VERSION_FROM_ACTION_YML}}"
+        else
+          echo "{{.LAST_RELEASE}}"
+        fi
       fi
   VERSION_NO_V:
     sh: v="{{.VERSION}}"; echo "${v#v}"
