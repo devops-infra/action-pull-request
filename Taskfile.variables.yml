@@ -87,7 +87,12 @@ vars:
   VERSION:
     sh: |
       if [ "${VERSION_OVERRIDE}" = "__TAKEN_FROM_ACTION_YML__" ]; then
-        echo "{{.VERSION_FROM_ACTION_YML}}"
+        from_file="{{.VERSION_FROM_ACTION_YML}}"
+        if [ -n "$from_file" ]; then
+          echo "$from_file"
+        else
+          git tag --sort=-v:refname 2>/dev/null | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1
+        fi
       elif [ -z "${VERSION_OVERRIDE}" ]; then
         echo "{{.LAST_RELEASE}}"
       else
