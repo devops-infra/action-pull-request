@@ -1,4 +1,4 @@
-name: (Cron) Weekly repository health
+name: (Cron) Check dependencies
 
 on:
   schedule:
@@ -6,10 +6,10 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  issues: write
-  pull-requests: read
+  contents: write
+  pull-requests: write
   packages: write
+  issues: read
 
 jobs:
   call:
