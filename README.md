@@ -44,6 +44,8 @@ This action supports three tag levels for flexible versioning:
 - `vX.Y.Z`: fixed to a specific release (e.g., `v1.2.3`).
 
 
+
+
 ## 📖 API Reference
 ```yaml
     - name: Run the Action
@@ -209,3 +211,32 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 If you have any questions or need help, please:
 - 📝 Create an [issue](https://github.com/devops-infra/action-pull-request/issues)
 - 🌟 Star this repository if you find it useful!
+
+## Forking
+To publish images from a fork, set these variables so Task uses your registry identities:
+`DOCKER_USERNAME`, `DOCKER_ORG_NAME`, `GITHUB_USERNAME`, `GITHUB_ORG_NAME`.
+
+Two supported options (environment variables take precedence over `.env`):
+```bash
+# .env (local only, not committed)
+DOCKER_USERNAME=your-dockerhub-user
+DOCKER_ORG_NAME=your-dockerhub-org
+GITHUB_USERNAME=your-github-user
+GITHUB_ORG_NAME=your-github-org
+```
+
+```bash
+# Shell override
+DOCKER_USERNAME=your-dockerhub-user \
+DOCKER_ORG_NAME=your-dockerhub-org \
+GITHUB_USERNAME=your-github-user \
+GITHUB_ORG_NAME=your-github-org \
+task docker:build
+```
+
+Recommended setup:
+- Local development: use a `.env` file.
+- GitHub Actions: set repo variables for the four values above, and secrets for `DOCKER_TOKEN` and `GITHUB_TOKEN`.
+
+Publish images without a release:
+- Run the `(Manual) Update Version` workflow with `build_only: true` to build and push images without tagging a release.

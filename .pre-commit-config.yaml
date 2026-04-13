@@ -31,16 +31,16 @@ repos:
         pass_filenames: false
       - id: hadolint
         name: hadolint
-        entry: bash -lc 'docker run --rm -v "$PWD:/work" -w /work hadolint/hadolint:latest-debian "$@"' --
+        entry: bash -lc 'docker run --rm -v "$PWD:/work" -w /work hadolint/hadolint:latest-debian /bin/hadolint "$@"' --
         language: system
-        files: '(^|/)Dockerfile(\..*)?$'
+        files: (^|/)Dockerfile(\..*)?$
       - id: shellcheck
         name: shellcheck
         entry: bash -lc 'docker run --rm -v "$PWD:/work" -w /work koalaman/shellcheck:stable -x -S style "$@"' --
         language: system
-        files: '\.sh$'
+        files: \.sh$
       - id: yamllint
         name: yamllint
         entry: bash -lc 'docker run --rm -v "$PWD:/work" -w /work cytopia/yamllint -c .yamllint.yml "$@"' --
         language: system
-        files: '\.(yml|yaml)$'
+        files: \.(yml|yaml)$
