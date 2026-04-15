@@ -1,4 +1,4 @@
-name: (Manual) Update Version
+name: (Manual) Release Create
 
 on:
   workflow_dispatch:
@@ -30,7 +30,7 @@ permissions:
 
 jobs:
   call:
-    uses: devops-infra/.github/.github/workflows/reusable-manual-update-version.yml@v1
+    uses: devops-infra/.github/.github/workflows/reusable-manual-release-create.yml@v1
     with:
       bump-type: ${{ inputs.type }}
       explicit-version: ${{ inputs.version }}

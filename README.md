@@ -239,4 +239,4 @@ Recommended setup:
 - GitHub Actions: set repo variables for the four values above, and secrets for `DOCKER_TOKEN` and `GITHUB_TOKEN`.
 
 Publish images without a release:
-- Run the `(Manual) Update Version` workflow with `build_only: true` to build and push images without tagging a release.
+- Run the `(Manual) Release Create` workflow with `build_only: true` to build and push images without tagging a release.
