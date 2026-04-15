@@ -1,4 +1,4 @@
-name: (Auto) Create Pull Request
+name: (Auto) Pull Request Create
 
 on:
   push:
@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   call:
-    uses: devops-infra/.github/.github/workflows/reusable-auto-create-pull-request.yml@v1
+    uses: devops-infra/.github/.github/workflows/reusable-auto-pull-request-create.yml@v1
     with:
       profile: actions
     secrets: inherit

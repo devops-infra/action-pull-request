@@ -1,4 +1,4 @@
-name: (Cron) Check dependencies
+name: (Cron) Dependency Update
 
 on:
   schedule:
@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   call:
-    uses: devops-infra/.github/.github/workflows/reusable-cron-check-dependencies.yml@v1
+    uses: devops-infra/.github/.github/workflows/reusable-cron-dependency-update.yml@v1
     with:
       profile: actions
     secrets: inherit

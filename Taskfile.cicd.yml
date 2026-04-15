@@ -90,10 +90,13 @@ tasks:
           exit $rc
         fi
 
-  version:get:
-    desc: Get current version
+  dependency:update:
+    desc: Check main dependency not covered by dependabot
     cmds:
-      - echo "{{.VERSION}}"
+      - |
+        echo "ℹ️ No dedicated dependency updater configured for this repository."
+        echo "ℹ️ Dependabot handles GitHub Actions and package metadata updates."
+        echo "ℹ️ Docker build validation remains the runtime safety net."
 
   version:set:
     desc: Update version in README.md and action.yml
@@ -264,44 +267,7 @@ tasks:
       - git config user.name "github-actions[bot]"
       - git config user.email "github-actions[bot]@users.noreply.github.com"
 
-  sync:all:
-    desc: Sync all common files
+  version:get:
+    desc: Get current version
     cmds:
-      - task sync:configs
-      - task sync:ignores
-      - task sync:taskfiles
-
-  sync:configs:
-    desc: Sync configuration files with devops-infra/.github
-    cmds:
-      - |
-        echo "▶️ Syncing configuration files from devops-infra/.github..."
-        curl -fsSL {{.CONFIGS_BASE_URL}}/.editorconfig -o ./.editorconfig
-        curl -fsSL {{.CONFIGS_BASE_URL}}/.hadolint.yaml -o ./.hadolint.yaml
-        curl -fsSL {{.CONFIGS_BASE_URL}}/.pre-commit-config.yaml -o ./.pre-commit-config.yaml
-        curl -fsSL {{.CONFIGS_BASE_URL}}/.shellcheckrc -o ./.shellcheckrc
-        curl -fsSL {{.CONFIGS_BASE_URL}}/.yamllint.yml -o ./.yamllint.yml
-        git add .editorconfig .hadolint.yaml .pre-commit-config.yaml .shellcheckrc .yamllint.yml
-        echo "✅ Synced configuration files"
-
-  sync:ignores:
-    desc: Sync ignore files with devops-infra/.github
-    cmds:
-      - |
-        echo "▶️ Syncing ignore files from devops-infra/.github..."
-        curl -fsSL {{.CONFIGS_BASE_URL}}/.gitignore -o ./.gitignore
-        curl -fsSL {{.CONFIGS_BASE_URL}}/.dockerignore -o ./.dockerignore
-        git add .gitignore .dockerignore
-        echo "✅ Synced ignore files"
-
-  sync:taskfiles:
-    desc: Sync Taskfiles with devops-infra/.github
-    cmds:
-      - |
-        echo "▶️ Syncing Taskfiles from devops-infra/.github..."
-        curl -fsSL {{.TASKFILES_BASE_URL}}/Taskfile.yml -o ./Taskfile.yml
-        curl -fsSL {{.TASKFILES_BASE_URL}}/Taskfile.cicd.yml -o ./Taskfile.cicd.yml
-        curl -fsSL {{.TASKFILES_BASE_URL}}/Taskfile.docker.yml -o ./Taskfile.docker.yml
-        curl -fsSL {{.TASKFILES_BASE_URL}}/Taskfile.variables.yml -o ./Taskfile.variables.yml
-        git add Taskfile*.yml
-        echo "✅ Synced Taskfiles"
+      - echo "{{.VERSION}}"
