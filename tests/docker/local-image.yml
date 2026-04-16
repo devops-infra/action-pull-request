@@ -1,0 +1,34 @@
+schemaVersion: 2.0.0
+
+commandTests:
+  - name: OS version check
+    command: cat
+    args: [/etc/os-release]
+    expectedOutput: [VERSION_ID="25\.10"]
+
+  - name: Required tools installed
+    command: bash
+    args:
+      - -lc
+      - command -v bash >/dev/null 2>&1 && command -v git >/dev/null 2>&1 && command -v gh >/dev/null 2>&1 && command -v hub >/dev/null 2>&1 && command -v jq >/dev/null 2>&1 && command -v curl >/dev/null 2>&1
+
+  - name: Apt cache cleaned
+    command: bash
+    args:
+      - -lc
+      - test ! -d /var/lib/apt/lists || test -z "$(find /var/lib/apt/lists -mindepth 1 -maxdepth 1 2>/dev/null)"
+
+  - name: Keyring file present
+    command: bash
+    args:
+      - -lc
+      - test -f /usr/share/keyrings/githubcli-archive-keyring.gpg
+fileExistenceTests:
+  - name: entrypoint exists
+    path: /entrypoint.sh
+    shouldExist: true
+    permissions: -rwxr-xr-x
+
+metadataTest:
+  workdir: /github/workspace
+  entrypoint: [/entrypoint.sh]

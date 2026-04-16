@@ -51,6 +51,90 @@ tasks:
       - docker buildx create --use
       - '{{.DOCKER_BUILD_START}} {{.DOCKER_BUILD_FINISH}}'
 
+  docker:build:local:
+    desc: Build local runnable Docker image for current architecture
+    cmds:
+      - |
+        set -eu
+        arch="$(uname -m)"
+        case "${arch}" in
+          x86_64|amd64) target_arch="amd64" ;;
+          aarch64|arm64) target_arch="arm64" ;;
+          *)
+            echo "❌ Unsupported local architecture: ${arch}"
+            exit 1
+            ;;
+        esac
+
+        docker build \
+          --build-arg TARGETARCH="${target_arch}" \
+          --tag "{{.DOCKER_NAME}}:{{.VERSION_FULL}}{{.VERSION_SUFFIX}}" \
+          --file Dockerfile \
+          .
+
+  docker:test:local:
+    desc: Run container-structure-test action locally (requires local build)
+    deps:
+      - task: docker:build:local
+    requires:
+      vars: [CONFIG]
+    cmds:
+      - |
+        set -eu
+        image='{{default "" .IMAGE}}'
+        image_from_oci_layout='{{default "" .IMAGE_FROM_OCI_LAYOUT}}'
+        config='{{.CONFIG}}'
+
+        if [ -z "${image}" ] && [ -z "${image_from_oci_layout}" ]; then
+          echo "❌ Provide IMAGE=<image-ref> or IMAGE_FROM_OCI_LAYOUT=<path>"
+          exit 1
+        fi
+        if [ -n "${image}" ] && [ -n "${image_from_oci_layout}" ]; then
+          echo "❌ IMAGE and IMAGE_FROM_OCI_LAYOUT are mutually exclusive"
+          exit 1
+        fi
+        if [ ! -S /var/run/docker.sock ] && [ '{{default "docker" .DRIVER}}' = 'docker' ]; then
+          echo "❌ Docker socket not available at /var/run/docker.sock (required for DRIVER=docker)"
+          exit 1
+        fi
+
+        docker run --rm \
+          -v "$PWD:/github/workspace" \
+          -w /github/workspace \
+          -v /var/run/docker.sock:/var/run/docker.sock \
+          -e INPUT_IMAGE="${image}" \
+          -e INPUT_IMAGE_FROM_OCI_LAYOUT="${image_from_oci_layout}" \
+          -e INPUT_CONFIG="${config}" \
+          -e INPUT_DRIVER='{{default "docker" .DRIVER}}' \
+          -e INPUT_PLATFORM='{{default "" .PLATFORM}}' \
+          -e INPUT_PULL='{{default "false" .PULL}}' \
+          -e INPUT_SAVE='{{default "false" .SAVE}}' \
+          -e INPUT_QUIET='{{default "false" .QUIET}}' \
+          -e INPUT_NO_COLOR='{{default "false" .NO_COLOR}}' \
+          -e INPUT_OUTPUT='{{default "text" .OUTPUT}}' \
+          -e INPUT_TEST_REPORT='{{default "" .TEST_REPORT}}' \
+          -e INPUT_JUNIT_SUITE_NAME='{{default "" .JUNIT_SUITE_NAME}}' \
+          -e INPUT_METADATA='{{default "" .METADATA}}' \
+          -e INPUT_RUNTIME='{{default "" .RUNTIME}}' \
+          -e INPUT_FORCE='{{default "false" .FORCE}}' \
+          -e INPUT_DEFAULT_IMAGE_TAG='{{default "" .DEFAULT_IMAGE_TAG}}' \
+          -e INPUT_IGNORE_REF_ANNOTATION='{{default "false" .IGNORE_REF_ANNOTATION}}' \
+          -e INPUT_DEBUG='{{default "false" .DEBUG}}' \
+          devopsinfra/action-container-structure-test:v1
+
+  docker:test:smoke:
+    desc: Smoke test local action image with container-structure-test
+    deps:
+      - task: docker:build:local
+    cmds:
+      - |
+        set -eu
+        task docker:test:local \
+          IMAGE="{{.DOCKER_NAME}}:{{.VERSION_FULL}}{{.VERSION_SUFFIX}}" \
+          CONFIG="tests/docker/local-image.yml" \
+          DRIVER=docker \
+          OUTPUT=text
+
   docker:build:inspect:
     desc: Inspect built Docker image
     cmds:
