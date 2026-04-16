@@ -7,7 +7,6 @@ env:
   TERM: xterm-256color
 
 vars:
-  # System context
   SED:
     sh: |
       if [ "$(uname -s)" = "Darwin" ]; then
@@ -30,8 +29,6 @@ vars:
       fi
   PROJECT_DIR_NAME:
     sh: basename "$PWD"
-
-  # Container metadata
   DOCKER_IMAGE: '{{.DOCKER_IMAGE | default .PROJECT_DIR_NAME}}'
   GITHUB_REPO: '{{.GITHUB_REPO | default .PROJECT_DIR_NAME}}'
   DOCKER_ORG_NAME: '{{.DOCKER_ORG_NAME | default "devopsinfra"}}'
@@ -63,8 +60,6 @@ vars:
   LABEL_HOMEPAGE: '{{.LABEL_HOMEPAGE | default "https://shyper.pro"}}'
   LABEL_VENDOR: '{{.LABEL_VENDOR | default "DevOps-Infra"}}'
   LABEL_LICENSE: '{{.LABEL_LICENSE | default "MIT"}}'
-
-  # Build context
   CONTEXT: '{{.CONTEXT | default "."}}'
   DOCKERFILE: '{{.DOCKERFILE | default "Dockerfile"}}'
   PLATFORMS: '{{.PLATFORMS | default "linux/amd64,linux/arm64"}}'
@@ -120,8 +115,6 @@ vars:
     sh: echo "{{.VERSION_FROM_ACTION_YML}}" | awk -F\. '{print $1}'
   MINOR_FROM_ACTION_YML:
     sh: echo "{{.VERSION_FROM_ACTION_YML}}" | awk -F\. '{print $1"."$2}'
-
-  # Git metadata
   GIT_SHA:
     sh: git rev-parse HEAD 2>/dev/null || echo 0000000000000000000000000000000000000000
   GIT_SHORT_SHA:
@@ -133,7 +126,6 @@ vars:
       else
         git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown"
       fi
-
   # Labels for http://label-schema.org/rc1/#build-time-labels
   # And for https://github.com/opencontainers/image-spec/blob/master/annotations.md
   ANNOTATIONS: >-

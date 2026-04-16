@@ -14,7 +14,6 @@ includes:
     taskfile: ./Taskfile.docker.yml
     flatten: true
 
-
 tasks:
   default:
     desc: List tasks
