@@ -1,25 +1,23 @@
 version: 2
 updates:
-  # Maintain dependencies for GitHub Actions
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
     assignees:
       - ChristophShyper
+    groups:
+      gha-all:
+        patterns:
+          - "*"
 
-  # Enable version updates for Docker
   - package-ecosystem: docker
     directory: /
     schedule:
       interval: weekly
     assignees:
       - ChristophShyper
-
-#  # Enable version updates for pip
-#  - package-ecosystem: pip
-#    directory: /
-#    schedule:
-#      interval: daily
-#    assignees:
-#      - ChristophShyper
+    groups:
+      docker-base-images:
+        patterns:
+          - "*"
