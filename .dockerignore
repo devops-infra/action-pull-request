@@ -4,5 +4,7 @@
 # Include
 !Dockerfile
 !entrypoint.sh
+!scripts/
+!scripts/replace-template-diff.sh
 !LICENSE
 !README.md

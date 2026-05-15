@@ -5,11 +5,12 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Copy all needed files
 COPY entrypoint.sh /
+COPY scripts/ /scripts/
 
 # Install needed packages
 SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 # hadolint ignore=DL3008
-RUN chmod +x /entrypoint.sh ;\
+RUN chmod +x /entrypoint.sh /scripts/replace-template-diff.sh ;\
   apt-get update -y ;\
   apt-get install --no-install-recommends -y \
     curl \

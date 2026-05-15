@@ -4,6 +4,60 @@ set -Eeuo pipefail
 
 # Return code
 RET_CODE=0
+GIT_LOG=""
+GIT_SUMMARY=""
+GIT_DIFF=""
+SOURCE_COMPARE_REF=""
+TARGET_COMPARE_REF=""
+RESOLVED_BRANCH_REF=""
+
+REPLACE_TEMPLATE_SCRIPT="/scripts/replace-template-diff.sh"
+if [[ ! -x "${REPLACE_TEMPLATE_SCRIPT}" ]]; then
+  REPLACE_TEMPLATE_SCRIPT="$(dirname "$0")/scripts/replace-template-diff.sh"
+fi
+
+get_git_log() {
+  if [[ -z "${GIT_LOG}" ]]; then
+    echo -e "\nListing new commits in the source branch..."
+    git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cd%Creset %n%s %b' --abbrev-commit --date=format:'%Y-%m-%d %H:%M:%S' "${TARGET_COMPARE_REF}...${SOURCE_COMPARE_REF}"
+    GIT_LOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cd%Creset %n%s%n%b' --abbrev-commit --date=format:'%Y-%m-%d %H:%M:%S' --no-color "${TARGET_COMPARE_REF}...${SOURCE_COMPARE_REF}")
+  fi
+}
+
+get_git_summary() {
+  if [[ -z "${GIT_SUMMARY}" ]]; then
+    echo -e "\n\nListing commits subjects in the source branch..."
+    git log --reverse --pretty=format:'%s' --abbrev-commit "${TARGET_COMPARE_REF}...${SOURCE_COMPARE_REF}"
+    GIT_SUMMARY=$(git log --reverse --pretty=format:'%s' --abbrev-commit "${TARGET_COMPARE_REF}...${SOURCE_COMPARE_REF}")
+  fi
+}
+
+get_git_diff() {
+  if [[ -z "${GIT_DIFF}" ]]; then
+    echo -e "\n\nListing files modified in the source branch..."
+    git diff --compact-summary "${TARGET_COMPARE_REF}...${SOURCE_COMPARE_REF}"
+    GIT_DIFF=$(git diff --compact-summary --no-color "${TARGET_COMPARE_REF}...${SOURCE_COMPARE_REF}")
+  fi
+}
+
+resolve_branch_ref() {
+  local branch_name="$1"
+  local remote_ref="refs/remotes/origin/${branch_name}"
+  local head_ref="refs/heads/${branch_name}"
+
+  if git show-ref --verify --quiet "${remote_ref}"; then
+    RESOLVED_BRANCH_REF="origin/${branch_name}"
+    return 0
+  fi
+
+  if git show-ref --verify --quiet "${head_ref}"; then
+    RESOLVED_BRANCH_REF="${branch_name}"
+    return 0
+  fi
+
+  echo -e "\n[ERROR] Missing branch reference: ${branch_name}" >&2
+  return 1
+}
 
 echo "Inputs:"
 echo "  source_branch: ${INPUT_SOURCE_BRANCH}"
@@ -60,40 +114,38 @@ echo "Target branch: ${TARGET_BRANCH}"
 echo -e "\nUpdating all branches..."
 git fetch origin '+refs/heads/*:refs/heads/*' --update-head-ok
 
+echo -e "\nValidating branches..."
+if ! resolve_branch_ref "${SOURCE_BRANCH}"; then
+  exit 1
+fi
+SOURCE_COMPARE_REF="${RESOLVED_BRANCH_REF}"
+
+if ! resolve_branch_ref "${TARGET_BRANCH}"; then
+  exit 1
+fi
+TARGET_COMPARE_REF="${RESOLVED_BRANCH_REF}"
+
 echo -e "\nComparing branches by revisions..."
-if [[ $(git rev-parse --revs-only "${SOURCE_BRANCH}") == $(git rev-parse --revs-only "${TARGET_BRANCH}") ]]; then
+if [[ $(git rev-parse --verify "${SOURCE_COMPARE_REF}") == $(git rev-parse --verify "${TARGET_COMPARE_REF}") ]]; then
   echo -e "\n[INFO] Both branches are the same. No action needed."
   exit 0
 fi
 
 echo -e "\nComparing branches by diff..."
-if [[ -z $(git diff "remotes/origin/${TARGET_BRANCH}...remotes/origin/${SOURCE_BRANCH}") ]]; then
+if git diff --quiet "${TARGET_COMPARE_REF}...${SOURCE_COMPARE_REF}"; then
   if [[ "${INPUT_ALLOW_NO_DIFF}" == "true" ]]; then
     echo -e "\n[INFO] Both branches are the same. Continuing."
   else
     echo -e "\n[INFO] Both branches are the same. No action needed."
     exit 0
   fi
+else
+  DIFF_STATUS="$?"
+  if [[ "${DIFF_STATUS}" != "1" ]]; then
+    echo -e "\n[ERROR] Failed to compare branches by diff (git exit code: ${DIFF_STATUS})."
+    exit 1
+  fi
 fi
-
-# sed has problems with putting multi-line strings in the next steps, and later we use # for sed
-# newline `\n` and hash `#` characters are replaced with some (hopefully) totally unlikely strings
-# after insertions of git information into template those strings are replaced back by proper characters
-
-echo -e "\nListing new commits in the source branch..."
-git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cd%Creset %n%s %b' --abbrev-commit --date=format:'%Y-%m-%d %H:%M:%S' "origin/${TARGET_BRANCH}...origin/${SOURCE_BRANCH}"
-GIT_LOG=$(git log --graph --pretty=format:'%Cred%h%Creset - %Cblue%an%Creset - %Cgreen%cd%Creset %n%s%n%b' --abbrev-commit --date=format:'%Y-%m-%d %H:%M:%S' --no-color "origin/${TARGET_BRANCH}...origin/${SOURCE_BRANCH}")
-GIT_LOG=$(echo -e "${GIT_LOG}" | sed 's|#|^HaSz^|g' | sed ':a;N;$!ba; s/\n/^NowALiNiA^/g')
-
-echo -e "\n\nListing commits subjects in the source branch..."
-git log --reverse --pretty=format:'%s' --abbrev-commit "origin/${TARGET_BRANCH}...origin/${SOURCE_BRANCH}"
-GIT_SUMMARY=$(git log --reverse --pretty=format:'%s' --abbrev-commit "origin/${TARGET_BRANCH}...origin/${SOURCE_BRANCH}")
-GIT_SUMMARY=$(echo -e "${GIT_SUMMARY}" | sed 's|#|^HaSz^|g' | sed ':a;N;$!ba; s/\n/^NowALiNiA^/g')
-
-echo -e "\n\nListing files modified in the source branch..."
-git diff --compact-summary "origin/${TARGET_BRANCH}...origin/${SOURCE_BRANCH}"
-GIT_DIFF=$(git diff --compact-summary --no-color "origin/${TARGET_BRANCH}...origin/${SOURCE_BRANCH}")
-GIT_DIFF=$(echo -e "${GIT_DIFF}" | sed 's|#|^HaSz^|g' | sed ':a;N;$!ba; s/\n/^NowALiNiA^/g')
 
 echo -e "\nSetting template..."
 PR_NUMBER=$(hub pr list --base "${TARGET_BRANCH}" --head "${SOURCE_BRANCH}" --format '%I')
@@ -103,6 +155,7 @@ if [[ -z "${PR_NUMBER}" ]]; then
   elif [[ -n "${INPUT_BODY}" ]]; then
     TEMPLATE="${INPUT_BODY}"
   else
+    get_git_log
     TEMPLATE="${GIT_LOG}"
   fi
 else
@@ -115,22 +168,62 @@ if [[ -n "${INPUT_OLD_STRING}" ]]; then
   if [[ -n "${INPUT_NEW_STRING}" ]]; then
     TEMPLATE=${TEMPLATE/${OLD_STRING}/${INPUT_NEW_STRING}}
   else
+    get_git_summary
     TEMPLATE=${TEMPLATE/${OLD_STRING}/${GIT_SUMMARY}}
   fi
 fi
 
 if [[ "${INPUT_GET_DIFF}" ==  "true" ]]; then
   echo -e "\nReplacing predefined fields with git information..."
-  # little hack to trick sed to work with multiline
-  # also backwards compatible with old replacement strings
-  TEMPLATE=$(echo -e "${TEMPLATE}" | sed ':a;N;$!ba; s#<!-- Diff summary - START -->.*<!-- Diff summary - END -->#<!-- Diff summary - START -->\n'"${GIT_SUMMARY}"'\n<!-- Diff summary - END -->#g')
-  TEMPLATE=$(echo -e "${TEMPLATE}" | sed ':a;N;$!ba; s#<!-- Diff commits -->#<!-- Diff commits - START -->\n'"${GIT_LOG}"'\n<!-- Diff commits - END -->#g')
-  TEMPLATE=$(echo -e "${TEMPLATE}" | sed ':a;N;$!ba; s#<!-- Diff commits - START -->.*<!-- Diff commits - END -->#<!-- Diff commits - START -->\n'"${GIT_LOG}"'\n<!-- Diff commits - END -->#g')
-  TEMPLATE=$(echo -e "${TEMPLATE}" | sed ':a;N;$!ba; s#<!-- Diff files -->#<!-- Diff files - START -->\n'"${GIT_DIFF}"'\n<!-- Diff files - END -->#g')
-  TEMPLATE=$(echo -e "${TEMPLATE}" | sed ':a;N;$!ba; s#<!-- Diff files - START -->.*<!-- Diff files - END -->#<!-- Diff files - START -->\n'"${GIT_DIFF}"'\n<!-- Diff files - END -->#g')
+  REPLACE_SUMMARY="false"
+  REPLACE_COMMITS="false"
+  REPLACE_FILES="false"
+
+  if [[ "${TEMPLATE}" == *"<!-- Diff summary - START -->"* && "${TEMPLATE}" == *"<!-- Diff summary - END -->"* ]]; then
+    REPLACE_SUMMARY="true"
+  fi
+  if [[ "${TEMPLATE}" == *"<!-- Diff commits -->"* || ( "${TEMPLATE}" == *"<!-- Diff commits - START -->"* && "${TEMPLATE}" == *"<!-- Diff commits - END -->"* ) ]]; then
+    REPLACE_COMMITS="true"
+  fi
+  if [[ "${TEMPLATE}" == *"<!-- Diff files -->"* || ( "${TEMPLATE}" == *"<!-- Diff files - START -->"* && "${TEMPLATE}" == *"<!-- Diff files - END -->"* ) ]]; then
+    REPLACE_FILES="true"
+  fi
+
+  if [[ "${REPLACE_SUMMARY}" == "true" || "${REPLACE_COMMITS}" == "true" || "${REPLACE_FILES}" == "true" ]]; then
+    TEMPLATE_WORK_FILE="/tmp/template-work.md"
+    SUMMARY_FILE="/tmp/template-summary.txt"
+    COMMITS_FILE="/tmp/template-commits.txt"
+    FILES_FILE="/tmp/template-files.txt"
+
+    printf '%s' "${TEMPLATE}" > "${TEMPLATE_WORK_FILE}"
+
+    if [[ "${REPLACE_SUMMARY}" == "true" ]]; then
+      get_git_summary
+      printf '%s' "${GIT_SUMMARY}" > "${SUMMARY_FILE}"
+    fi
+    if [[ "${REPLACE_COMMITS}" == "true" ]]; then
+      get_git_log
+      printf '%s' "${GIT_LOG}" > "${COMMITS_FILE}"
+    fi
+    if [[ "${REPLACE_FILES}" == "true" ]]; then
+      get_git_diff
+      printf '%s' "${GIT_DIFF}" > "${FILES_FILE}"
+    fi
+
+    "${REPLACE_TEMPLATE_SCRIPT}" \
+      --template "${TEMPLATE_WORK_FILE}" \
+      --summary-file "${SUMMARY_FILE}" \
+      --commits-file "${COMMITS_FILE}" \
+      --files-file "${FILES_FILE}" \
+      --replace-summary "${REPLACE_SUMMARY}" \
+      --replace-commits "${REPLACE_COMMITS}" \
+      --replace-files "${REPLACE_FILES}"
+
+    TEMPLATE=$(cat "${TEMPLATE_WORK_FILE}")
+  else
+    echo -e "[INFO] No diff markers found in template body. Skipping get_diff replacements."
+  fi
 fi
-#shellcheck disable=SC2016
-TEMPLATE=$(echo -e "${TEMPLATE}" | sed 's|\^HaSz\^|#|g' | sed '1h;2,$H;$!d;g; s|\^NowALiNiA\^|\n|g')
 
 if [[ -z "${PR_NUMBER}" ]]; then
   echo -e "\nSetting all arguments..."
