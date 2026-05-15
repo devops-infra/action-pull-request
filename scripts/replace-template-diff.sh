@@ -90,9 +90,9 @@ perl -0777 -i -pe '
       return defined($content) ? $content : q{};
     }
 
-    $summary = read_file($ENV{SUMMARY_FILE});
-    $commits = read_file($ENV{COMMITS_FILE});
-    $files = read_file($ENV{FILES_FILE});
+    $summary = $ENV{REPLACE_SUMMARY} eq q{true} ? read_file($ENV{SUMMARY_FILE}) : q{};
+    $commits = $ENV{REPLACE_COMMITS} eq q{true} ? read_file($ENV{COMMITS_FILE}) : q{};
+    $files = $ENV{REPLACE_FILES} eq q{true} ? read_file($ENV{FILES_FILE}) : q{};
   }
 
   if ($ENV{REPLACE_SUMMARY} eq q{true}) {

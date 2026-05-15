@@ -45,6 +45,17 @@ run_replacement() {
     --replace-files "${replace_files}"
 }
 
+run_replacement_files_only() {
+  local template_file="$1"
+
+  "${SCRIPT_PATH}" \
+    --template "${template_file}" \
+    --files-file "${TMP_DIR}/files.txt" \
+    --replace-summary "false" \
+    --replace-commits "false" \
+    --replace-files "true"
+}
+
 cat > "${TMP_DIR}/summary.txt" <<'EOF'
 Summary line 1
 Summary line 2
@@ -102,6 +113,19 @@ EOF
 run_replacement "${TMP_DIR}/template-no-markers.md" "false" "false" "false"
 
 assert_contains "${TMP_DIR}/template-no-markers.md" "No markers here."
+
+cat > "${TMP_DIR}/template-files-only.md" <<'EOF'
+Body start
+<!-- Diff files - START -->
+old files
+<!-- Diff files - END -->
+Body end
+EOF
+
+run_replacement_files_only "${TMP_DIR}/template-files-only.md"
+
+assert_contains "${TMP_DIR}/template-files-only.md" "A scripts/new.sh"
+assert_not_contains "${TMP_DIR}/template-files-only.md" "old files"
 
 python3 - <<'PY' > "${TMP_DIR}/commits-large.txt"
 for i in range(15000):
