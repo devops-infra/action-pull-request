@@ -77,6 +77,8 @@ set +e
   INPUT_NEW_STRING="" \
   INPUT_IGNORE_USERS="dependabot" \
   INPUT_ALLOW_NO_DIFF="false" \
+  INPUT_MAX_BODY_BYTES="65000" \
+  INPUT_MAX_DIFF_LINES="0" \
   bash "${SCRIPT_PATH}" >"${LOG_FILE}" 2>&1
 )
 STATUS="$?"
