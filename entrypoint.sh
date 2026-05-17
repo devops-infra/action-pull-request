@@ -315,15 +315,27 @@ echo -e "\nSetting template..."
 PR_NUMBER=$(hub pr list --base "${TARGET_BRANCH}" --head "${SOURCE_BRANCH}" --format '%I')
 if [[ -z "${PR_NUMBER}" ]]; then
   if [[ -n "${INPUT_TEMPLATE}" ]]; then
+    echo "Template source: input template file"
     TEMPLATE=$(cat "${INPUT_TEMPLATE}")
   elif [[ -n "${INPUT_BODY}" ]]; then
+    echo "Template source: input body"
     TEMPLATE="${INPUT_BODY}"
   else
+    echo "Template source: generated git log"
     get_git_log
     TEMPLATE="${GIT_LOG}"
   fi
 else
-  TEMPLATE=$(hub api --method GET "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" | jq -r '.body')
+  if [[ -n "${INPUT_TEMPLATE}" ]]; then
+    echo "Template source: input template file (update mode)"
+    TEMPLATE=$(cat "${INPUT_TEMPLATE}")
+  elif [[ -n "${INPUT_BODY}" ]]; then
+    echo "Template source: input body (update mode)"
+    TEMPLATE="${INPUT_BODY}"
+  else
+    echo "Template source: existing pull request body"
+    TEMPLATE=$(hub api --method GET "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" | jq -r '.body')
+  fi
 fi
 
 if [[ -n "${INPUT_OLD_STRING}" ]]; then
@@ -352,6 +364,8 @@ if [[ "${INPUT_GET_DIFF}" ==  "true" ]]; then
   if [[ "${TEMPLATE}" == *"<!-- Diff files -->"* || ( "${TEMPLATE}" == *"<!-- Diff files - START -->"* && "${TEMPLATE}" == *"<!-- Diff files - END -->"* ) ]]; then
     REPLACE_FILES="true"
   fi
+
+  echo "Detected diff markers: summary=${REPLACE_SUMMARY} commits=${REPLACE_COMMITS} files=${REPLACE_FILES}"
 
   if [[ "${REPLACE_SUMMARY}" == "true" || "${REPLACE_COMMITS}" == "true" || "${REPLACE_FILES}" == "true" ]]; then
     TEMPLATE_WORK_FILE="/tmp/template-work.md"
@@ -424,6 +438,10 @@ printf '%s' "${TEMPLATE}" > "/tmp/template-final.md"
 apply_body_limits "/tmp/template-final.md" "${MAX_BODY_BYTES}" "${MAX_COMMENT_BODY_BYTES}"
 TEMPLATE="$(cat "${OVERFLOW_MAIN_FILE}")"
 printf '%s' "${TEMPLATE}" > /tmp/template
+
+FINAL_BODY_BYTES="$(wc -c < /tmp/template | tr -d '[:space:]')"
+echo "Final main body size (bytes): ${FINAL_BODY_BYTES}"
+echo "Managed overflow chunks: ${CHUNK_COUNT}"
 
 if [[ -z "${PR_NUMBER}" ]]; then
   echo -e "\nCreating pull request"
