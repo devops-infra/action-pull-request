@@ -49,7 +49,7 @@ This action supports three tag levels for flexible versioning:
 ## 📖 API Reference
 ```yaml
     - name: Run the Action
-      uses: devops-infra/action-pull-request@v1.0.2
+      uses: devops-infra/action-pull-request@v1.1.0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         source_branch: development
@@ -167,7 +167,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Create pull request
-        uses: devops-infra/action-pull-request@v1.0.2
+        uses: devops-infra/action-pull-request@v1.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           title: Automatic pull request
@@ -198,7 +198,7 @@ jobs:
 
       - name: Run the Action
         if: startsWith(github.ref, 'refs/heads/feature')
-        uses: devops-infra/action-pull-request@v1.0.2
+        uses: devops-infra/action-pull-request@v1.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           title: ${{ github.event.commits[0].message }}
@@ -230,7 +230,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: devops-infra/action-pull-request@v1.0.2
+      - uses: devops-infra/action-pull-request@v1.1.0
         id: Pin patch version
 
       - uses: devops-infra/action-pull-request@v1.0
