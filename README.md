@@ -108,7 +108,7 @@ permissions:
 
 - `contents: read` is required to read repository state.
 - `pull-requests: write` is required to create and update pull requests.
-- `issues: write` is required for larger PRs that will spill over 65000 bytes (default `max_body_bytes`) and create new PR issue comments. In other cases can be omitted.
+- `issues: write` is required when managed overflow comments are created, updated, or deleted (including cleanup on later runs).
 
 
 ### 📤 Outputs Parameters

@@ -26,7 +26,8 @@ RUN chmod +x /entrypoint.sh /scripts/replace-template-diff.sh /scripts/split_con
     git \
     gh \
     hub \
-    jq ;\
+    jq \
+    python3 ;\
   apt-get clean ;\
   rm -rf /var/lib/apt/lists/*
 

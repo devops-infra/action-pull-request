@@ -77,7 +77,7 @@ validate_number_input() {
   local input_name="$2"
 
   if [[ ! "${value}" =~ ^[0-9]+$ ]]; then
-    echo -e "\n[ERROR] Input '${input_name}' must be a non-negative integer. Got: ${value}"
+    echo -e "\n[ERROR] Input '${input_name}' must be a non-negative integer. Got: ${value}" >&2
     exit 1
   fi
 }
@@ -91,11 +91,7 @@ apply_line_cap() {
     return 0
   fi
 
-  local total_lines
-  total_lines="$(wc -l < "${file_path}" | tr -d '[:space:]')"
-
-  if (( total_lines > max_lines )); then
-    python3 - "$file_path" "$max_lines" "$section_name" <<'PY'
+  python3 - "$file_path" "$max_lines" "$section_name" <<'PY'
 import pathlib
 import sys
 
@@ -104,12 +100,13 @@ limit = int(sys.argv[2])
 section = sys.argv[3]
 content = path.read_text(encoding="utf-8")
 lines = content.splitlines()
+if len(lines) <= limit:
+    raise SystemExit(0)
 trimmed = lines[:limit]
 removed = len(lines) - len(trimmed)
 trimmed.append(f"... truncated {removed} lines from {section} because max_diff_lines={limit} ...")
 path.write_text("\n".join(trimmed) + "\n", encoding="utf-8")
 PY
-  fi
 }
 
 write_chunk_comment_file() {
@@ -141,11 +138,10 @@ get_managed_comment_ids() {
   local output_file="$2"
 
   gh api "repos/${GITHUB_REPOSITORY}/issues/${pr_number}/comments" --paginate | jq -r \
-    --arg actor "${GITHUB_ACTOR}" \
     --arg start "${MANAGED_COMMENT_START}" \
     --arg end "${MANAGED_COMMENT_END}" \
     'if type == "array" then .[] else . end
-     | select(.user.login == $actor and (.body // "" | contains($start)) and (.body // "" | contains($end)))
+     | select((.body // "" | contains($start)) and (.body // "" | contains($end)))
      | .id' | sort -n > "${output_file}"
 }
 
@@ -202,9 +198,9 @@ apply_body_limits() {
 
   local with_note_file="/tmp/template-with-note.md"
   {
-    cat "${template_file}"
-    printf '\n\n---\n'
     printf '_Note: Additional diff output is included in managed comments because body size exceeded max_body_bytes=%s._\n' "${max_body_bytes}"
+    printf '\n---\n\n'
+    cat "${template_file}"
   } > "${with_note_file}"
 
   CHUNK_COUNT="$(split_template_by_bytes "${with_note_file}" "${OVERFLOW_MAIN_FILE}" "${OVERFLOW_CHUNK_PREFIX}" "${max_body_bytes}" "${max_comment_bytes}")"
@@ -235,7 +231,7 @@ validate_number_input "${MAX_BODY_BYTES}" "max_body_bytes"
 validate_number_input "${MAX_DIFF_LINES}" "max_diff_lines"
 
 if (( MAX_BODY_BYTES < 2048 )); then
-  echo -e "\n[ERROR] Input 'max_body_bytes' must be at least 2048. Got: ${MAX_BODY_BYTES}"
+  echo -e "\n[ERROR] Input 'max_body_bytes' must be at least 2048. Got: ${MAX_BODY_BYTES}" >&2
   exit 1
 fi
 
@@ -427,6 +423,7 @@ fi
 printf '%s' "${TEMPLATE}" > "/tmp/template-final.md"
 apply_body_limits "/tmp/template-final.md" "${MAX_BODY_BYTES}" "${MAX_COMMENT_BODY_BYTES}"
 TEMPLATE="$(cat "${OVERFLOW_MAIN_FILE}")"
+printf '%s' "${TEMPLATE}" > /tmp/template
 
 if [[ -z "${PR_NUMBER}" ]]; then
   echo -e "\nCreating pull request"
