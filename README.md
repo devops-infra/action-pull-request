@@ -67,6 +67,8 @@ This action supports three tag levels for flexible versioning:
         get_diff: true
         ignore_users: "dependabot"
         allow_no_diff: false
+        max_body_bytes: 65000
+        max_diff_lines: 0
 ```
 
 
@@ -89,6 +91,24 @@ This action supports three tag levels for flexible versioning:
 | `get_diff`      | No       | `false`                       | Whether to replace predefined comments with differences between branches - see details below                            |
 | `ignore_users`  | No       | `"dependabot"`                | List of users to ignore, comma separated                                                                                |
 | `allow_no_diff` | No       | `false`                       | Allows to continue on merge commits with no diffs                                                                       |
+| `max_body_bytes` | No      | `65000`                      | Maximum PR body size in bytes before overflow is posted as managed PR comments                                         |
+| `max_diff_lines` | No      | `0`                          | Maximum lines per generated diff section (`0` means unlimited)                                                         |
+
+
+### 🔐 Required Workflow Permissions
+
+Set explicit job/workflow token permissions when using this action:
+
+```yaml
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+```
+
+- `contents: read` is required to read repository state.
+- `pull-requests: write` is required to create and update pull requests.
+- `issues: write` is required when managed overflow comments are created, updated, or deleted (including cleanup on later runs).
 
 
 ### 📤 Outputs Parameters
@@ -106,6 +126,11 @@ Now this action will expect to have three types of comment blocks. Meaning anyth
 * `<!-- Diff summary - START -->` and `<!-- Diff summary - END -->` - show first lines of each commit in the pull request
 * `<!-- Diff commits - START -->` and `<!-- Diff commits - END -->` - show graph of commits in the pull request, with authors' info and time
 * `<!-- Diff files - START -->` and `<!-- Diff files - END -->` - show list of modified files
+
+When the generated PR body exceeds `max_body_bytes`, the action keeps the main body within the configured size and publishes remaining content in managed PR comments.
+Managed comments are updated/deleted on subsequent runs.
+
+Set `max_diff_lines` to cap each generated diff section before insertion.
 
 If your template uses old comment strings it will try to adjust them in the pull request body to a new standard when pull request is created. It will not modify the template.
 
@@ -128,6 +153,12 @@ name: Run the Action
 on:
   push:
     branches-ignore: master
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   action-pull-request:
     runs-on: ubuntu-latest
@@ -150,6 +181,12 @@ name: Run the Action
 on:
   push:
     branches-ignore: master
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   action-pull-request:
     runs-on: ubuntu-latest
@@ -181,6 +218,12 @@ name: Run the Action
 on:
   push:
     branches-ignore: master
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   action-pull-request:
     runs-on: ubuntu-latest

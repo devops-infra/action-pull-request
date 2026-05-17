@@ -65,6 +65,14 @@ inputs:
     description: Allows to continue on merge commits with no diffs
     required: false
     default: "false"
+  max_body_bytes:
+    description: Maximum PR body size in bytes before overflow is moved into managed comments
+    required: false
+    default: "65000"
+  max_diff_lines:
+    description: Maximum lines per generated diff section (0 means unlimited)
+    required: false
+    default: "0"
 outputs:
   url:
     description: Pull request URL
