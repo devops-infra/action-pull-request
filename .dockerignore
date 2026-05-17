@@ -6,5 +6,6 @@
 !entrypoint.sh
 !scripts/
 !scripts/replace-template-diff.sh
+!scripts/split_content_bytes.py
 !LICENSE
 !README.md

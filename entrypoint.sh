@@ -104,7 +104,12 @@ if len(lines) <= limit:
     raise SystemExit(0)
 trimmed = lines[:limit]
 removed = len(lines) - len(trimmed)
-trimmed.append(f"... truncated {removed} lines from {section} because max_diff_lines={limit} ...")
+if limit == 1:
+    trimmed = [f"... truncated {removed} lines from {section} because max_diff_lines={limit} ..."]
+else:
+    trimmed = lines[: limit - 1]
+    removed = len(lines) - len(trimmed)
+    trimmed.append(f"... truncated {removed} lines from {section} because max_diff_lines={limit} ...")
 path.write_text("\n".join(trimmed) + "\n", encoding="utf-8")
 PY
 }
