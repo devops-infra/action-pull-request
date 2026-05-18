@@ -5,6 +5,7 @@ on:
     branches-ignore:
       - master
       - main
+      - release/**
       - dependabot/**
 
 permissions:
