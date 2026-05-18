@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   call:
-    uses: devops-infra/.github/.github/workflows/reusable-automatic-release-create.yml@v1
+    uses: devops-infra/.github/.github/workflows/reusable-auto-release-create.yml@v1
     with:
       profile: actions
     secrets: inherit
