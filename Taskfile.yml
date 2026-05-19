@@ -7,6 +7,7 @@ dotenv:
 
 includes:
   variables: ./Taskfile.variables.yml
+  scripts: ./Taskfile.scripts.yml
   cicd:
     taskfile: ./Taskfile.cicd.yml
     flatten: true
@@ -23,12 +24,4 @@ tasks:
   help:
     desc: Detailed help
     cmds:
-      - |
-        echo "Tasks:"
-        task --list
-        echo ""
-        echo "Environment:"
-        echo "  DOCKER_NAME={{.DOCKER_NAME}}  DOCKER_USERNAME={{.DOCKER_USERNAME}}"
-        echo "  GHRC_NAME={{.GHRC_NAME}}  GITHUB_USERNAME={{.GITHUB_USERNAME}}"
-        echo "  LAST_RELEASE={{.LAST_RELEASE}}"  VERSION={{.VERSION}}   VERSION_FULL={{.VERSION_FULL}}
-        echo "  BRANCH={{.GIT_BRANCH}}  GIT_SHORT_SHA={{.GIT_SHORT_SHA}}"  GIT_SHA={{.GIT_SHA}}
+      - task: scripts:help
