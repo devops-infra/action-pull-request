@@ -1,0 +1,32 @@
+name: (Automatic) Release Create
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  workflow_dispatch:
+    inputs:
+      release_branch:
+        description: Release branch to publish from (e.g. release/v1.3.0)
+        required: false
+        default: ''
+        type: string
+      release_version:
+        description: Explicit release version override (e.g. v1.3.0)
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  call:
+    uses: devops-infra/.github/.github/workflows/reusable-auto-release-create.yml@v1
+    with:
+      profile: actions
+      release-branch: ${{ inputs.release_branch }}
+      release-version: ${{ inputs.release_version }}
+    secrets: inherit
