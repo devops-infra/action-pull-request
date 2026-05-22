@@ -111,7 +111,7 @@ permissions:
 - `issues: write` is required when managed overflow comments are created, updated, or deleted (including cleanup on later runs).
 
 
-### 📤 Outputs Parameters
+### 📤 Output Parameters
 | Output      | Description                   |
 |-------------|-------------------------------|
 | `url`       | Pull request URL              |
@@ -211,7 +211,10 @@ jobs:
 ```
 
 ### 🎯 Use specific version
-Run the Action with a specific version tag.
+Pick the tag level based on your stability needs:
+- `vX.Y.Z`: exact immutable release (most predictable)
+- `vX.Y`: latest patch within one minor line
+- `vX`: latest patch within one major line
 
 ```yaml
 name: Run the Action
