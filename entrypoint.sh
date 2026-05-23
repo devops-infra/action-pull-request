@@ -289,10 +289,6 @@ if [[ ! "${TARGET_REPOSITORY}" =~ ^[A-Za-z0-9]([A-Za-z0-9-]{0,38})/[A-Za-z0-9._-
   echo -e "\n[ERROR] Input 'repository' must use owner/name format. Got: ${TARGET_REPOSITORY}" >&2
   exit 1
 fi
-if [[ "${TARGET_REPOSITORY}" == *".."* || "${TARGET_REPOSITORY}" == */.* || "${TARGET_REPOSITORY}" == */*. || "${TARGET_REPOSITORY}" == *"/."* ]]; then
-  echo -e "\n[ERROR] Input 'repository' contains unsupported characters. Got: ${TARGET_REPOSITORY}" >&2
-  exit 1
-fi
 
 REPOSITORY_PATH="${INPUT_REPOSITORY_PATH:-.}"
 if [[ -z "${REPOSITORY_PATH}" ]]; then

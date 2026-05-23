@@ -58,4 +58,44 @@ fi
 
 assert_contains "${LOG_FILE}" "Input 'repository' must use owner/name format"
 
+LOG_FILE_DOT_REPO="${TMP_DIR}/run-dot-repo.log"
+
+set +e
+GITHUB_ACTOR="ci-user" \
+GITHUB_TOKEN="token" \
+GITHUB_REPOSITORY="owner/repo" \
+GITHUB_WORKSPACE="${TMP_DIR}" \
+GITHUB_OUTPUT="${TMP_DIR}/output-dot-repo.txt" \
+INPUT_GITHUB_TOKEN="token" \
+INPUT_REPOSITORY="owner/.github" \
+INPUT_REPOSITORY_PATH="." \
+INPUT_SOURCE_BRANCH="develop" \
+INPUT_TARGET_BRANCH="main" \
+INPUT_TITLE="" \
+INPUT_TEMPLATE="" \
+INPUT_BODY="" \
+INPUT_REVIEWER="" \
+INPUT_ASSIGNEE="" \
+INPUT_LABEL="" \
+INPUT_MILESTONE="" \
+INPUT_DRAFT="false" \
+INPUT_GET_DIFF="false" \
+INPUT_OLD_STRING="" \
+INPUT_NEW_STRING="" \
+INPUT_IGNORE_USERS="ci-user" \
+INPUT_ALLOW_NO_DIFF="false" \
+INPUT_MAX_BODY_BYTES="65000" \
+INPUT_MAX_DIFF_LINES="0" \
+bash "${SCRIPT_PATH}" >"${LOG_FILE_DOT_REPO}" 2>&1
+STATUS_DOT_REPO="$?"
+set -e
+
+if [[ "${STATUS_DOT_REPO}" != "0" ]]; then
+  echo "Expected successful execution for owner/.github repository" >&2
+  cat "${LOG_FILE_DOT_REPO}" >&2
+  exit 1
+fi
+
+assert_contains "${LOG_FILE_DOT_REPO}" "User ci-user is ignored. Skipping."
+
 echo "Repository validation test passed."
