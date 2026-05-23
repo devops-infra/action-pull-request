@@ -285,8 +285,12 @@ if [[ -z "${TARGET_REPOSITORY}" ]]; then
   echo -e "\n[ERROR] Unable to resolve repository. Set input 'repository' or ensure GITHUB_REPOSITORY is available." >&2
   exit 1
 fi
-if [[ ! "${TARGET_REPOSITORY}" =~ ^[^/]+/[^/]+$ ]]; then
+if [[ ! "${TARGET_REPOSITORY}" =~ ^[A-Za-z0-9]([A-Za-z0-9-]{0,38})/[A-Za-z0-9._-]+$ ]]; then
   echo -e "\n[ERROR] Input 'repository' must use owner/name format. Got: ${TARGET_REPOSITORY}" >&2
+  exit 1
+fi
+if [[ "${TARGET_REPOSITORY}" == *".."* || "${TARGET_REPOSITORY}" == */.* || "${TARGET_REPOSITORY}" == */*. || "${TARGET_REPOSITORY}" == *"/."* ]]; then
+  echo -e "\n[ERROR] Input 'repository' contains unsupported characters. Got: ${TARGET_REPOSITORY}" >&2
   exit 1
 fi
 
@@ -310,12 +314,6 @@ if [[ ! -d "${REPO_DIR}" ]]; then
   exit 1
 fi
 
-if ! git -C "${REPO_DIR}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-  echo -e "\n[ERROR] Path is not a git repository: ${REPO_DIR}" >&2
-  exit 1
-fi
-
-echo -e "\nSetting GitHub credentials..."
 # Keep all global git config isolated to a temporary file
 export GIT_CONFIG_GLOBAL
 GIT_CONFIG_GLOBAL="$(mktemp /tmp/action-pull-request-git-config-XXXXXX)"
@@ -325,6 +323,13 @@ trap 'rm -f "${GIT_CONFIG_GLOBAL}"' EXIT
 git config --global --add safe.directory "${WORKSPACE_DIR}"
 git config --global --add safe.directory /github/workspace
 git config --global --add safe.directory "${REPO_DIR}"
+
+if ! git -C "${REPO_DIR}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo -e "\n[ERROR] Path is not a git repository: ${REPO_DIR}" >&2
+  exit 1
+fi
+
+echo -e "\nSetting GitHub credentials..."
 git -C "${REPO_DIR}" remote set-url origin "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${TARGET_REPOSITORY}"
 git -C "${REPO_DIR}" config user.name "${GITHUB_ACTOR}"
 git -C "${REPO_DIR}" config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
@@ -479,19 +484,18 @@ if [[ -z "${PR_NUMBER}" ]]; then
   else
     TITLE=$(git log -1 --pretty=%s | head -1)
   fi
-  ARG_LIST=()
-  ARG_LIST+=("-F /tmp/template")
+  ARG_LIST=("-F" "/tmp/template")
   if [[ -n "${INPUT_REVIEWER}" ]]; then
-    ARG_LIST+=("-r \"${INPUT_REVIEWER}\"")
+    ARG_LIST+=("-r" "${INPUT_REVIEWER}")
   fi
   if [[ -n "${INPUT_ASSIGNEE}" ]]; then
-    ARG_LIST+=("-a \"${INPUT_ASSIGNEE}\"")
+    ARG_LIST+=("-a" "${INPUT_ASSIGNEE}")
   fi
   if [[ -n "${INPUT_LABEL}" ]]; then
-    ARG_LIST+=("-l \"${INPUT_LABEL}\"")
+    ARG_LIST+=("-l" "${INPUT_LABEL}")
   fi
   if [[ -n "${INPUT_MILESTONE}" ]]; then
-    ARG_LIST+=("-M \"${INPUT_MILESTONE}\"")
+    ARG_LIST+=("-M" "${INPUT_MILESTONE}")
   fi
   if [[ "${INPUT_DRAFT}" ==  "true" ]]; then
     ARG_LIST+=("-d")
@@ -515,10 +519,8 @@ if [[ -z "${PR_NUMBER}" ]]; then
   echo -e "\n${TEMPLATE}" >> /tmp/template
   echo -e "\nTemplate:"
   cat /tmp/template
-  # shellcheck disable=SC2016,SC2124
-  COMMAND="hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ${ARG_LIST[@]}"
-  echo -e "\nRunning: ${COMMAND}"
-  URL=$(sh -c "${COMMAND}")
+  echo -e "\nRunning: hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ..."
+  URL=$(hub pull-request -b "${TARGET_BRANCH}" -h "${SOURCE_BRANCH}" --no-edit "${ARG_LIST[@]}")
   # shellcheck disable=SC2181
   if [[ "$?" != "0" ]]; then RET_CODE=1; fi
   PR_NUMBER=$(gh pr view --json number -q .number "${URL}")
@@ -527,9 +529,8 @@ if [[ -z "${PR_NUMBER}" ]]; then
   fi
 else
   echo -e "\nUpdating pull request"
-  COMMAND="hub api --method PATCH repos/${TARGET_REPOSITORY}/pulls/${PR_NUMBER} --field 'body=@/tmp/template'"
-  echo -e "Running: ${COMMAND}"
-  URL=$(sh -c "${COMMAND} | jq -r '.html_url'")
+  echo -e "Running: hub api --method PATCH repos/${TARGET_REPOSITORY}/pulls/${PR_NUMBER} --field body=@/tmp/template"
+  URL=$(hub api --method PATCH "repos/${TARGET_REPOSITORY}/pulls/${PR_NUMBER}" --field "body=@/tmp/template" | jq -r '.html_url')
   # shellcheck disable=SC2181
   if [[ "$?" != "0" ]]; then RET_CODE=1; fi
   if (( CHUNK_COUNT > 0 )); then
