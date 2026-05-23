@@ -5,6 +5,14 @@ inputs:
   github_token:
     description: GitHub token
     required: true
+  repository:
+    description: Repository in owner/name format used for API calls and git remote auth (defaults to current repository)
+    required: false
+    default: ""
+  repository_path:
+    description: Relative path under GITHUB_WORKSPACE to the checked-out repository (use when actions/checkout path is set)
+    required: false
+    default: "."
   source_branch:
     description: Name of the source branch
     required: false
