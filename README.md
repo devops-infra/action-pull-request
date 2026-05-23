@@ -20,6 +20,12 @@
 ## 🔗 Related Actions
 **Useful in combination with my other action [devops-infra/action-commit-push](https://github.com/devops-infra/action-commit-push).**
 
+Both actions are compatible when you use `actions/checkout` with a custom `path`:
+- set `repository_path` in `devops-infra/action-commit-push`
+- set the same `repository_path` in `devops-infra/action-pull-request`
+
+This action isolates global Git config in a temporary file (via `GIT_CONFIG_GLOBAL`) to avoid modifying runner/user-level Git config.
+
 
 ## 📊 Badges
 [
@@ -52,6 +58,8 @@ This action supports three tag levels for flexible versioning:
       uses: devops-infra/action-pull-request@v1.1.3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
+        repository: devops-infra/action-pull-request
+        repository_path: .
         source_branch: development
         target_branch: master
         title: My pull request
@@ -73,26 +81,28 @@ This action supports three tag levels for flexible versioning:
 
 
 ### 🔧 Input Parameters
-| Input Variable  | Required | Default                       | Description                                                                                                             |
-|-----------------|----------|-------------------------------|-------------------------------------------------------------------------------------------------------------------------|
-| `github_token`  | **Yes**  | `""`                          | GitHub token `${{ secrets.GITHUB_TOKEN }}`                                                                              |
-| `source_branch` | No       | *current branch*              | Name of the source branch                                                                                               |
-| `target_branch` | No       | `master`                      | Name of the target branch. Change it if you use `main`                                                                  |
-| `title`         | No       | *subject of the first commit* | Pull request title                                                                                                      |
-| `template`      | No       | `""`                          | Template file location                                                                                                  |
-| `body`          | No       | *list of commits*             | Pull request body                                                                                                       |
-| `reviewer`      | No       | `""`                          | Reviewer's username                                                                                                     |
-| `assignee`      | No       | `""`                          | Assignee's usernames                                                                                                    |
-| `label`         | No       | `""`                          | Labels to apply, comma separated                                                                                        |
-| `milestone`     | No       | `""`                          | Milestone                                                                                                               |
-| `draft`         | No       | `false`                       | Whether to mark it as a draft                                                                                           |
-| `old_string`    | No       | `""`                          | Old string for the replacement in the template                                                                          |
-| `new_string`    | No       | `""`                          | New string for the replacement in the template. If not specified, but `old_string` was, it will gather commits subjects |
-| `get_diff`      | No       | `false`                       | Whether to replace predefined comments with differences between branches - see details below                            |
-| `ignore_users`  | No       | `"dependabot"`                | List of users to ignore, comma separated                                                                                |
-| `allow_no_diff` | No       | `false`                       | Allows to continue on merge commits with no diffs                                                                       |
-| `max_body_bytes` | No      | `65000`                      | Maximum PR body size in bytes before overflow is posted as managed PR comments                                         |
-| `max_diff_lines` | No      | `0`                          | Maximum lines per generated diff section (`0` means unlimited)                                                         |
+| Input Variable    | Required | Default                       | Description                                                                                                             |
+|-------------------|----------|-------------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| `github_token`    | **Yes**  | `""`                          | GitHub token `${{ secrets.GITHUB_TOKEN }}`                                                                              |
+| `repository`      | No       | `${{ github.repository }}`    | Target repository in `owner/name` format used for API calls and git remote auth                                         |
+| `repository_path` | No       | `.`                           | Relative path under `GITHUB_WORKSPACE` to the checked-out repository                                                    |
+| `source_branch`   | No       | *current branch*              | Name of the source branch                                                                                               |
+| `target_branch`   | No       | `master`                      | Name of the target branch. Change it if you use `main`                                                                  |
+| `title`           | No       | *subject of the first commit* | Pull request title                                                                                                      |
+| `template`        | No       | `""`                          | Template file location                                                                                                  |
+| `body`            | No       | *list of commits*             | Pull request body                                                                                                       |
+| `reviewer`        | No       | `""`                          | Reviewer's username                                                                                                     |
+| `assignee`        | No       | `""`                          | Assignee's usernames                                                                                                    |
+| `label`           | No       | `""`                          | Labels to apply, comma separated                                                                                        |
+| `milestone`       | No       | `""`                          | Milestone                                                                                                               |
+| `draft`           | No       | `false`                       | Whether to mark it as a draft                                                                                           |
+| `old_string`      | No       | `""`                          | Old string for the replacement in the template                                                                          |
+| `new_string`      | No       | `""`                          | New string for the replacement in the template. If not specified, but `old_string` was, it will gather commits subjects |
+| `get_diff`        | No       | `false`                       | Whether to replace predefined comments with differences between branches - see details below                            |
+| `ignore_users`    | No       | `"dependabot"`                | List of users to ignore, comma separated                                                                                |
+| `allow_no_diff`   | No       | `false`                       | Allows to continue on merge commits with no diffs                                                                       |
+| `max_body_bytes`  | No       | `65000`                       | Maximum PR body size in bytes before overflow is posted as managed PR comments                                          |
+| `max_diff_lines`  | No       | `0`                           | Maximum lines per generated diff section (`0` means unlimited)                                                          |
 
 
 ### 🔐 Required Workflow Permissions
@@ -195,12 +205,15 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
+          path: repo
 
       - name: Run the Action
         if: startsWith(github.ref, 'refs/heads/feature')
         uses: devops-infra/action-pull-request@v1.1.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          repository_path: repo
           title: ${{ github.event.commits[0].message }}
           assignee: ${{ github.actor }}
           label: automatic,feature
@@ -236,7 +249,7 @@ jobs:
       - uses: devops-infra/action-pull-request@v1.1.3
         id: Pin patch version
 
-      - uses: devops-infra/action-pull-request@v1.0
+      - uses: devops-infra/action-pull-request@v1.1
         id: Pin minor version
 
       - uses: devops-infra/action-pull-request@v1

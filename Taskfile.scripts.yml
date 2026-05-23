@@ -102,13 +102,13 @@ tasks:
       - echo Updating full version from {{.VERSION_FROM_ACTION_YML}} to {{.VERSION}}
       - echo Updating minor version from {{.MINOR_FROM_ACTION_YML}} to {{.VERSION_MINOR}}
       - echo Updating major version from {{.MAJOR_FROM_ACTION_YML}} to {{.VERSION_MAJOR}}
-      - "{{.SED}} -i 's#{{.DOCKER_NAME}}:{{.VERSION_FROM_ACTION_YML}}#{{.DOCKER_NAME}}:{{.VERSION}}#g' action.yml"
-      - "{{.SED}} -i 's#{{.DOCKER_NAME}}@{{.VERSION_FROM_ACTION_YML}}#{{.DOCKER_NAME}}@{{.VERSION}}#g' README.md"
-      - "{{.SED}} -i 's#{{.GITHUB_NAME}}@{{.VERSION_FROM_ACTION_YML}}#{{.GITHUB_NAME}}@{{.VERSION}}#g' README.md"
-      - "{{.SED}} -i 's#{{.DOCKER_NAME}}@{{.MINOR_FROM_ACTION_YML}}#{{.DOCKER_NAME}}@{{.VERSION_MINOR}}#g' README.md"
-      - "{{.SED}} -i 's#{{.GITHUB_NAME}}@{{.MINOR_FROM_ACTION_YML}}#{{.GITHUB_NAME}}@{{.VERSION_MINOR}}#g' README.md"
-      - "{{.SED}} -i 's#{{.DOCKER_NAME}}@{{.MAJOR_FROM_ACTION_YML}}#{{.DOCKER_NAME}}@{{.VERSION_MAJOR}}#g' README.md"
-      - "{{.SED}} -i 's#{{.GITHUB_NAME}}@{{.MAJOR_FROM_ACTION_YML}}#{{.GITHUB_NAME}}@{{.VERSION_MAJOR}}#g' README.md"
+      - "{{.SED}} -E -i 's#({{.DOCKER_NAME}}:)v[0-9]+\\.[0-9]+\\.[0-9]+#\\1{{.VERSION}}#g' action.yml"
+      - "{{.SED}} -E -i 's#({{.DOCKER_NAME}}@)v[0-9]+\\.[0-9]+\\.[0-9]+([^0-9.]|$)#\\1{{.VERSION}}\\2#g' README.md"
+      - "{{.SED}} -E -i 's#({{.GITHUB_NAME}}@)v[0-9]+\\.[0-9]+\\.[0-9]+([^0-9.]|$)#\\1{{.VERSION}}\\2#g' README.md"
+      - "{{.SED}} -E -i 's#({{.DOCKER_NAME}}@)v[0-9]+\\.[0-9]+([^0-9.]|$)#\\1{{.VERSION_MINOR}}\\2#g' README.md"
+      - "{{.SED}} -E -i 's#({{.GITHUB_NAME}}@)v[0-9]+\\.[0-9]+([^0-9.]|$)#\\1{{.VERSION_MINOR}}\\2#g' README.md"
+      - "{{.SED}} -E -i 's#({{.DOCKER_NAME}}@)v[0-9]+([^0-9.]|$)#\\1{{.VERSION_MAJOR}}\\2#g' README.md"
+      - "{{.SED}} -E -i 's#({{.GITHUB_NAME}}@)v[0-9]+([^0-9.]|$)#\\1{{.VERSION_MAJOR}}\\2#g' README.md"
 
   version:resolve-next:
     desc: Resolve next version from bump type and profile

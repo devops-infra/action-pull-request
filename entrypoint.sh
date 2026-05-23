@@ -18,6 +18,10 @@ OVERFLOW_CHUNK_PREFIX="/tmp/template-overflow-chunk"
 CHUNK_COUNT=0
 MANAGED_COMMENT_START="<!-- action-pull-request:managed-diff-chunk:start -->"
 MANAGED_COMMENT_END="<!-- action-pull-request:managed-diff-chunk:end -->"
+TARGET_REPOSITORY=""
+REPOSITORY_PATH=""
+WORKSPACE_DIR=""
+REPO_DIR=""
 
 REPLACE_TEMPLATE_SCRIPT="/scripts/replace-template-diff.sh"
 if [[ ! -x "${REPLACE_TEMPLATE_SCRIPT}" ]]; then
@@ -138,11 +142,21 @@ split_template_by_bytes() {
   python3 "${SPLIT_CONTENT_SCRIPT}" "${input_file}" "${main_output_file}" "${chunk_prefix}" "${max_main_bytes}" "${max_comment_bytes}"
 }
 
+resolve_path() {
+  local input_path="$1"
+  python3 - "$input_path" <<'PY'
+import pathlib
+import sys
+
+print(pathlib.Path(sys.argv[1]).resolve(strict=False))
+PY
+}
+
 get_managed_comment_ids() {
   local pr_number="$1"
   local output_file="$2"
 
-  gh api "repos/${GITHUB_REPOSITORY}/issues/${pr_number}/comments" --paginate | jq -r \
+  gh api "repos/${TARGET_REPOSITORY}/issues/${pr_number}/comments" --paginate | jq -r \
     --arg start "${MANAGED_COMMENT_START}" \
     --arg end "${MANAGED_COMMENT_END}" \
     'if type == "array" then .[] else . end
@@ -172,16 +186,16 @@ reconcile_managed_comments() {
 
     if (( idx <= ${#existing_ids[@]} )); then
       local comment_id="${existing_ids[$((idx-1))]}"
-      gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${comment_id}" --field "body=@${comment_file}" >/dev/null
+      gh api --method PATCH "repos/${TARGET_REPOSITORY}/issues/comments/${comment_id}" --field "body=@${comment_file}" >/dev/null
     else
-      gh api --method POST "repos/${GITHUB_REPOSITORY}/issues/${pr_number}/comments" --field "body=@${comment_file}" >/dev/null
+      gh api --method POST "repos/${TARGET_REPOSITORY}/issues/${pr_number}/comments" --field "body=@${comment_file}" >/dev/null
     fi
   done
 
   if (( ${#existing_ids[@]} > chunk_count )); then
     for ((idx=chunk_count+1; idx<=${#existing_ids[@]}; idx++)); do
       local stale_id="${existing_ids[$((idx-1))]}"
-      gh api --method DELETE "repos/${GITHUB_REPOSITORY}/issues/comments/${stale_id}" >/dev/null
+      gh api --method DELETE "repos/${TARGET_REPOSITORY}/issues/comments/${stale_id}" >/dev/null
     done
   fi
 }
@@ -212,6 +226,8 @@ apply_body_limits() {
 }
 
 echo "Inputs:"
+echo "  repository: ${INPUT_REPOSITORY:-}"
+echo "  repository_path: ${INPUT_REPOSITORY_PATH:-.}"
 echo "  source_branch: ${INPUT_SOURCE_BRANCH}"
 echo "  target_branch: ${INPUT_TARGET_BRANCH}"
 echo "  title: ${INPUT_TITLE}"
@@ -264,15 +280,60 @@ if [[ -z "${INPUT_GITHUB_TOKEN}" ]]; then
   exit 1
 fi
 
+TARGET_REPOSITORY="${INPUT_REPOSITORY:-${GITHUB_REPOSITORY}}"
+if [[ -z "${TARGET_REPOSITORY}" ]]; then
+  echo -e "\n[ERROR] Unable to resolve repository. Set input 'repository' or ensure GITHUB_REPOSITORY is available." >&2
+  exit 1
+fi
+if [[ ! "${TARGET_REPOSITORY}" =~ ^[^/]+/[^/]+$ ]]; then
+  echo -e "\n[ERROR] Input 'repository' must use owner/name format. Got: ${TARGET_REPOSITORY}" >&2
+  exit 1
+fi
+
+REPOSITORY_PATH="${INPUT_REPOSITORY_PATH:-.}"
+if [[ -z "${REPOSITORY_PATH}" ]]; then
+  REPOSITORY_PATH="."
+fi
+if [[ "${REPOSITORY_PATH}" == /* ]]; then
+  echo -e "\n[ERROR] Input 'repository_path' must be a relative path under GITHUB_WORKSPACE." >&2
+  exit 1
+fi
+
+WORKSPACE_DIR="$(resolve_path "${GITHUB_WORKSPACE}")"
+REPO_DIR="$(resolve_path "${GITHUB_WORKSPACE}/${REPOSITORY_PATH}")"
+if [[ "${REPO_DIR}" != "${WORKSPACE_DIR}" && "${REPO_DIR}" != "${WORKSPACE_DIR}"/* ]]; then
+  echo -e "\n[ERROR] Input 'repository_path' resolves outside GITHUB_WORKSPACE." >&2
+  exit 1
+fi
+if [[ ! -d "${REPO_DIR}" ]]; then
+  echo -e "\n[ERROR] Repository path does not exist: ${REPO_DIR}" >&2
+  exit 1
+fi
+
+if ! git -C "${REPO_DIR}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo -e "\n[ERROR] Path is not a git repository: ${REPO_DIR}" >&2
+  exit 1
+fi
+
 echo -e "\nSetting GitHub credentials..."
+# Keep all global git config isolated to a temporary file
+export GIT_CONFIG_GLOBAL
+GIT_CONFIG_GLOBAL="$(mktemp /tmp/action-pull-request-git-config-XXXXXX)"
+trap 'rm -f "${GIT_CONFIG_GLOBAL}"' EXIT
+
 # Prevents issues with: fatal: unsafe repository ('/github/workspace' is owned by someone else)
-git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+git config --global --add safe.directory "${WORKSPACE_DIR}"
 git config --global --add safe.directory /github/workspace
-git remote set-url origin "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}"
-git config --global user.name "${GITHUB_ACTOR}"
-git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+git config --global --add safe.directory "${REPO_DIR}"
+git -C "${REPO_DIR}" remote set-url origin "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${TARGET_REPOSITORY}"
+git -C "${REPO_DIR}" config user.name "${GITHUB_ACTOR}"
+git -C "${REPO_DIR}" config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 # Needed for hub binary
 export GITHUB_USER="${GITHUB_ACTOR}"
+echo "Repository: ${TARGET_REPOSITORY}"
+echo "Repository path: ${REPO_DIR}"
+
+cd "${REPO_DIR}"
 
 echo -e "\nSetting branches..."
 SOURCE_BRANCH="${INPUT_SOURCE_BRANCH:-$(git symbolic-ref --short -q HEAD)}"
@@ -339,7 +400,7 @@ else
     TEMPLATE="${INPUT_BODY}"
   else
     echo "Template source: existing pull request body"
-    TEMPLATE=$(hub api --method GET "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" | jq -r '.body')
+    TEMPLATE=$(hub api --method GET "repos/${TARGET_REPOSITORY}/pulls/${PR_NUMBER}" | jq -r '.body')
   fi
 fi
 
@@ -466,7 +527,7 @@ if [[ -z "${PR_NUMBER}" ]]; then
   fi
 else
   echo -e "\nUpdating pull request"
-  COMMAND="hub api --method PATCH repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER} --field 'body=@/tmp/template'"
+  COMMAND="hub api --method PATCH repos/${TARGET_REPOSITORY}/pulls/${PR_NUMBER} --field 'body=@/tmp/template'"
   echo -e "Running: ${COMMAND}"
   URL=$(sh -c "${COMMAND} | jq -r '.html_url'")
   # shellcheck disable=SC2181

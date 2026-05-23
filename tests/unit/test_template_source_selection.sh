@@ -19,56 +19,73 @@ assert_contains() {
 }
 
 mkdir -p "${TMP_DIR}/bin"
+mkdir -p "${TMP_DIR}/repo"
 
 cat > "${TMP_DIR}/bin/git" <<'EOF'
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-if [[ "$#" -ge 2 && "$1" == "config" && "$2" == "--global" ]]; then
+args=("$@")
+if [[ "${#args[@]}" -ge 2 && "${args[0]}" == "-C" ]]; then
+  args=("${args[@]:2}")
+fi
+
+if [[ "${#args[@]}" -ge 2 && "${args[0]}" == "config" && "${args[1]}" == "--global" ]]; then
   exit 0
 fi
 
-if [[ "$#" -ge 2 && "$1" == "remote" && "$2" == "set-url" ]]; then
+if [[ "${#args[@]}" -ge 1 && "${args[0]}" == "config" ]]; then
   exit 0
 fi
 
-if [[ "$#" -ge 1 && "$1" == "fetch" ]]; then
+if [[ "${#args[@]}" -ge 2 && "${args[0]}" == "remote" && "${args[1]}" == "set-url" ]]; then
   exit 0
 fi
 
-if [[ "$#" -ge 2 && "$1" == "show-ref" ]]; then
-  if [[ "${@: -1}" == "refs/remotes/origin/develop" || "${@: -1}" == "refs/remotes/origin/release/MAPL-v3" ]]; then
+if [[ "${#args[@]}" -ge 1 && "${args[0]}" == "fetch" ]]; then
+  exit 0
+fi
+
+if [[ "${#args[@]}" -ge 2 && "${args[0]}" == "rev-parse" && "${args[1]}" == "--is-inside-work-tree" ]]; then
+  echo "true"
+  exit 0
+fi
+
+if [[ "${#args[@]}" -ge 2 && "${args[0]}" == "show-ref" ]]; then
+  last_arg="${args[$((${#args[@]} - 1))]}"
+  if [[ "${last_arg}" == "refs/remotes/origin/develop" || "${last_arg}" == "refs/remotes/origin/release/MAPL-v3" ]]; then
     exit 0
   fi
   exit 1
 fi
 
-if [[ "$#" -ge 2 && "$1" == "rev-parse" ]]; then
-  if [[ "${@: -1}" == "origin/develop" ]]; then
+if [[ "${#args[@]}" -ge 2 && "${args[0]}" == "rev-parse" ]]; then
+  last_arg="${args[$((${#args[@]} - 1))]}"
+  if [[ "${last_arg}" == "origin/develop" ]]; then
     echo "bbb222"
     exit 0
   fi
-  if [[ "${@: -1}" == "origin/release/MAPL-v3" ]]; then
+  if [[ "${last_arg}" == "origin/release/MAPL-v3" ]]; then
     echo "aaa111"
     exit 0
   fi
 fi
 
-if [[ "$#" -ge 2 && "$1" == "diff" && "$2" == "--quiet" ]]; then
+if [[ "${#args[@]}" -ge 2 && "${args[0]}" == "diff" && "${args[1]}" == "--quiet" ]]; then
   exit 1
 fi
 
-if [[ "$#" -ge 1 && "$1" == "diff" ]]; then
+if [[ "${#args[@]}" -ge 1 && "${args[0]}" == "diff" ]]; then
   echo "M README.md"
   exit 0
 fi
 
-if [[ "$#" -ge 1 && "$1" == "log" ]]; then
+if [[ "${#args[@]}" -ge 1 && "${args[0]}" == "log" ]]; then
   echo "stub log"
   exit 0
 fi
 
-if [[ "$#" -ge 2 && "$1" == "symbolic-ref" ]]; then
+if [[ "${#args[@]}" -ge 2 && "${args[0]}" == "symbolic-ref" ]]; then
   echo "develop"
   exit 0
 fi
@@ -135,6 +152,7 @@ GITHUB_REPOSITORY="owner/repo" \
 GITHUB_WORKSPACE="${TMP_DIR}" \
 GITHUB_OUTPUT="${TMP_DIR}/output.txt" \
 INPUT_GITHUB_TOKEN="token" \
+INPUT_REPOSITORY_PATH="repo" \
 INPUT_SOURCE_BRANCH="develop" \
 INPUT_TARGET_BRANCH="release/MAPL-v3" \
 INPUT_TITLE="" \
