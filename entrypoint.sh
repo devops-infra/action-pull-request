@@ -326,7 +326,7 @@ if ! git -C "${REPO_DIR}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 fi
 
 echo -e "\nSetting GitHub credentials..."
-git -C "${REPO_DIR}" remote set-url origin "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${TARGET_REPOSITORY}"
+git -C "${REPO_DIR}" remote set-url origin "https://${GITHUB_ACTOR}:${INPUT_GITHUB_TOKEN}@github.com/${TARGET_REPOSITORY}"
 git -C "${REPO_DIR}" config user.name "${GITHUB_ACTOR}"
 git -C "${REPO_DIR}" config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 # Needed for hub binary
