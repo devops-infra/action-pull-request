@@ -1,0 +1,32 @@
+name: (Manual) E2E Validate
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Validation mode
+        required: false
+        default: ref
+        type: choice
+        options:
+          - ref
+          - image
+      image_tag:
+        description: Image tag used when mode=image (for example v1.2.3-test or v1.2.3-rc)
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  packages: read
+
+jobs:
+  e2e:
+    uses: devops-infra/triglav/.github/workflows/e2e-action-pull-request.yml@master
+    with:
+      mode: ${{ inputs.mode }}
+      image_tag: ${{ inputs.image_tag }}
+    secrets: inherit
