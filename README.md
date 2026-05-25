@@ -174,7 +174,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Create pull request
         uses: devops-infra/action-pull-request@v1.2.0
@@ -202,7 +202,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           path: repo
@@ -244,7 +244,7 @@ jobs:
   action-pull-request:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: devops-infra/action-pull-request@v1.2.0
         id: Pin patch version
@@ -270,6 +270,29 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 If you have any questions or need help, please:
 - 📝 Create an [issue](https://github.com/devops-infra/action-pull-request/issues)
 - 🌟 Star this repository if you find it useful!
+
+## 🧪 End-to-End Validation
+Use the manual workflow `.github/workflows/manual-e2e-validate.yml` to validate this action against the centralized E2E repository.
+
+- `mode=ref` validates ref-oriented E2E paths against stable pinned action refs.
+- `mode=image` is wired but currently placeholder-only in the central E2E workflow for this action.
+
+CI/CD automation also runs these E2E checks automatically:
+
+- Pull requests: E2E validation runs through reusable org workflows.
+- Release branch prepare: E2E validation runs against release candidate refs.
+- Release create: E2E validation runs against production release refs.
+
+Example trigger inputs:
+
+```text
+mode=ref
+```
+
+```text
+mode=image
+image_tag=v1.2.3-test
+```
 
 ## Forking
 To publish images from a fork, set these variables so Task uses your registry identities:

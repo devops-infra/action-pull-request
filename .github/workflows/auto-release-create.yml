@@ -21,7 +21,8 @@ on:
 permissions:
   contents: write
   packages: write
-  pull-requests: read
+  pull-requests: write
+  issues: write
 
 jobs:
   call:

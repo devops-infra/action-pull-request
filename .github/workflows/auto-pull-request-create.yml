@@ -9,9 +9,10 @@ on:
       - dependabot/**
 
 permissions:
-  contents: read
+  contents: write
   packages: write
   pull-requests: write
+  issues: write
 
 jobs:
   call:

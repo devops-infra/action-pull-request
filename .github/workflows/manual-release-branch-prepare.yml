@@ -27,6 +27,7 @@ permissions:
   contents: write
   packages: write
   pull-requests: write
+  issues: write
 
 jobs:
   call:
