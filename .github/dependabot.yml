@@ -4,6 +4,9 @@ updates:
     directory: /
     schedule:
       interval: weekly
+      day: monday
+      time: "05:00"
+      timezone: "UTC"
     assignees:
       - ChristophShyper
     groups:
@@ -15,6 +18,9 @@ updates:
     directory: /
     schedule:
       interval: weekly
+      day: monday
+      time: "05:00"
+      timezone: "UTC"
     assignees:
       - ChristophShyper
     groups:
