@@ -3,4 +3,5 @@ curl~=8.19
 github-cli~=2.83
 git~=2.52
 jq~=1.8
+perl~=5.40
 python3~=3.12
