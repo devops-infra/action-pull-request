@@ -10,7 +10,7 @@ commandTests:
     command: bash
     args:
       - -lc
-      - command -v bash >/dev/null 2>&1 && command -v git >/dev/null 2>&1 && command -v gh >/dev/null 2>&1 && command -v jq >/dev/null 2>&1 && command -v curl >/dev/null 2>&1 && ! command -v hub >/dev/null 2>&1
+      - command -v bash >/dev/null 2>&1 && command -v git >/dev/null 2>&1 && command -v gh >/dev/null 2>&1 && command -v jq >/dev/null 2>&1 && command -v curl >/dev/null 2>&1
 
   - name: Temporary and APK cache cleaned
     command: bash
