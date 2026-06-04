@@ -44,9 +44,9 @@ tasks:
       - task: scripts:lint:yamllint
 
   dependency:update:
-    desc: 'No-op: no dedicated dependency updater configured for this profile'
+    desc: Update repository dependencies not covered by Dependabot
     cmds:
-      - task: scripts:dependency:update
+      - task: scripts:packages:update
 
   version:set:
     desc: Update version in README.md and action.yml

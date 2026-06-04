@@ -7,4 +7,4 @@
 !README.md
 !entrypoint.sh
 !scripts
-!pip
+!alpine-packages.txt
