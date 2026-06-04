@@ -98,25 +98,61 @@ cat > "${TMP_DIR}/bin/gh" <<'EOF'
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+cmd="$*"
+
 if [[ "$#" -ge 2 && "$1" == "pr" && "$2" == "list" ]]; then
-  echo "123"
   exit 0
 fi
 
-if [[ "$#" -ge 1 && "$1" == "api" ]]; then
-  cmd="$*"
-  if [[ "${cmd}" == *"repos/owner/repo/issues/123/comments"* ]]; then
-    echo "[]"
-    exit 0
+if [[ "$#" -ge 2 && "$1" == "pr" && "$2" == "create" ]]; then
+  if [[ "${cmd}" != *"--repo owner/repo"* ]]; then
+    echo "Missing --repo" >&2
+    exit 1
   fi
-  if [[ "${cmd}" == *"repos/owner/repo/pulls/123"* && "${cmd}" == *"--method GET"* ]]; then
-    echo "OLD BODY WITHOUT MARKERS"
-    exit 0
+  if [[ "${cmd}" != *"--base release/MAPL-v3"* ]]; then
+    echo "Missing --base" >&2
+    exit 1
   fi
-  if [[ "${cmd}" == *"repos/owner/repo/pulls/123"* && "${cmd}" == *"--method PATCH"* ]]; then
-    echo "https://example.test/pr/123"
-    exit 0
+  if [[ "${cmd}" != *"--head owner:develop"* ]]; then
+    echo "Missing --head" >&2
+    exit 1
   fi
+  if [[ "${cmd}" != *"--title My PR title"* ]]; then
+    echo "Missing --title" >&2
+    exit 1
+  fi
+  if [[ "${cmd}" != *"--body-file /tmp/template"* ]]; then
+    echo "Missing --body-file" >&2
+    exit 1
+  fi
+  if [[ "${cmd}" != *"--reviewer alice"* || "${cmd}" != *"--reviewer bob"* ]]; then
+    echo "Missing reviewers" >&2
+    exit 1
+  fi
+  if [[ "${cmd}" != *"--assignee assignee1"* || "${cmd}" != *"--assignee assignee2"* ]]; then
+    echo "Missing assignees" >&2
+    exit 1
+  fi
+  if [[ "${cmd}" != *"--label bug"* || "${cmd}" != *"--label chore"* ]]; then
+    echo "Missing labels" >&2
+    exit 1
+  fi
+  if [[ "${cmd}" != *"--milestone Milestone-1"* ]]; then
+    echo "Missing milestone" >&2
+    exit 1
+  fi
+  if [[ "${cmd}" != *"--draft"* ]]; then
+    echo "Missing draft flag" >&2
+    exit 1
+  fi
+
+  echo "https://example.test/pr/456"
+  exit 0
+fi
+
+if [[ "$#" -ge 2 && "$1" == "pr" && "$2" == "view" ]]; then
+  echo "456"
+  exit 0
 fi
 
 echo "Unsupported gh call: $*" >&2
@@ -124,9 +160,7 @@ exit 1
 EOF
 
 cat > "${TMP_DIR}/template.md" <<'EOF'
-## Template
-<!-- Diff files - START -->
-<!-- Diff files - END -->
+## Template body from file
 EOF
 
 chmod +x "${TMP_DIR}/bin/git" "${TMP_DIR}/bin/gh"
@@ -143,15 +177,15 @@ INPUT_GITHUB_TOKEN="token" \
 INPUT_REPOSITORY_PATH="repo" \
 INPUT_SOURCE_BRANCH="develop" \
 INPUT_TARGET_BRANCH="release/MAPL-v3" \
-INPUT_TITLE="" \
+INPUT_TITLE="My PR title" \
 INPUT_TEMPLATE="${TMP_DIR}/template.md" \
 INPUT_BODY="" \
-INPUT_REVIEWER="" \
-INPUT_ASSIGNEE="" \
-INPUT_LABEL="" \
-INPUT_MILESTONE="" \
-INPUT_DRAFT="false" \
-INPUT_GET_DIFF="true" \
+INPUT_REVIEWER="alice,bob" \
+INPUT_ASSIGNEE="assignee1,assignee2" \
+INPUT_LABEL="bug,chore" \
+INPUT_MILESTONE="Milestone-1" \
+INPUT_DRAFT="true" \
+INPUT_GET_DIFF="false" \
 INPUT_OLD_STRING="" \
 INPUT_NEW_STRING="" \
 INPUT_IGNORE_USERS="dependabot" \
@@ -163,12 +197,14 @@ STATUS="$?"
 set -e
 
 if [[ "${STATUS}" != "0" ]]; then
-  echo "Expected successful execution in update mode" >&2
+  echo "Expected successful execution in create mode" >&2
   cat "${LOG_FILE}" >&2
   exit 1
 fi
 
-assert_contains "${LOG_FILE}" "Template source: input template file (update mode)"
-assert_contains "${LOG_FILE}" "Detected diff markers: summary=false commits=false files=true"
+assert_contains "${LOG_FILE}" "Creating pull request"
+assert_contains "${LOG_FILE}" "Running: gh pr create --repo owner/repo --base release/MAPL-v3 --head owner:develop"
+assert_contains "${TMP_DIR}/output.txt" "url=https://example.test/pr/456"
+assert_contains "${TMP_DIR}/output.txt" "pr_number=456"
 
-echo "Template source selection test passed."
+echo "GH create flow test passed."
