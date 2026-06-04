@@ -19,6 +19,7 @@ CHUNK_COUNT=0
 MANAGED_COMMENT_START="<!-- action-pull-request:managed-diff-chunk:start -->"
 MANAGED_COMMENT_END="<!-- action-pull-request:managed-diff-chunk:end -->"
 TARGET_REPOSITORY=""
+TARGET_OWNER=""
 REPOSITORY_PATH=""
 WORKSPACE_DIR=""
 REPO_DIR=""
@@ -150,6 +151,33 @@ import sys
 
 print(pathlib.Path(sys.argv[1]).resolve(strict=False))
 PY
+}
+
+trim_whitespace() {
+  local value="$1"
+  value="${value#"${value%%[![:space:]]*}"}"
+  value="${value%"${value##*[![:space:]]}"}"
+  printf '%s' "${value}"
+}
+
+append_csv_arg() {
+  local flag="$1"
+  local csv_value="$2"
+  local -n args_ref="$3"
+  local raw_value trimmed_value
+  local -a parsed_values
+
+  if [[ -z "${csv_value}" ]]; then
+    return 0
+  fi
+
+  IFS=',' read -r -a parsed_values <<< "${csv_value}"
+  for raw_value in "${parsed_values[@]}"; do
+    trimmed_value="$(trim_whitespace "${raw_value}")"
+    if [[ -n "${trimmed_value}" ]]; then
+      args_ref+=("${flag}" "${trimmed_value}")
+    fi
+  done
 }
 
 get_managed_comment_ids() {
@@ -289,6 +317,7 @@ if [[ ! "${TARGET_REPOSITORY}" =~ ^[A-Za-z0-9]([A-Za-z0-9-]{0,38})/[A-Za-z0-9._-
   echo -e "\n[ERROR] Input 'repository' must use owner/name format. Got: ${TARGET_REPOSITORY}" >&2
   exit 1
 fi
+TARGET_OWNER="${TARGET_REPOSITORY%%/*}"
 
 REPOSITORY_PATH="${INPUT_REPOSITORY_PATH:-.}"
 if [[ -z "${REPOSITORY_PATH}" ]]; then
@@ -329,8 +358,6 @@ echo -e "\nSetting GitHub credentials..."
 git -C "${REPO_DIR}" remote set-url origin "https://${GITHUB_ACTOR}:${INPUT_GITHUB_TOKEN}@github.com/${TARGET_REPOSITORY}"
 git -C "${REPO_DIR}" config user.name "${GITHUB_ACTOR}"
 git -C "${REPO_DIR}" config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-# Needed for hub binary
-export GITHUB_USER="${GITHUB_ACTOR}"
 echo "Repository: ${TARGET_REPOSITORY}"
 echo "Repository path: ${REPO_DIR}"
 
@@ -379,7 +406,7 @@ else
 fi
 
 echo -e "\nSetting template..."
-PR_NUMBER=$(hub pr list --base "${TARGET_BRANCH}" --head "${SOURCE_BRANCH}" --format '%I')
+PR_NUMBER="$(gh pr list --repo "${TARGET_REPOSITORY}" --state open --base "${TARGET_BRANCH}" --head "${TARGET_OWNER}:${SOURCE_BRANCH}" --json number --jq '.[0].number // empty')"
 if [[ -z "${PR_NUMBER}" ]]; then
   if [[ -n "${INPUT_TEMPLATE}" ]]; then
     echo "Template source: input template file"
@@ -401,7 +428,7 @@ else
     TEMPLATE="${INPUT_BODY}"
   else
     echo "Template source: existing pull request body"
-    TEMPLATE=$(hub api --method GET "repos/${TARGET_REPOSITORY}/pulls/${PR_NUMBER}" | jq -r '.body')
+    TEMPLATE="$(gh api --method GET "repos/${TARGET_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.body // ""')"
   fi
 fi
 
@@ -480,22 +507,6 @@ if [[ -z "${PR_NUMBER}" ]]; then
   else
     TITLE=$(git log -1 --pretty=%s | head -1)
   fi
-  ARG_LIST=("-F" "/tmp/template")
-  if [[ -n "${INPUT_REVIEWER}" ]]; then
-    ARG_LIST+=("-r" "${INPUT_REVIEWER}")
-  fi
-  if [[ -n "${INPUT_ASSIGNEE}" ]]; then
-    ARG_LIST+=("-a" "${INPUT_ASSIGNEE}")
-  fi
-  if [[ -n "${INPUT_LABEL}" ]]; then
-    ARG_LIST+=("-l" "${INPUT_LABEL}")
-  fi
-  if [[ -n "${INPUT_MILESTONE}" ]]; then
-    ARG_LIST+=("-M" "${INPUT_MILESTONE}")
-  fi
-  if [[ "${INPUT_DRAFT}" ==  "true" ]]; then
-    ARG_LIST+=("-d")
-  fi
 else
   echo -e "${TEMPLATE}" > /tmp/template
 fi
@@ -510,23 +521,39 @@ echo "Final main body size (bytes): ${FINAL_BODY_BYTES}"
 echo "Managed overflow chunks: ${CHUNK_COUNT}"
 
 if [[ -z "${PR_NUMBER}" ]]; then
+  GH_CREATE_ARGS=(
+    --repo "${TARGET_REPOSITORY}"
+    --base "${TARGET_BRANCH}"
+    --head "${TARGET_OWNER}:${SOURCE_BRANCH}"
+    --title "${TITLE}"
+    --body-file /tmp/template
+  )
+  append_csv_arg --reviewer "${INPUT_REVIEWER}" GH_CREATE_ARGS
+  append_csv_arg --assignee "${INPUT_ASSIGNEE}" GH_CREATE_ARGS
+  append_csv_arg --label "${INPUT_LABEL}" GH_CREATE_ARGS
+  milestone_value="$(trim_whitespace "${INPUT_MILESTONE}")"
+  if [[ -n "${milestone_value}" ]]; then
+    GH_CREATE_ARGS+=(--milestone "${milestone_value}")
+  fi
+  if [[ "${INPUT_DRAFT}" ==  "true" ]]; then
+    GH_CREATE_ARGS+=(--draft)
+  fi
+
   echo -e "\nCreating pull request"
-  echo -e "${TITLE}" > /tmp/template
-  echo -e "\n${TEMPLATE}" >> /tmp/template
   echo -e "\nTemplate:"
   cat /tmp/template
-  echo -e "\nRunning: hub pull-request -b ${TARGET_BRANCH} -h ${SOURCE_BRANCH} --no-edit ..."
-  URL=$(hub pull-request -b "${TARGET_BRANCH}" -h "${SOURCE_BRANCH}" --no-edit "${ARG_LIST[@]}")
+  echo -e "\nRunning: gh pr create --repo ${TARGET_REPOSITORY} --base ${TARGET_BRANCH} --head ${TARGET_OWNER}:${SOURCE_BRANCH} ..."
+  URL="$(gh pr create "${GH_CREATE_ARGS[@]}")"
   # shellcheck disable=SC2181
   if [[ "$?" != "0" ]]; then RET_CODE=1; fi
-  PR_NUMBER=$(gh pr view --json number -q .number "${URL}")
+  PR_NUMBER="$(gh pr view "${URL}" --repo "${TARGET_REPOSITORY}" --json number --jq '.number')"
   if (( CHUNK_COUNT > 0 )); then
     reconcile_managed_comments "${PR_NUMBER}" "${CHUNK_COUNT}"
   fi
 else
   echo -e "\nUpdating pull request"
-  echo -e "Running: hub api --method PATCH repos/${TARGET_REPOSITORY}/pulls/${PR_NUMBER} --field body=@/tmp/template"
-  URL=$(hub api --method PATCH "repos/${TARGET_REPOSITORY}/pulls/${PR_NUMBER}" --field "body=@/tmp/template" | jq -r '.html_url')
+  echo -e "Running: gh api --method PATCH repos/${TARGET_REPOSITORY}/pulls/${PR_NUMBER} --field body=@/tmp/template"
+  URL="$(gh api --method PATCH "repos/${TARGET_REPOSITORY}/pulls/${PR_NUMBER}" --field "body=@/tmp/template" --jq '.html_url')"
   # shellcheck disable=SC2181
   if [[ "$?" != "0" ]]; then RET_CODE=1; fi
   if (( CHUNK_COUNT > 0 )); then
