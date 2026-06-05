@@ -160,6 +160,29 @@ trim_whitespace() {
   printf '%s' "${value}"
 }
 
+# GitHub Actions usually exports every input env var, even when empty. Direct
+# docker execution does not, so normalize optional inputs before `set -u`
+# references later in the script.
+: "${INPUT_REPOSITORY:=}"
+: "${INPUT_REPOSITORY_PATH:=.}"
+: "${INPUT_SOURCE_BRANCH:=}"
+: "${INPUT_TARGET_BRANCH:=master}"
+: "${INPUT_TITLE:=}"
+: "${INPUT_TEMPLATE:=}"
+: "${INPUT_BODY:=}"
+: "${INPUT_REVIEWER:=}"
+: "${INPUT_ASSIGNEE:=}"
+: "${INPUT_LABEL:=}"
+: "${INPUT_MILESTONE:=}"
+: "${INPUT_DRAFT:=false}"
+: "${INPUT_OLD_STRING:=}"
+: "${INPUT_NEW_STRING:=}"
+: "${INPUT_GET_DIFF:=false}"
+: "${INPUT_IGNORE_USERS:=dependabot}"
+: "${INPUT_ALLOW_NO_DIFF:=false}"
+: "${INPUT_MAX_BODY_BYTES:=65000}"
+: "${INPUT_MAX_DIFF_LINES:=0}"
+
 append_csv_arg() {
   local flag="$1"
   local csv_value="$2"
