@@ -53,7 +53,7 @@ fi
 
 if [[ "${#args[@]}" -ge 2 && "${args[0]}" == "show-ref" ]]; then
   last_arg="${args[$((${#args[@]} - 1))]}"
-  if [[ "${last_arg}" == "refs/remotes/origin/develop" || "${last_arg}" == "refs/remotes/origin/release/MAPL-v3" ]]; then
+  if [[ "${last_arg}" == "refs/remotes/origin/develop" || "${last_arg}" == "refs/remotes/origin/main" ]]; then
     exit 0
   fi
   exit 1
@@ -65,7 +65,7 @@ if [[ "${#args[@]}" -ge 2 && "${args[0]}" == "rev-parse" ]]; then
     echo "bbb222"
     exit 0
   fi
-  if [[ "${last_arg}" == "origin/release/MAPL-v3" ]]; then
+  if [[ "${last_arg}" == "origin/main" ]]; then
     echo "aaa111"
     exit 0
   fi
@@ -98,24 +98,30 @@ cat > "${TMP_DIR}/bin/gh" <<'EOF'
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+cmd="$*"
+
 if [[ "$#" -ge 1 && "$1" == "api" ]]; then
-  cmd="$*"
-  if [[ "${cmd}" == *"repos/owner/repo/pulls?state=open&base=release/MAPL-v3"* ]]; then
-    printf '%s\n' '[{"number":123,"head":{"ref":"develop","repo":{"full_name":"owner/repo"}}}]'
-    exit 0
-  fi
-  if [[ "${cmd}" == *"repos/owner/repo/issues/123/comments"* ]]; then
-    echo "[]"
+  if [[ "${cmd}" == *"repos/owner/repo/pulls?state=open&base=main"* ]]; then
+    printf '%s\n' '[{"number":88,"head":{"ref":"other-branch","repo":{"full_name":"owner/repo"}}},{"number":123,"head":{"ref":"develop","repo":{"full_name":"owner/repo"}}},{"number":321,"head":{"ref":"develop","repo":{"full_name":"fork/repo"}}}]'
     exit 0
   fi
   if [[ "${cmd}" == *"repos/owner/repo/pulls/123"* && "${cmd}" == *"--method GET"* ]]; then
-    echo "OLD BODY WITHOUT MARKERS"
+    echo "OLD BODY"
     exit 0
   fi
   if [[ "${cmd}" == *"repos/owner/repo/pulls/123"* && "${cmd}" == *"--method PATCH"* ]]; then
     echo "https://example.test/pr/123"
     exit 0
   fi
+  if [[ "${cmd}" == *"repos/owner/repo/issues/123/comments"* ]]; then
+    echo "[]"
+    exit 0
+  fi
+fi
+
+if [[ "$#" -ge 2 && "$1" == "pr" && "$2" == "create" ]]; then
+  echo "gh pr create should not be called when PR already exists" >&2
+  exit 1
 fi
 
 echo "Unsupported gh call: $*" >&2
@@ -123,9 +129,7 @@ exit 1
 EOF
 
 cat > "${TMP_DIR}/template.md" <<'EOF'
-## Template
-<!-- Diff files - START -->
-<!-- Diff files - END -->
+## Template body from file
 EOF
 
 chmod +x "${TMP_DIR}/bin/git" "${TMP_DIR}/bin/gh"
@@ -141,7 +145,7 @@ GITHUB_OUTPUT="${TMP_DIR}/output.txt" \
 INPUT_GITHUB_TOKEN="token" \
 INPUT_REPOSITORY_PATH="repo" \
 INPUT_SOURCE_BRANCH="develop" \
-INPUT_TARGET_BRANCH="release/MAPL-v3" \
+INPUT_TARGET_BRANCH="main" \
 INPUT_TITLE="" \
 INPUT_TEMPLATE="${TMP_DIR}/template.md" \
 INPUT_BODY="" \
@@ -150,7 +154,7 @@ INPUT_ASSIGNEE="" \
 INPUT_LABEL="" \
 INPUT_MILESTONE="" \
 INPUT_DRAFT="false" \
-INPUT_GET_DIFF="true" \
+INPUT_GET_DIFF="false" \
 INPUT_OLD_STRING="" \
 INPUT_NEW_STRING="" \
 INPUT_IGNORE_USERS="dependabot" \
@@ -167,7 +171,8 @@ if [[ "${STATUS}" != "0" ]]; then
   exit 1
 fi
 
-assert_contains "${LOG_FILE}" "Template source: input template file (update mode)"
-assert_contains "${LOG_FILE}" "Detected diff markers: summary=false commits=false files=true"
+assert_contains "${LOG_FILE}" "Updating pull request"
+assert_contains "${TMP_DIR}/output.txt" "url=https://example.test/pr/123"
+assert_contains "${TMP_DIR}/output.txt" "pr_number=123"
 
-echo "Template source selection test passed."
+echo "Existing PR lookup test passed."

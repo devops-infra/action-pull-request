@@ -228,6 +228,22 @@ reconcile_managed_comments() {
   fi
 }
 
+find_existing_pr_number() {
+  local pulls_json=""
+  pulls_json="$(gh api --method GET "repos/${TARGET_REPOSITORY}/pulls?state=open&base=${TARGET_BRANCH}")"
+
+  jq -r \
+    --arg repo "${TARGET_REPOSITORY}" \
+    --arg branch "${SOURCE_BRANCH}" \
+    '
+      [
+        .[]
+        | select(.head.ref == $branch)
+        | select((.head.repo.full_name // "") == $repo)
+      ][0].number // empty
+    ' <<< "${pulls_json}"
+}
+
 apply_body_limits() {
   local template_file="$1"
   local max_body_bytes="$2"
@@ -406,7 +422,7 @@ else
 fi
 
 echo -e "\nSetting template..."
-PR_NUMBER="$(gh pr list --repo "${TARGET_REPOSITORY}" --state open --base "${TARGET_BRANCH}" --head "${TARGET_OWNER}:${SOURCE_BRANCH}" --json number --jq '.[0].number // empty')"
+PR_NUMBER="$(find_existing_pr_number)"
 if [[ -z "${PR_NUMBER}" ]]; then
   if [[ -n "${INPUT_TEMPLATE}" ]]; then
     echo "Template source: input template file"
