@@ -1,4 +1,4 @@
-name: (Cron) Dependency Update
+name: (C) Dependency Update
 
 on:
   schedule:
