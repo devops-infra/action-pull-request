@@ -1,4 +1,4 @@
-name: (Automatic) Release Create
+name: (A) Release Create
 
 on:
   push:
