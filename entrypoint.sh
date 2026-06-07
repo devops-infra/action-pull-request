@@ -23,6 +23,7 @@ TARGET_OWNER=""
 REPOSITORY_PATH=""
 WORKSPACE_DIR=""
 REPO_DIR=""
+PROJECT_VALUE=""
 
 REPLACE_TEMPLATE_SCRIPT="/scripts/replace-template-diff.sh"
 if [[ ! -x "${REPLACE_TEMPLATE_SCRIPT}" ]]; then
@@ -174,6 +175,7 @@ trim_whitespace() {
 : "${INPUT_ASSIGNEE:=}"
 : "${INPUT_LABEL:=}"
 : "${INPUT_MILESTONE:=}"
+: "${INPUT_PROJECT:=}"
 : "${INPUT_DRAFT:=false}"
 : "${INPUT_OLD_STRING:=}"
 : "${INPUT_NEW_STRING:=}"
@@ -201,6 +203,42 @@ append_csv_arg() {
       args_ref+=("${flag}" "${trimmed_value}")
     fi
   done
+}
+
+pr_has_project() {
+  local pr_number="$1"
+  local project_title="$2"
+  local project_titles=""
+
+  project_titles="$(
+    gh pr view "${pr_number}" --repo "${TARGET_REPOSITORY}" --json projectItems,projectCards --jq \
+      '[.projectItems[]?.project.title?, .projectCards[]?.project.name?, .projectCards[]?.project.title?]
+       | map(select(. != null))
+       | .[]'
+  )"
+
+  if grep -Fxq -- "${project_title}" <<< "${project_titles}"; then
+    return 0
+  fi
+
+  return 1
+}
+
+add_pr_to_project_if_needed() {
+  local pr_number="$1"
+  local project_title="$2"
+
+  if [[ -z "${project_title}" ]]; then
+    return 0
+  fi
+
+  if pr_has_project "${pr_number}" "${project_title}"; then
+    echo -e "\n[INFO] Pull request #${pr_number} is already assigned to project '${project_title}'."
+    return 0
+  fi
+
+  echo -e "\nAdding pull request #${pr_number} to project '${project_title}'"
+  gh pr edit "${pr_number}" --repo "${TARGET_REPOSITORY}" --add-project "${project_title}" >/dev/null
 }
 
 get_managed_comment_ids() {
@@ -304,6 +342,7 @@ echo "  reviewer: ${INPUT_REVIEWER}"
 echo "  assignee: ${INPUT_ASSIGNEE}"
 echo "  label: ${INPUT_LABEL}"
 echo "  milestone: ${INPUT_MILESTONE}"
+echo "  project: ${INPUT_PROJECT}"
 echo "  draft: ${INPUT_DRAFT}"
 echo "  get_diff: ${INPUT_GET_DIFF}"
 echo "  old_string: ${INPUT_OLD_STRING}"
@@ -315,6 +354,7 @@ echo "  max_diff_lines: ${INPUT_MAX_DIFF_LINES}"
 
 MAX_BODY_BYTES="${INPUT_MAX_BODY_BYTES:-65000}"
 MAX_DIFF_LINES="${INPUT_MAX_DIFF_LINES:-0}"
+PROJECT_VALUE="$(trim_whitespace "${INPUT_PROJECT}")"
 validate_number_input "${MAX_BODY_BYTES}" "max_body_bytes"
 validate_number_input "${MAX_DIFF_LINES}" "max_diff_lines"
 
@@ -574,6 +614,9 @@ if [[ -z "${PR_NUMBER}" ]]; then
   if [[ -n "${milestone_value}" ]]; then
     GH_CREATE_ARGS+=(--milestone "${milestone_value}")
   fi
+  if [[ -n "${PROJECT_VALUE}" ]]; then
+    GH_CREATE_ARGS+=(--project "${PROJECT_VALUE}")
+  fi
   if [[ "${INPUT_DRAFT}" ==  "true" ]]; then
     GH_CREATE_ARGS+=(--draft)
   fi
@@ -595,6 +638,7 @@ else
   URL="$(gh api --method PATCH "repos/${TARGET_REPOSITORY}/pulls/${PR_NUMBER}" --field "body=@/tmp/template" --jq '.html_url')"
   # shellcheck disable=SC2181
   if [[ "$?" != "0" ]]; then RET_CODE=1; fi
+  add_pr_to_project_if_needed "${PR_NUMBER}" "${PROJECT_VALUE}"
   if (( CHUNK_COUNT > 0 )); then
     reconcile_managed_comments "${PR_NUMBER}" "${CHUNK_COUNT}"
   else

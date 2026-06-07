@@ -49,6 +49,10 @@ inputs:
     description: Milestone
     required: false
     default: ""
+  project:
+    description: GitHub Project title to add the pull request to
+    required: false
+    default: ""
   draft:
     description: Whether to mark it as a draft
     required: false

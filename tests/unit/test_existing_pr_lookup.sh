@@ -124,6 +124,20 @@ if [[ "$#" -ge 2 && "$1" == "pr" && "$2" == "create" ]]; then
   exit 1
 fi
 
+if [[ "$#" -ge 2 && "$1" == "pr" && "$2" == "view" ]]; then
+  if [[ "${cmd}" == *"--json projectItems,projectCards"* ]]; then
+    exit 0
+  fi
+fi
+
+if [[ "$#" -ge 2 && "$1" == "pr" && "$2" == "edit" ]]; then
+  if [[ "${cmd}" != *"--repo owner/repo"* || "${cmd}" != *"--add-project Roadmap"* || "${cmd}" != *"123"* ]]; then
+    echo "Missing project add call in update mode" >&2
+    exit 1
+  fi
+  exit 0
+fi
+
 echo "Unsupported gh call: $*" >&2
 exit 1
 EOF
@@ -153,6 +167,7 @@ INPUT_REVIEWER="" \
 INPUT_ASSIGNEE="" \
 INPUT_LABEL="" \
 INPUT_MILESTONE="" \
+INPUT_PROJECT="Roadmap" \
 INPUT_DRAFT="false" \
 INPUT_GET_DIFF="false" \
 INPUT_OLD_STRING="" \
@@ -172,6 +187,7 @@ if [[ "${STATUS}" != "0" ]]; then
 fi
 
 assert_contains "${LOG_FILE}" "Updating pull request"
+assert_contains "${LOG_FILE}" "Adding pull request #123 to project 'Roadmap'"
 assert_contains "${TMP_DIR}/output.txt" "url=https://example.test/pr/123"
 assert_contains "${TMP_DIR}/output.txt" "pr_number=123"
 
