@@ -69,6 +69,7 @@ This action supports three tag levels for flexible versioning:
         assignee: octocat
         label: enhancement
         milestone: My milestone
+        project: Engineering Roadmap
         draft: true
         old_string: "<!-- Add your description here -->"
         new_string: "** Automatic pull request**"
@@ -95,6 +96,7 @@ This action supports three tag levels for flexible versioning:
 | `assignee`        | No       | `""`                          | Assignee's usernames                                                                                                    |
 | `label`           | No       | `""`                          | Labels to apply, comma separated                                                                                        |
 | `milestone`       | No       | `""`                          | Milestone                                                                                                               |
+| `project`         | No       | `""`                          | GitHub Project title to add the pull request to                                                                         |
 | `draft`           | No       | `false`                       | Whether to mark it as a draft                                                                                           |
 | `old_string`      | No       | `""`                          | Old string for the replacement in the template                                                                          |
 | `new_string`      | No       | `""`                          | New string for the replacement in the template. If not specified, but `old_string` was, it will gather commits subjects |
@@ -119,6 +121,7 @@ permissions:
 - `contents: read` is required to read repository state.
 - `pull-requests: write` is required to create and update pull requests.
 - `issues: write` is required when managed overflow comments are created, updated, or deleted (including cleanup on later runs).
+- Project assignment via `project` requires a token/auth context that `gh` can use with project access.
 
 
 ### 📤 Output Parameters
@@ -217,6 +220,7 @@ jobs:
           title: ${{ github.event.commits[0].message }}
           assignee: ${{ github.actor }}
           label: automatic,feature
+          project: Engineering Roadmap
           template: .github/PULL_REQUEST_TEMPLATE/FEATURE.md
           old_string: "**Write your description here**"
           new_string: ${{ github.event.commits[0].message }}

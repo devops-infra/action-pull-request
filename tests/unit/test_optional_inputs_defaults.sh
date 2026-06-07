@@ -160,6 +160,7 @@ if [[ "${STATUS}" != "0" ]]; then
 fi
 
 assert_contains "${LOG_FILE}" "template: "
+assert_contains "${LOG_FILE}" "project: "
 assert_contains "${LOG_FILE}" "Creating pull request"
 assert_contains "${TMP_DIR}/output.txt" "pr_number=123"
 
