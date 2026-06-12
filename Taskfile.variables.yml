@@ -38,7 +38,21 @@ vars:
   DOCKER_NAME: '{{.DOCKER_ORG_NAME}}/{{.DOCKER_IMAGE}}'
   GITHUB_NAME: '{{.GITHUB_ORG_NAME}}/{{.GITHUB_REPO}}'
   GHRC_NAME: ghcr.io/{{.GITHUB_ORG_NAME}}/{{.GITHUB_REPO}}
-  DEFAULT_BRANCH: master
+  DEFAULT_BRANCH:
+    sh: |
+      if [ -n "${DEFAULT_BRANCH:-}" ]; then
+        printf "%s\n" "${DEFAULT_BRANCH}"
+      elif branch_ref="$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null)"; then
+        printf "%s\n" "${branch_ref#origin/}"
+      elif current_branch="$(git symbolic-ref --quiet --short HEAD 2>/dev/null)" && { [ "${current_branch}" = "main" ] || [ "${current_branch}" = "master" ]; }; then
+        printf "%s\n" "${current_branch}"
+      elif git show-ref --verify --quiet refs/heads/main || git show-ref --verify --quiet refs/remotes/origin/main; then
+        echo main
+      elif git show-ref --verify --quiet refs/heads/master || git show-ref --verify --quiet refs/remotes/origin/master; then
+        echo master
+      else
+        echo master
+      fi
   VERSION_FROM_ACTION_YML:
     sh: 'grep "image: docker://{{.DOCKER_NAME}}:" action.yml 2>/dev/null | cut -d ":" -f 4'
   AUTHOR_FROM_ACTION_YML:
