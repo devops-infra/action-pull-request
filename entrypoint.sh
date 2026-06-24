@@ -609,7 +609,12 @@ if [[ -z "${PR_NUMBER}" ]]; then
   )
   append_csv_arg --reviewer "${INPUT_REVIEWER}" GH_CREATE_ARGS
   append_csv_arg --assignee "${INPUT_ASSIGNEE}" GH_CREATE_ARGS
-  append_csv_arg --label "${INPUT_LABEL}" GH_CREATE_ARGS
+
+  ###
+  LABEL_ARGS=()
+  append_csv_arg --add-label "${INPUT_LABEL}" LABEL_ARGS
+  ###
+  
   milestone_value="$(trim_whitespace "${INPUT_MILESTONE}")"
   if [[ -n "${milestone_value}" ]]; then
     GH_CREATE_ARGS+=(--milestone "${milestone_value}")
@@ -629,6 +634,17 @@ if [[ -z "${PR_NUMBER}" ]]; then
   # shellcheck disable=SC2181
   if [[ "$?" != "0" ]]; then RET_CODE=1; fi
   PR_NUMBER="$(gh pr view "${URL}" --repo "${TARGET_REPOSITORY}" --json number --jq '.number')"
+
+  ###
+  if (( ${#LABEL_ARGS[@]} > 0 )); then
+    echo -e "\nAdding labels..."
+
+    gh pr edit "${PR_NUMBER}" \
+      --repo "${TARGET_REPOSITORY}" \
+      "${LABEL_ARGS[@]}"
+  fi
+  ###
+  
   if (( CHUNK_COUNT > 0 )); then
     reconcile_managed_comments "${PR_NUMBER}" "${CHUNK_COUNT}"
   fi
