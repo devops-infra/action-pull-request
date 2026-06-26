@@ -586,6 +586,22 @@ if [[ -z "${PR_NUMBER}" ]]; then
   else
     TITLE=$(git log -1 --pretty=%s | head -1)
   fi
+
+  if [[ -n "${INPUT_LABEL}" ]]; then
+      echo "Ensuring labels exist..."
+  
+      IFS=',' read -ra LABELS <<< "${INPUT_LABEL}"
+  
+      for label in "${LABELS[@]}"; do
+          label="$(trim_whitespace "${label}")"
+  
+          echo "Creating label if missing: ${label}"
+  
+          gh label create "${label}" \
+            --repo "${TARGET_REPOSITORY}" \
+            --force || true
+      done
+  fi  
 else
   echo -e "${TEMPLATE}" > /tmp/template
 fi
