@@ -46,7 +46,7 @@ tasks:
   dependency:update:
     desc: Update repository dependencies not covered by Dependabot
     cmds:
-      - task: scripts:packages:update
+      - task: scripts:dependency:update
 
   version:set:
     desc: Update version in README.md and action.yml
