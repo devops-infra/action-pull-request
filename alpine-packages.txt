@@ -1,7 +1,7 @@
 bash~=5.3
-curl~=8.19
-github-cli~=2.83
-git~=2.52
+curl~=8.21
+github-cli~=2.93
+git~=2.54
 jq~=1.8
 perl~=5.42
-python3~=3.12
+python3~=3.14
