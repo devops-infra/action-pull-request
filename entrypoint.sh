@@ -24,6 +24,12 @@ REPOSITORY_PATH=""
 WORKSPACE_DIR=""
 REPO_DIR=""
 PROJECT_VALUE=""
+ALLOW_NO_DIFF_VALUE=""
+GET_DIFF_VALUE=""
+DRAFT_VALUE=""
+CREATE_MISSING_LABELS_VALUE=""
+REPOSITORY_LABELS_JSON=""
+DEFAULT_CREATED_LABEL_COLOR="0366d6"
 
 REPLACE_TEMPLATE_SCRIPT="/scripts/replace-template-diff.sh"
 if [[ ! -x "${REPLACE_TEMPLATE_SCRIPT}" ]]; then
@@ -86,6 +92,19 @@ validate_number_input() {
     echo -e "\n[ERROR] Input '${input_name}' must be a non-negative integer. Got: ${value}" >&2
     exit 1
   fi
+}
+
+validate_boolean_input() {
+  local value="$1"
+  local input_name="$2"
+
+  case "${value}" in
+    true|false) ;;
+    *)
+      echo -e "\n[ERROR] Input '${input_name}' must be 'true' or 'false'. Got: ${value}" >&2
+      exit 1
+      ;;
+  esac
 }
 
 apply_line_cap() {
@@ -184,24 +203,134 @@ trim_whitespace() {
 : "${INPUT_ALLOW_NO_DIFF:=false}"
 : "${INPUT_MAX_BODY_BYTES:=65000}"
 : "${INPUT_MAX_DIFF_LINES:=0}"
+: "${INPUT_CREATE_MISSING_LABELS:=false}"
 
-append_csv_arg() {
-  local flag="$1"
-  local csv_value="$2"
-  local -n args_ref="$3"
+parse_csv_values() {
+  local csv_value="$1"
+  local -n values_ref="$2"
   local raw_value trimmed_value
-  local -a parsed_values
+  local value
+  local -a raw_values=()
+  local -A seen_values=()
+
+  values_ref=()
 
   if [[ -z "${csv_value}" ]]; then
     return 0
   fi
 
-  IFS=',' read -r -a parsed_values <<< "${csv_value}"
-  for raw_value in "${parsed_values[@]}"; do
+  IFS=',' read -r -a raw_values <<< "${csv_value}"
+  for raw_value in "${raw_values[@]}"; do
     trimmed_value="$(trim_whitespace "${raw_value}")"
-    if [[ -n "${trimmed_value}" ]]; then
-      args_ref+=("${flag}" "${trimmed_value}")
+    if [[ -z "${trimmed_value}" || -n "${seen_values["${trimmed_value}"]+x}" ]]; then
+      continue
     fi
+    values_ref+=("${trimmed_value}")
+    seen_values["${trimmed_value}"]=1
+  done
+}
+
+append_csv_arg() {
+  local flag="$1"
+  local csv_value="$2"
+  local -n args_ref="$3"
+  local value
+  local -a parsed_values
+
+  parse_csv_values "${csv_value}" parsed_values
+  for value in "${parsed_values[@]}"; do
+    if [[ -n "${value}" ]]; then
+      args_ref+=("${flag}" "${value}")
+    fi
+  done
+}
+
+load_repository_labels_json() {
+  if [[ -n "${REPOSITORY_LABELS_JSON}" ]]; then
+    return 0
+  fi
+
+  REPOSITORY_LABELS_JSON="$(
+    gh api "repos/${TARGET_REPOSITORY}/labels?per_page=100" --paginate | jq -sc '
+      [
+        .[]
+        | if type == "array" then .[] else . end
+      ]
+    '
+  )"
+}
+
+label_exists() {
+  local label_name="$1"
+
+  load_repository_labels_json
+  jq -e --arg name "${label_name}" 'any(.[]?; (.name // "") == $name)' <<< "${REPOSITORY_LABELS_JSON}" >/dev/null
+}
+
+append_label_to_cache() {
+  local label_name="$1"
+
+  if [[ -z "${REPOSITORY_LABELS_JSON}" ]]; then
+    return 0
+  fi
+
+  REPOSITORY_LABELS_JSON="$(
+    jq -c --arg name "${label_name}" '. + [{"name": $name}]' <<< "${REPOSITORY_LABELS_JSON}"
+  )"
+}
+
+create_label_if_missing() {
+  local label_name="$1"
+  local create_output=""
+  local create_status=0
+
+  if label_exists "${label_name}"; then
+    echo -e "\n[INFO] Label already exists: ${label_name}"
+    return 0
+  fi
+
+  echo -e "\n[INFO] Creating missing label: ${label_name}"
+  set +e
+  create_output="$(
+    gh api --method POST "repos/${TARGET_REPOSITORY}/labels" \
+      --raw-field "name=${label_name}" \
+      --raw-field "color=${DEFAULT_CREATED_LABEL_COLOR}" 2>&1
+  )"
+  create_status="$?"
+  set -e
+
+  if [[ "${create_status}" == "0" ]]; then
+    append_label_to_cache "${label_name}"
+    return 0
+  fi
+
+  REPOSITORY_LABELS_JSON=""
+  if label_exists "${label_name}"; then
+    echo -e "\n[INFO] Label became available during creation attempt: ${label_name}"
+    return 0
+  fi
+
+  echo -e "\n[ERROR] Failed to create label '${label_name}'." >&2
+  echo "${create_output}" >&2
+  return "${create_status}"
+}
+
+ensure_labels_exist() {
+  local csv_labels="$1"
+  local label_name
+  local -a label_values=()
+
+  if [[ "${CREATE_MISSING_LABELS_VALUE}" != "true" ]]; then
+    return 0
+  fi
+
+  parse_csv_values "${csv_labels}" label_values
+  if [[ "${#label_values[@]}" == "0" ]]; then
+    return 0
+  fi
+
+  for label_name in "${label_values[@]}"; do
+    create_label_if_missing "${label_name}"
   done
 }
 
@@ -351,12 +480,21 @@ echo "  ignore_users: ${INPUT_IGNORE_USERS}"
 echo "  allow_no_diff: ${INPUT_ALLOW_NO_DIFF}"
 echo "  max_body_bytes: ${INPUT_MAX_BODY_BYTES}"
 echo "  max_diff_lines: ${INPUT_MAX_DIFF_LINES}"
+echo "  create_missing_labels: ${INPUT_CREATE_MISSING_LABELS}"
 
 MAX_BODY_BYTES="${INPUT_MAX_BODY_BYTES:-65000}"
 MAX_DIFF_LINES="${INPUT_MAX_DIFF_LINES:-0}"
 PROJECT_VALUE="$(trim_whitespace "${INPUT_PROJECT}")"
+ALLOW_NO_DIFF_VALUE="$(trim_whitespace "${INPUT_ALLOW_NO_DIFF}")"
+GET_DIFF_VALUE="$(trim_whitespace "${INPUT_GET_DIFF}")"
+DRAFT_VALUE="$(trim_whitespace "${INPUT_DRAFT}")"
+CREATE_MISSING_LABELS_VALUE="$(trim_whitespace "${INPUT_CREATE_MISSING_LABELS}")"
 validate_number_input "${MAX_BODY_BYTES}" "max_body_bytes"
 validate_number_input "${MAX_DIFF_LINES}" "max_diff_lines"
+validate_boolean_input "${ALLOW_NO_DIFF_VALUE}" "allow_no_diff"
+validate_boolean_input "${GET_DIFF_VALUE}" "get_diff"
+validate_boolean_input "${DRAFT_VALUE}" "draft"
+validate_boolean_input "${CREATE_MISSING_LABELS_VALUE}" "create_missing_labels"
 
 if (( MAX_BODY_BYTES < 2048 )); then
   echo -e "\n[ERROR] Input 'max_body_bytes' must be at least 2048. Got: ${MAX_BODY_BYTES}" >&2
@@ -470,7 +608,7 @@ fi
 
 echo -e "\nComparing branches by diff..."
 if git diff --quiet "${TARGET_COMPARE_REF}...${SOURCE_COMPARE_REF}"; then
-  if [[ "${INPUT_ALLOW_NO_DIFF}" == "true" ]]; then
+  if [[ "${ALLOW_NO_DIFF_VALUE}" == "true" ]]; then
     echo -e "\n[INFO] Both branches are the same. Continuing."
   else
     echo -e "\n[INFO] Both branches are the same. No action needed."
@@ -522,7 +660,7 @@ if [[ -n "${INPUT_OLD_STRING}" ]]; then
   fi
 fi
 
-if [[ "${INPUT_GET_DIFF}" ==  "true" ]]; then
+if [[ "${GET_DIFF_VALUE}" ==  "true" ]]; then
   echo -e "\nReplacing predefined fields with git information..."
   REPLACE_SUMMARY="false"
   REPLACE_COMMITS="false"
@@ -607,6 +745,7 @@ if [[ -z "${PR_NUMBER}" ]]; then
     --title "${TITLE}"
     --body-file /tmp/template
   )
+  ensure_labels_exist "${INPUT_LABEL}"
   append_csv_arg --reviewer "${INPUT_REVIEWER}" GH_CREATE_ARGS
   append_csv_arg --assignee "${INPUT_ASSIGNEE}" GH_CREATE_ARGS
   append_csv_arg --label "${INPUT_LABEL}" GH_CREATE_ARGS
@@ -617,7 +756,7 @@ if [[ -z "${PR_NUMBER}" ]]; then
   if [[ -n "${PROJECT_VALUE}" ]]; then
     GH_CREATE_ARGS+=(--project "${PROJECT_VALUE}")
   fi
-  if [[ "${INPUT_DRAFT}" ==  "true" ]]; then
+  if [[ "${DRAFT_VALUE}" ==  "true" ]]; then
     GH_CREATE_ARGS+=(--draft)
   fi
 
