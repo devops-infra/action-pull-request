@@ -68,6 +68,7 @@ This action supports three tag levels for flexible versioning:
         reviewer: octocat
         assignee: octocat
         label: enhancement
+        create_missing_labels: false
         milestone: My milestone
         project: Engineering Roadmap
         draft: true
@@ -82,29 +83,30 @@ This action supports three tag levels for flexible versioning:
 
 
 ### 🔧 Input Parameters
-| Input Variable    | Required | Default                       | Description                                                                                                             |
-|-------------------|----------|-------------------------------|-------------------------------------------------------------------------------------------------------------------------|
-| `github_token`    | **Yes**  | `""`                          | GitHub token `${{ secrets.GITHUB_TOKEN }}`                                                                              |
-| `repository`      | No       | `${{ github.repository }}`    | Target repository in `owner/name` format used for API calls and git remote auth                                         |
-| `repository_path` | No       | `.`                           | Relative path under `GITHUB_WORKSPACE` to the checked-out repository                                                    |
-| `source_branch`   | No       | *current branch*              | Name of the source branch                                                                                               |
-| `target_branch`   | No       | `master`                      | Name of the target branch. Change it if you use `main`                                                                  |
-| `title`           | No       | *subject of the first commit* | Pull request title                                                                                                      |
-| `template`        | No       | `""`                          | Template file location                                                                                                  |
-| `body`            | No       | *list of commits*             | Pull request body                                                                                                       |
-| `reviewer`        | No       | `""`                          | Reviewer's username                                                                                                     |
-| `assignee`        | No       | `""`                          | Assignee's usernames                                                                                                    |
-| `label`           | No       | `""`                          | Labels to apply, comma separated                                                                                        |
-| `milestone`       | No       | `""`                          | Milestone                                                                                                               |
-| `project`         | No       | `""`                          | GitHub Project title to add the pull request to                                                                         |
-| `draft`           | No       | `false`                       | Whether to mark it as a draft                                                                                           |
-| `old_string`      | No       | `""`                          | Old string for the replacement in the template                                                                          |
-| `new_string`      | No       | `""`                          | New string for the replacement in the template. If not specified, but `old_string` was, it will gather commits subjects |
-| `get_diff`        | No       | `false`                       | Whether to replace predefined comments with differences between branches - see details below                            |
-| `ignore_users`    | No       | `"dependabot"`                | List of users to ignore, comma separated                                                                                |
-| `allow_no_diff`   | No       | `false`                       | Allows to continue on merge commits with no diffs                                                                       |
-| `max_body_bytes`  | No       | `65000`                       | Maximum PR body size in bytes before overflow is posted as managed PR comments                                          |
-| `max_diff_lines`  | No       | `0`                           | Maximum lines per generated diff section (`0` means unlimited)                                                          |
+| Input Variable          | Required | Default                       | Description                                                                                                             |
+|-------------------------|----------|-------------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| `github_token`          | **Yes**  | `""`                          | GitHub token `${{ secrets.GITHUB_TOKEN }}`                                                                              |
+| `repository`            | No       | `${{ github.repository }}`    | Target repository in `owner/name` format used for API calls and git remote auth                                         |
+| `repository_path`       | No       | `.`                           | Relative path under `GITHUB_WORKSPACE` to the checked-out repository                                                    |
+| `source_branch`         | No       | *current branch*              | Name of the source branch                                                                                               |
+| `target_branch`         | No       | `master`                      | Name of the target branch. Change it if you use `main`                                                                  |
+| `title`                 | No       | *subject of the first commit* | Pull request title                                                                                                      |
+| `template`              | No       | `""`                          | Template file location                                                                                                  |
+| `body`                  | No       | *list of commits*             | Pull request body                                                                                                       |
+| `reviewer`              | No       | `""`                          | Reviewer's username                                                                                                     |
+| `assignee`              | No       | `""`                          | Assignee's usernames                                                                                                    |
+| `label`                 | No       | `""`                          | Labels to apply, comma separated. GitHub-supported special characters such as `/` work; commas remain the separator.    |
+| `create_missing_labels` | No       | `false`                       | Create labels that do not exist yet before PR creation. Existing labels are reused without being refreshed.             |
+| `milestone`             | No       | `""`                          | Milestone                                                                                                               |
+| `project`               | No       | `""`                          | GitHub Project title to add the pull request to                                                                         |
+| `draft`                 | No       | `false`                       | Whether to mark it as a draft                                                                                           |
+| `old_string`            | No       | `""`                          | Old string for the replacement in the template                                                                          |
+| `new_string`            | No       | `""`                          | New string for the replacement in the template. If not specified, but `old_string` was, it will gather commits subjects |
+| `get_diff`              | No       | `false`                       | Whether to replace predefined comments with differences between branches - see details below                            |
+| `ignore_users`          | No       | `"dependabot"`                | List of users to ignore, comma separated                                                                                |
+| `allow_no_diff`         | No       | `false`                       | Allows to continue on merge commits with no diffs                                                                       |
+| `max_body_bytes`        | No       | `65000`                       | Maximum PR body size in bytes before overflow is posted as managed PR comments                                          |
+| `max_diff_lines`        | No       | `0`                           | Maximum lines per generated diff section (`0` means unlimited)                                                          |
 
 
 ### 🔐 Required Workflow Permissions
@@ -121,6 +123,7 @@ permissions:
 - `contents: read` is required to read repository state.
 - `pull-requests: write` is required to create and update pull requests.
 - `issues: write` is required when managed overflow comments are created, updated, or deleted (including cleanup on later runs).
+- `issues: write` is also required when `create_missing_labels=true`, because label creation uses the repository labels API.
 - Project assignment via `project` requires a token/auth context that `gh` can use with project access.
 
 
@@ -219,7 +222,8 @@ jobs:
           repository_path: repo
           title: ${{ github.event.commits[0].message }}
           assignee: ${{ github.actor }}
-          label: automatic,feature
+          label: automatic,team/platform
+          create_missing_labels: true
           project: Engineering Roadmap
           template: .github/PULL_REQUEST_TEMPLATE/FEATURE.md
           old_string: "**Write your description here**"

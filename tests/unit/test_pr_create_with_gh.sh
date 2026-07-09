@@ -98,54 +98,75 @@ cat > "${TMP_DIR}/bin/gh" <<'EOF'
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-cmd="$*"
-
-if [[ "$#" -ge 2 && "$1" == "pr" && "$2" == "list" ]]; then
+if [[ "$#" -ge 3 && "$1" == "api" && "$2" == "--method" && "$3" == "GET" && "$4" == "repos/owner/repo/pulls?state=open&base=release/MAPL-v3" ]]; then
+  echo "[]"
   exit 0
 fi
 
 if [[ "$#" -ge 2 && "$1" == "pr" && "$2" == "create" ]]; then
-  if [[ "${cmd}" != *"--repo owner/repo"* ]]; then
-    echo "Missing --repo" >&2
+  expect_repo="false"
+  expect_base="false"
+  expect_head="false"
+  expect_title="false"
+  expect_body_file="false"
+  expect_milestone="false"
+  expect_project="false"
+  expect_draft="false"
+  reviewer_alice="false"
+  reviewer_bob="false"
+  assignee_one="false"
+  assignee_two="false"
+  label_bug="false"
+  label_chore="false"
+  previous=""
+
+  for arg in "$@"; do
+    case "${previous}:${arg}" in
+      --repo:owner/repo) expect_repo="true" ;;
+      --base:release/MAPL-v3) expect_base="true" ;;
+      --head:owner:develop) expect_head="true" ;;
+      --title:"My PR title") expect_title="true" ;;
+      --body-file:/tmp/template) expect_body_file="true" ;;
+      --reviewer:alice) reviewer_alice="true" ;;
+      --reviewer:bob) reviewer_bob="true" ;;
+      --assignee:assignee1) assignee_one="true" ;;
+      --assignee:assignee2) assignee_two="true" ;;
+      --label:bug) label_bug="true" ;;
+      --label:chore) label_chore="true" ;;
+      --milestone:Milestone-1) expect_milestone="true" ;;
+      --project:Roadmap) expect_project="true" ;;
+    esac
+    if [[ "${arg}" == "--draft" ]]; then
+      expect_draft="true"
+    fi
+    previous="${arg}"
+  done
+
+  if [[ "${expect_repo}" != "true" || "${expect_base}" != "true" || "${expect_head}" != "true" || "${expect_title}" != "true" || "${expect_body_file}" != "true" ]]; then
+    echo "Missing required PR create arguments" >&2
     exit 1
   fi
-  if [[ "${cmd}" != *"--base release/MAPL-v3"* ]]; then
-    echo "Missing --base" >&2
-    exit 1
-  fi
-  if [[ "${cmd}" != *"--head owner:develop"* ]]; then
-    echo "Missing --head" >&2
-    exit 1
-  fi
-  if [[ "${cmd}" != *"--title My PR title"* ]]; then
-    echo "Missing --title" >&2
-    exit 1
-  fi
-  if [[ "${cmd}" != *"--body-file /tmp/template"* ]]; then
-    echo "Missing --body-file" >&2
-    exit 1
-  fi
-  if [[ "${cmd}" != *"--reviewer alice"* || "${cmd}" != *"--reviewer bob"* ]]; then
+  if [[ "${reviewer_alice}" != "true" || "${reviewer_bob}" != "true" ]]; then
     echo "Missing reviewers" >&2
     exit 1
   fi
-  if [[ "${cmd}" != *"--assignee assignee1"* || "${cmd}" != *"--assignee assignee2"* ]]; then
+  if [[ "${assignee_one}" != "true" || "${assignee_two}" != "true" ]]; then
     echo "Missing assignees" >&2
     exit 1
   fi
-  if [[ "${cmd}" != *"--label bug"* || "${cmd}" != *"--label chore"* ]]; then
+  if [[ "${label_bug}" != "true" || "${label_chore}" != "true" ]]; then
     echo "Missing labels" >&2
     exit 1
   fi
-  if [[ "${cmd}" != *"--milestone Milestone-1"* ]]; then
+  if [[ "${expect_milestone}" != "true" ]]; then
     echo "Missing milestone" >&2
     exit 1
   fi
-  if [[ "${cmd}" != *"--project Roadmap"* ]]; then
+  if [[ "${expect_project}" != "true" ]]; then
     echo "Missing project" >&2
     exit 1
   fi
-  if [[ "${cmd}" != *"--draft"* ]]; then
+  if [[ "${expect_draft}" != "true" ]]; then
     echo "Missing draft flag" >&2
     exit 1
   fi

@@ -45,6 +45,10 @@ inputs:
     description: Labels to apply, coma separated
     required: false
     default: ""
+  create_missing_labels:
+    description: Whether to create labels that do not already exist before creating the PR
+    required: false
+    default: "false"
   milestone:
     description: Milestone
     required: false
